@@ -24,9 +24,6 @@ COPY . .
 # Создание директорий для статических и медиа файлов
 RUN mkdir -p /app/static /app/media
 
-# Сборка статических файлов
-RUN python manage.py collectstatic --noinput
-
 # Копирование конфигурационных файлов
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
