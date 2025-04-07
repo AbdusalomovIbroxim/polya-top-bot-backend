@@ -23,6 +23,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'accounts',
     'drf_yasg',
+    'whitenoise',
+
 
 ]
 
@@ -35,6 +37,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+
 ]
 
 ROOT_URLCONF = 'root.urls'
@@ -88,6 +92,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, os.getenv('MEDIA_ROOT'))

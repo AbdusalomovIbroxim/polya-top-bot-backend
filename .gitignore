@@ -3,6 +3,8 @@
 # Миграции Django
 **/migrations/*.py
 **/migrations/*.pyc
+**/__pycache__/*.py
+**/__pycache__/*.pyc
 
 # SQLite база данных
 db.sqlite3
