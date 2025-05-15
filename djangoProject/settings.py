@@ -164,10 +164,12 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
     "https://polya-top-boy-frontend.onrender.com",
+    "http://192.168.1.34:8081",
     "http://localhost:8081",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
+    "https://polya-top-boy-frontend.onrender.com/",
     "http://192.168.1.34:8081",
     "http://localhost:8081",
 ]
