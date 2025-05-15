@@ -5,6 +5,12 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from drf_yasg.utils import swagger_auto_schema
 from .serializers import UserSerializer, UserCreateSerializer
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+import hashlib
+import hmac
+import json
+from django.conf import settings
 
 User = get_user_model()
 
@@ -91,3 +97,56 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+class TelegramAuthView(APIView):
+    def post(self, request):
+        try:
+            init_data = request.data.get('initData')
+            if not init_data:
+                return Response({'error': 'No initData provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Verify the data from Telegram
+            data_check_string = '\n'.join(sorted(init_data.split('&')))
+            secret_key = hmac.new(
+                "WebAppData".encode(),
+                settings.TELEGRAM_BOT_TOKEN.encode(),
+                hashlib.sha256
+            ).digest()
+            
+            hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
+            
+            if hash != init_data.split('hash=')[1]:
+                return Response({'error': 'Invalid hash'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Parse user data
+            user_data = json.loads(init_data.split('user=')[1].split('&')[0])
+            
+            # Get or create user
+            user, created = User.objects.get_or_create(
+                telegram_id=user_data['id'],
+                defaults={
+                    'username': f"tg_{user_data['id']}",
+                    'telegram_username': user_data.get('username', ''),
+                    'telegram_first_name': user_data.get('first_name', ''),
+                    'telegram_last_name': user_data.get('last_name', ''),
+                }
+            )
+
+            # Generate JWT tokens
+            refresh = RefreshToken.for_user(user)
+            
+            return Response({
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'telegram_username': user.telegram_username,
+                    'first_name': user.telegram_first_name,
+                    'last_name': user.telegram_last_name,
+                    'role': user.role,
+                }
+            })
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

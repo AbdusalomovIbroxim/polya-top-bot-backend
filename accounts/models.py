@@ -15,6 +15,10 @@ class User(AbstractUser):
         verbose_name='Роль'
     )
     phone = models.CharField(max_length=15, blank=True, verbose_name='Телефон')
+    telegram_id = models.BigIntegerField(null=True, blank=True, unique=True)
+    telegram_username = models.CharField(max_length=255, null=True, blank=True)
+    telegram_first_name = models.CharField(max_length=255, null=True, blank=True)
+    telegram_last_name = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         verbose_name = 'Пользователь'
