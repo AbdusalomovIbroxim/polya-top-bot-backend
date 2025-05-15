@@ -1,0 +1,101 @@
+from django.db import models
+from django.contrib.auth import get_user_model
+from playgrounds.models import Playground
+from decimal import Decimal
+
+User = get_user_model()
+
+class Booking(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Ожидает подтверждения'),
+        ('CONFIRMED', 'Подтверждено'),
+        ('CANCELLED', 'Отменено'),
+        ('COMPLETED', 'Завершено'),
+    ]
+
+    PAYMENT_STATUS_CHOICES = [
+        ('PENDING', 'Ожидает оплаты'),
+        ('PAID', 'Оплачено'),
+        ('REFUNDED', 'Возвращено'),
+    ]
+
+    playground = models.ForeignKey(
+        Playground,
+        on_delete=models.CASCADE,
+        related_name='bookings',
+        verbose_name='Игровое поле'
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='bookings',
+        verbose_name='Пользователь',
+        null=True,
+        blank=True
+    )
+    session_key = models.CharField(
+        max_length=40,
+        null=True,
+        blank=True,
+        verbose_name='Ключ сессии'
+    )
+    start_time = models.DateTimeField(verbose_name='Время начала')
+    end_time = models.DateTimeField(verbose_name='Время окончания')
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='PENDING',
+        verbose_name='Статус'
+    )
+    payment_status = models.CharField(
+        max_length=20,
+        choices=PAYMENT_STATUS_CHOICES,
+        default='PENDING',
+        verbose_name='Статус оплаты'
+    )
+    payment_url = models.URLField(
+        max_length=500,
+        blank=True,
+        null=True,
+        verbose_name='Ссылка на оплату'
+    )
+    qr_code = models.ImageField(
+        upload_to='qr_codes/',
+        blank=True,
+        null=True,
+        verbose_name='QR-код'
+    )
+    total_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name='Общая стоимость'
+    )
+    deposit_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name='Сумма депозита',
+        default=0
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+
+    class Meta:
+        verbose_name = 'Бронирование'
+        verbose_name_plural = 'Бронирования'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Бронирование {self.playground.name} - {self.user.username} ({self.start_time.date()})'
+
+    def save(self, *args, **kwargs):
+        if self.start_time and self.end_time:
+            # Вычисляем длительность в часах как Decimal
+            duration = self.end_time - self.start_time
+            duration_hours = Decimal(str(duration.total_seconds() / 3600))
+            
+            # Вычисляем общую стоимость
+            self.total_price = self.playground.price_per_hour * duration_hours
+            
+            # Устанавливаем сумму депозита
+            self.deposit_amount = self.playground.deposit_amount
+        super().save(*args, **kwargs)
