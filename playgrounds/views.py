@@ -244,6 +244,8 @@ class FavoritePlaygroundViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        if not self.request.user.is_authenticated:
+            return FavoritePlayground.objects.none()
         return FavoritePlayground.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
