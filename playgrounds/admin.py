@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Playground, PlaygroundImage, FavoritePlayground, PlaygroundType
+from .models import Playground, PlaygroundImage, PlaygroundType
 
 
 class PlaygroundImageInline(admin.TabularInline):
@@ -44,21 +44,6 @@ class PlaygroundAdmin(admin.ModelAdmin):
         return 'Нет изображений'
     image_preview.short_description = 'Превью'
     image_preview.allow_tags = True
-
-
-@admin.register(PlaygroundImage)
-class PlaygroundImageAdmin(admin.ModelAdmin):
-    list_display = ('playground', 'preview_image', 'created_at')
-    list_filter = ('created_at', 'playground', 'playground__company')
-    search_fields = ('playground__name', 'playground__company__username')
-    readonly_fields = ('created_at', 'preview_image')
-
-    def preview_image(self, obj):
-        if obj.image:
-            return f'<img src="{obj.image.url}" style="max-height: 100px;"/>'
-        return 'Нет изображения'
-    preview_image.short_description = 'Превью'
-    preview_image.allow_tags = True
 
 
 @admin.register(PlaygroundType)
