@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Playground, PlaygroundImage, FavoritePlayground
+from .models import Playground, PlaygroundImage, FavoritePlayground, PlaygroundType
 from accounts.serializers import UserSerializer
 from datetime import datetime, timedelta
 from django.utils import timezone
@@ -53,3 +53,10 @@ class FavoritePlaygroundSerializer(serializers.ModelSerializer):
         model = FavoritePlayground
         fields = ['id', 'playground', 'playground_details', 'created_at']
         read_only_fields = ['created_at']
+
+
+class PlaygroundTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlaygroundType
+        fields = ['id', 'name', 'description', 'icon', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']

@@ -3,6 +3,21 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+class PlaygroundType(models.Model):
+    name = models.CharField(max_length=100, verbose_name='Название типа')
+    description = models.TextField(verbose_name='Описание', blank=True)
+    icon = models.ImageField(upload_to='playground_type_icons/', verbose_name='Иконка', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Тип поля'
+        verbose_name_plural = 'Типы полей'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
 class Playground(models.Model):
     TYPE_CHOICES = [
         ('FOOTBALL', 'Футбол'),
@@ -21,7 +36,9 @@ class Playground(models.Model):
         max_length=20,
         choices=TYPE_CHOICES,
         default='FOOTBALL',
-        verbose_name='Тип поля'
+        verbose_name='Тип поля',
+        null=True,
+        blank=True
     )
     deposit_amount = models.DecimalField(
         max_digits=10,

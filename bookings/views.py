@@ -33,16 +33,16 @@ class BookingViewSet(viewsets.ModelViewSet):
         queryset = super().get_queryset()
         user = self.request.user
 
-        # Админы видят все бронирования
         if user.is_authenticated and user.role == 'admin':
             return queryset
 
-        # Продавцы видят бронирования своих полей
         if user.is_authenticated and user.role == 'seller':
             return queryset.filter(playground__company=user)
 
-        # Обычные пользователи видят только свои бронирования
-        return queryset.filter(user=user)
+        if user.is_authenticated:
+            return queryset.filter(user=user)
+            
+        return queryset.none()
 
     def perform_create(self, serializer):
         if self.request.user.is_authenticated:

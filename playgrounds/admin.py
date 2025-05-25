@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Playground, PlaygroundImage
+from .models import Playground, PlaygroundImage, FavoritePlayground, PlaygroundType
 
 
 class PlaygroundImageInline(admin.TabularInline):
@@ -59,3 +59,11 @@ class PlaygroundImageAdmin(admin.ModelAdmin):
         return 'Нет изображения'
     preview_image.short_description = 'Превью'
     preview_image.allow_tags = True
+
+
+@admin.register(PlaygroundType)
+class PlaygroundTypeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description', 'created_at', 'updated_at')
+    search_fields = ('name', 'description')
+    list_filter = ('created_at', 'updated_at')
+    ordering = ('name',)

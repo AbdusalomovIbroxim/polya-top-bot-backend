@@ -9,12 +9,14 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 
 from bookings.models import Booking
-from .models import Playground, PlaygroundImage, FavoritePlayground
+from .models import Playground, PlaygroundImage, FavoritePlayground, PlaygroundType
 from .serializers import (
     PlaygroundSerializer,
     PlaygroundImageSerializer,
-    FavoritePlaygroundSerializer
+    FavoritePlaygroundSerializer,
+    PlaygroundTypeSerializer
 )
+from djangoProject.utils import csrf_exempt_api
 
 
 class PlaygroundFilter(filters.FilterSet):
@@ -282,3 +284,28 @@ class FavoritePlaygroundViewSet(viewsets.ModelViewSet):
     )
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
+
+
+class PlaygroundTypeViewSet(viewsets.ModelViewSet):
+    queryset = PlaygroundType.objects.all()
+    serializer_class = PlaygroundTypeSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    @swagger_auto_schema(
+        operation_description="Создает новый тип поля",
+        responses={
+            201: PlaygroundTypeSerializer,
+            400: "Bad Request"
+        }
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Возвращает список всех типов полей",
+        responses={
+            200: PlaygroundTypeSerializer(many=True)
+        }
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
