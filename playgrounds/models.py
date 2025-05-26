@@ -19,14 +19,6 @@ class PlaygroundType(models.Model):
         return self.name
 
 class Playground(models.Model):
-    TYPE_CHOICES = [
-        ('FOOTBALL', 'Футбол'),
-        ('BASKETBALL', 'Баскетбол'),
-        ('TENNIS', 'Теннис'),
-        ('VOLLEYBALL', 'Волейбол'),
-        ('OTHER', 'Другое'),
-    ]
-
     name = models.CharField(max_length=200, verbose_name='Название')
     description = models.TextField(verbose_name='Описание')
     price_per_hour = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена за час')
@@ -48,13 +40,13 @@ class Playground(models.Model):
         null=True,
         blank=True
     )
-    type = models.CharField(
-        max_length=20,
-        choices=TYPE_CHOICES,
-        default='FOOTBALL',
+    type = models.ForeignKey(
+        PlaygroundType,
+        on_delete=models.SET_NULL,
         verbose_name='Тип поля',
         null=True,
-        blank=True
+        blank=True,
+        related_name='playgrounds'
     )
     deposit_amount = models.DecimalField(
         max_digits=10,
