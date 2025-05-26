@@ -21,20 +21,15 @@ class PlaygroundAdmin(admin.ModelAdmin):
     list_display = ('name', 'company', 'price_per_hour', 'image_preview', 'created_at', 'updated_at')
     list_filter = ('created_at', 'updated_at', 'price_per_hour', 'company')
     search_fields = ('name', 'description', 'company__username', 'company__email')
-    readonly_fields = ('created_at', 'updated_at', 'image_preview')
+    readonly_fields = ('created_at', 'updated_at')
     inlines = [PlaygroundImageInline]
     
     fieldsets = (
         ('Основная информация', {
-            'fields': ('name', 'description', 'price_per_hour', 'company')
+            'fields': ('name', 'description', 'price_per_hour', 'company', 'type', 'deposit_amount')
         }),
-        ('Изображения', {
-            'fields': ('image_preview',),
-            'classes': ('collapse',)
-        }),
-        ('Временные метки', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
+        ('Локация', {
+            'fields': ('city', 'address', 'latitude', 'longitude')
         }),
     )
 

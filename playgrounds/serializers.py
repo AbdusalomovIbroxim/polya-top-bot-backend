@@ -20,7 +20,7 @@ class PlaygroundSerializer(serializers.ModelSerializer):
     class Meta:
         model = Playground
         fields = ['id', 'name', 'description', 'price_per_hour', 'images', 'company', 'company_id', 'created_at',
-                  'updated_at']
+                  'updated_at', 'city', 'address', 'latitude', 'longitude', 'type', 'deposit_amount']
         read_only_fields = ['created_at', 'updated_at']
 
     def validate_company_id(self, value):

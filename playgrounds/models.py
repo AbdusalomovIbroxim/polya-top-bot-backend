@@ -32,6 +32,22 @@ class Playground(models.Model):
     price_per_hour = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена за час')
     city = models.CharField(max_length=100, verbose_name='Город', default='Ташкент')
     address = models.CharField(max_length=200, verbose_name='Адрес', default='Адрес не указан')
+    latitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        verbose_name='Широта',
+        help_text='Географическая широта',
+        null=True,
+        blank=True
+    )
+    longitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        verbose_name='Долгота',
+        help_text='Географическая долгота',
+        null=True,
+        blank=True
+    )
     type = models.CharField(
         max_length=20,
         choices=TYPE_CHOICES,
