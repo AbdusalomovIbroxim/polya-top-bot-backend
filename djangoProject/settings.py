@@ -27,6 +27,19 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'playgrounds.apps.PlaygroundsConfig',
     'bookings.apps.BookingsConfig',
+    'wagtail.contrib.forms',
+    'wagtail.contrib.redirects',
+    'wagtail.embeds',
+    'wagtail.sites',
+    'wagtail.users',
+    'wagtail.snippets',
+    'wagtail.documents',
+    'wagtail.images',
+    'wagtail.search',
+    'wagtail.admin',
+    'wagtail',
+    'modelcluster',
+    'taggit',
 ]
 
 MIDDLEWARE = [
@@ -35,9 +48,11 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'wagtail.contrib.redirects.middleware.RedirectMiddleware',
 ]
 
 ROOT_URLCONF = 'djangoProject.urls'
@@ -204,3 +219,22 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 WEBAPP_URL = os.getenv('WEBAPP_URL')
+
+# Wagtail settings
+WAGTAIL_SITE_NAME = 'Playground Booking System'
+WAGTAILADMIN_BASE_URL = 'http://example.com'
+
+# Wagtail image settings
+WAGTAILIMAGES_IMAGE_MODEL = 'wagtailimages.Image'
+WAGTAILIMAGES_FEATURE_DETECTION_ENABLED = True
+
+# Wagtail search settings
+WAGTAILSEARCH_BACKENDS = {
+    'default': {
+        'BACKEND': 'wagtail.search.backends.database',
+    }
+}
+
+# Wagtail admin settings
+WAGTAILADMIN_RECENT_EDITS_LIMIT = 5
+WAGTAILADMIN_NOTIFICATION_FUNCTION = 'wagtail.admin.notifications.email_notification'

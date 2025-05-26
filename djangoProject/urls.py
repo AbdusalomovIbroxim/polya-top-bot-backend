@@ -10,14 +10,17 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
 )
+from wagtail import urls as wagtail_urls
+from wagtail.admin import urls as wagtailadmin_urls
+from wagtail.documents import urls as wagtaildocs_urls
 
 schema_view = get_schema_view(
     openapi.Info(
         title="Playground Booking API",
         default_version='v1',
-        description="API for playground booking system",
+        description="API для системы бронирования игровых полей",
         terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="contact@playground.com"),
+        contact=openapi.Contact(email="contact@snippets.local"),
         license=openapi.License(name="BSD License"),
     ),
     public=True,
@@ -40,4 +43,8 @@ urlpatterns = [
                   path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
                   path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
                   path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+
+                  path('cms/', include(wagtailadmin_urls)),
+                  path('documents/', include(wagtaildocs_urls)),
+                  path('', include(wagtail_urls)),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
