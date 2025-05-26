@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from .models import Playground, PlaygroundImage, PlaygroundType
 
 
@@ -33,12 +34,14 @@ class PlaygroundAdmin(admin.ModelAdmin):
         }),
     )
 
+    @admin.display(description='Превью')
     def image_preview(self, obj):
         if obj.images.exists():
-            return f'<img src="{obj.images.first().image.url}" style="max-height: 100px;"/>'
+            return format_html(
+                '<img src="{}" style="max-height: 100px;"/>',
+                obj.images.first().image.url
+            )
         return 'Нет изображений'
-    image_preview.short_description = 'Превью'
-    image_preview.allow_tags = True
 
 
 @admin.register(PlaygroundType)
