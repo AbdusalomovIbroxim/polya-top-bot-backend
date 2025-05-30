@@ -40,6 +40,13 @@ class Playground(models.Model):
         null=True,
         blank=True
     )
+    yandex_map_url = models.URLField(
+        max_length=500,
+        verbose_name='Ссылка на Яндекс Карты',
+        help_text='Ссылка на место в Яндекс Картах',
+        null=True,
+        blank=True
+    )
     type = models.CharField(
         max_length=20,
         choices=[
