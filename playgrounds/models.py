@@ -40,13 +40,19 @@ class Playground(models.Model):
         null=True,
         blank=True
     )
-    type = models.ForeignKey(
-        PlaygroundType,
-        on_delete=models.SET_NULL,
+    type = models.CharField(
+        max_length=20,
+        choices=[
+            ('FOOTBALL', 'Футбол'),
+            ('BASKETBALL', 'Баскетбол'),
+            ('TENNIS', 'Теннис'),
+            ('VOLLEYBALL', 'Волейбол'),
+            ('OTHER', 'Другое'),
+        ],
+        default='FOOTBALL',
         verbose_name='Тип поля',
         null=True,
-        blank=True,
-        related_name='playgrounds'
+        blank=True
     )
     deposit_amount = models.DecimalField(
         max_digits=10,
