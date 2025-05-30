@@ -30,7 +30,7 @@ class PlaygroundAdmin(admin.ModelAdmin):
             'fields': ('name', 'description', 'price_per_hour', 'company', 'type', 'deposit_amount')
         }),
         ('Локация', {
-            'fields': ('city', 'address', 'latitude', 'longitude')
+            'fields': ('city', 'address', 'latitude', 'longitude', 'yandex_map_url')
         }),
     )
 
