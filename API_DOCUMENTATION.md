@@ -1,43 +1,65 @@
 # API Documentation - Playground Booking System
 
 ## Содержание
-1. [Аутентификация](#аутентификация)
-2. [Пользователи](#пользователи)
-3. [Игровые поля](#игровые-поля)
-4. [Бронирования](#бронирования)
-5. [Общие примечания](#общие-примечания)
+1. [Общая информация](#общая-информация)
+2. [Аутентификация](#аутентификация)
+3. [Пользователи](#пользователи)
+4. [Игровые поля](#игровые-поля)
+5. [Бронирования](#бронирования)
+6. [Избранное](#избранное)
+
+## Общая информация
+
+### Базовый URL
+```
+http://your-domain.com/api/
+```
+
+### Форматы данных
+- Все даты и время: `YYYY-MM-DD HH:MM:SS`
+- Цены: десятичные числа с двумя знаками после запятой
+- Изображения: `multipart/form-data`
+- JSON для всех остальных данных
+
+### Заголовки
+```http
+Content-Type: application/json
+Authorization: Bearer <token>  # где <token> - JWT токен
+```
+
+### Пагинация
+Все списки поддерживают пагинацию:
+- `page`: номер страницы (по умолчанию 1)
+- `page_size`: количество элементов на странице (по умолчанию 10, максимум 100)
+
+### Роли пользователей
+- `USER`: обычный пользователь
+- `SELLER`: владелец полей
+- `ADMIN`: администратор системы
 
 ## Аутентификация
 
-### Регистрация пользователя
+### Регистрация
 ```http
 POST /api/users/
 ```
+Создает нового пользователя.
 
 **Тело запроса:**
 ```json
 {
-    "username": "string",
-    "email": "string",
-    "password": "string",
-    "role": "USER"
+    "username": "string",     // уникальное имя пользователя
+    "email": "string",        // email
+    "password": "string",     // пароль
+    "role": "USER"           // роль (USER, SELLER, ADMIN)
 }
 ```
 
-**Ответ (201 Created):**
-```json
-{
-    "id": "integer",
-    "username": "string",
-    "email": "string",
-    "role": "string"
-}
-```
-
-### Вход в систему (JWT)
+### Вход
 ```http
 POST /api/token/
 ```
+Получение JWT токенов.
 
 **Тело запроса:**
 ```json
@@ -47,11 +69,11 @@ POST /api/token/
 }
 ```
 
-**Ответ (200 OK):**
+**Ответ:**
 ```json
 {
-    "access": "string",
-    "refresh": "string"
+    "access": "string",   // токен для доступа
+    "refresh": "string"   // токен для обновления
 }
 ```
 
@@ -59,156 +81,36 @@ POST /api/token/
 ```http
 POST /api/token/refresh/
 ```
+Получение нового access токена.
 
 **Тело запроса:**
 ```json
 {
-    "refresh": "string"
+    "refresh": "string"  // refresh токен
 }
-```
-
-**Ответ (200 OK):**
-```json
-{
-    "access": "string"
-}
-```
-
-### Проверка токена
-```http
-POST /api/token/verify/
-```
-
-**Тело запроса:**
-```json
-{
-    "token": "string"
-}
-```
-
-**Ответ (200 OK):**
-```json
-{}
 ```
 
 ## Пользователи
 
-### Получение списка пользователей
-```http
-GET /api/users/
-```
-
-**Заголовки:**
-```
-Authorization: Bearer <token>
-```
-
-**Ответ (200 OK):**
-```json
-{
-    "count": "integer",
-    "next": "string",
-    "previous": "string",
-    "results": [
-        {
-            "id": "integer",
-            "username": "string",
-            "email": "string",
-            "first_name": "string",
-            "last_name": "string",
-            "role": "string",
-            "phone": "string",
-            "address": "string",
-            "date_joined": "datetime"
-        }
-    ]
-}
-```
-
-### Получение информации о пользователе
-```http
-GET /api/users/{id}/
-```
-
-**Заголовки:**
-```
-Authorization: Bearer <token>
-```
-
-**Ответ (200 OK):**
-```json
-{
-    "id": "integer",
-    "username": "string",
-    "email": "string",
-    "first_name": "string",
-    "last_name": "string",
-    "role": "string",
-    "phone": "string",
-    "address": "string",
-    "date_joined": "datetime"
-}
-```
-
-### Получение текущего пользователя
+### Получение профиля
 ```http
 GET /api/users/me/
 ```
+Получение данных текущего пользователя.
 
-**Заголовки:**
-```
-Authorization: Bearer <token>
-```
-
-**Ответ (200 OK):**
-```json
-{
-    "id": "integer",
-    "username": "string",
-    "email": "string",
-    "first_name": "string",
-    "last_name": "string",
-    "role": "string",
-    "phone": "string",
-    "address": "string",
-    "date_joined": "datetime"
-}
-```
-
-### Обновление данных текущего пользователя
+### Обновление профиля
 ```http
-PUT/PATCH /api/users/update_me/
+PATCH /api/users/update_me/
 ```
-
-**Заголовки:**
-```
-Authorization: Bearer <token>
-```
+Обновление данных пользователя.
 
 **Тело запроса:**
 ```json
 {
-    "username": "string",
-    "email": "string",
     "first_name": "string",
     "last_name": "string",
     "phone": "string",
     "address": "string"
-}
-```
-
-**Ответ (200 OK):**
-```json
-{
-    "id": "integer",
-    "username": "string",
-    "email": "string",
-    "first_name": "string",
-    "last_name": "string",
-    "role": "string",
-    "phone": "string",
-    "address": "string",
-    "date_joined": "datetime"
 }
 ```
 
@@ -219,56 +121,18 @@ Authorization: Bearer <token>
 GET /api/playgrounds/
 ```
 
-**Параметры запроса:**
-- `city` - фильтр по городу
-- `type` - фильтр по типу поля (FOOTBALL, BASKETBALL, TENNIS, VOLLEYBALL, OTHER)
-- `min_price` - минимальная цена
-- `max_price` - максимальная цена
-- `company` - ID компании
+**Параметры фильтрации:**
+- `city`: фильтр по городу
+- `type`: тип поля (FOOTBALL, BASKETBALL, TENNIS, VOLLEYBALL, OTHER)
+- `min_price`: минимальная цена
+- `max_price`: максимальная цена
+- `company`: ID компании
 
-**Ответ (200 OK):**
-```json
-{
-    "count": "integer",
-    "next": "string",
-    "previous": "string",
-    "results": [
-        {
-            "id": "integer",
-            "name": "string",
-            "description": "string",
-            "price_per_hour": "decimal",
-            "city": "string",
-            "address": "string",
-            "type": "string",
-            "deposit_amount": "decimal",
-            "images": [
-                {
-                    "id": "integer",
-                    "image": "string"
-                }
-            ],
-            "company": {
-                "id": "integer",
-                "username": "string",
-                "email": "string"
-            }
-        }
-    ]
-}
-```
-
-### Создание поля (только для продавцов)
+### Создание поля (SELLER)
 ```http
 POST /api/playgrounds/
 ```
 
-**Заголовки:**
-```
-Authorization: Bearer <token>
-Content-Type: multipart/form-data
-```
-
 **Тело запроса:**
 ```json
 {
@@ -279,187 +143,19 @@ Content-Type: multipart/form-data
     "address": "string",
     "type": "string",
     "deposit_amount": "decimal",
-    "images": ["file1", "file2"]
+    "images": ["file1", "file2"]  // изображения
 }
 ```
 
-**Ответ (201 Created):**
-```json
-{
-    "id": "integer",
-    "name": "string",
-    "description": "string",
-    "price_per_hour": "decimal",
-    "city": "string",
-    "address": "string",
-    "type": "string",
-    "deposit_amount": "decimal",
-    "images": [
-        {
-            "id": "integer",
-            "image": "string"
-        }
-    ],
-    "company": {
-        "id": "integer",
-        "username": "string",
-        "email": "string"
-    }
-}
-```
-
-### Получение деталей поля
-```http
-GET /api/playgrounds/{id}/
-```
-
-**Ответ (200 OK):**
-```json
-{
-    "id": "integer",
-    "name": "string",
-    "description": "string",
-    "price_per_hour": "decimal",
-    "city": "string",
-    "address": "string",
-    "type": "string",
-    "deposit_amount": "decimal",
-    "images": [
-        {
-            "id": "integer",
-            "image": "string"
-        }
-    ],
-    "company": {
-        "id": "integer",
-        "username": "string",
-        "email": "string"
-    }
-}
-```
-
-### Обновление поля (только для владельца)
-```http
-PUT/PATCH /api/playgrounds/{id}/
-```
-
-**Заголовки:**
-```
-Authorization: Bearer <token>
-Content-Type: multipart/form-data
-```
-
-**Тело запроса:**
-```json
-{
-    "name": "string",
-    "description": "string",
-    "price_per_hour": "decimal",
-    "city": "string",
-    "address": "string",
-    "type": "string",
-    "deposit_amount": "decimal",
-    "images": ["file1", "file2"]
-}
-```
-
-**Ответ (200 OK):**
-```json
-{
-    "id": "integer",
-    "name": "string",
-    "description": "string",
-    "price_per_hour": "decimal",
-    "city": "string",
-    "address": "string",
-    "type": "string",
-    "deposit_amount": "decimal",
-    "images": [
-        {
-            "id": "integer",
-            "image": "string"
-        }
-    ],
-    "company": {
-        "id": "integer",
-        "username": "string",
-        "email": "string"
-    }
-}
-```
-
-### Удаление поля (только для владельца)
-```http
-DELETE /api/playgrounds/{id}/
-```
-
-**Заголовки:**
-```
-Authorization: Bearer <token>
-```
-
-**Ответ (204 No Content):**
-```json
-{}
-```
-
-### Добавление изображения к полю (только для владельца)
-```http
-POST /api/playgrounds/{id}/add_image/
-```
-
-**Заголовки:**
-```
-Authorization: Bearer <token>
-Content-Type: multipart/form-data
-```
-
-**Тело запроса:**
-```json
-{
-    "image": "file"
-}
-```
-
-**Ответ (201 Created):**
-```json
-{
-    "id": "integer",
-    "image": "string"
-}
-```
-
-### Удаление изображения поля (только для владельца)
-```http
-DELETE /api/playgrounds/{id}/remove_image/
-```
-
-**Заголовки:**
-```
-Authorization: Bearer <token>
-```
-
-**Тело запроса:**
-```json
-{
-    "image_id": "integer"
-}
-```
-
-**Ответ (204 No Content):**
-```json
-{}
-```
-
-### Проверка доступности поля
+### Проверка доступности
 ```http
 GET /api/playgrounds/{id}/check_availability/
 ```
 
-**Параметры запроса:**
-- `date` - дата для проверки (YYYY-MM-DD)
+**Параметры:**
+- `date`: дата для проверки (YYYY-MM-DD)
 
-**Ответ (200 OK):**
+**Ответ:**
 ```json
 {
     "date": "2024-03-20",
@@ -471,279 +167,49 @@ GET /api/playgrounds/{id}/check_availability/
         {
             "time": "08:00",
             "is_available": true
-        },
-        {
-            "time": "08:30",
-            "is_available": true
         }
     ]
 }
-```
-
-### Избранные поля
-
-#### Получение списка избранных полей
-```http
-GET /api/favorites/
-```
-
-**Заголовки:**
-```
-Authorization: Bearer <token>
-```
-
-**Ответ (200 OK):**
-```json
-{
-    "count": "integer",
-    "next": "string",
-    "previous": "string",
-    "results": [
-        {
-            "id": "integer",
-            "playground": "integer",
-            "playground_details": {
-                "id": "integer",
-                "name": "string",
-                "description": "string",
-                "price_per_hour": "decimal",
-                "city": "string",
-                "address": "string",
-                "type": "string",
-                "deposit_amount": "decimal",
-                "images": [
-                    {
-                        "id": "integer",
-                        "image": "string"
-                    }
-                ],
-                "company": {
-                    "id": "integer",
-                    "username": "string",
-                    "email": "string"
-                }
-            },
-            "created_at": "datetime"
-        }
-    ]
-}
-```
-
-#### Добавление поля в избранное
-```http
-POST /api/favorites/
-```
-
-**Заголовки:**
-```
-Authorization: Bearer <token>
-```
-
-**Тело запроса:**
-```json
-{
-    "playground": "integer"
-}
-```
-
-**Ответ (201 Created):**
-```json
-{
-    "id": "integer",
-    "playground": "integer",
-    "playground_details": {
-        "id": "integer",
-        "name": "string",
-        "description": "string",
-        "price_per_hour": "decimal",
-        "city": "string",
-        "address": "string",
-        "type": "string",
-        "deposit_amount": "decimal",
-        "images": [
-            {
-                "id": "integer",
-                "image": "string"
-            }
-        ],
-        "company": {
-            "id": "integer",
-            "username": "string",
-            "email": "string"
-        }
-    },
-    "created_at": "datetime"
-}
-```
-
-#### Удаление поля из избранного
-```http
-DELETE /api/favorites/{id}/
-```
-
-**Заголовки:**
-```
-Authorization: Bearer <token>
-```
-
-**Ответ (204 No Content):**
-```json
-{}
 ```
 
 ## Бронирования
-
-### Получение списка бронирований
-```http
-GET /api/bookings/
-```
-
-**Заголовки (опционально):**
-```
-Authorization: Bearer <token>
-```
-
-**Параметры запроса:**
-- `start_date` - дата начала (YYYY-MM-DD HH:MM:SS)
-- `end_date` - дата окончания (YYYY-MM-DD HH:MM:SS)
-- `status` - статус бронирования (PENDING, CONFIRMED, CANCELLED, COMPLETED)
-- `playground` - ID поля
-- `user` - ID пользователя
-
-**Ответ (200 OK):**
-```json
-{
-    "count": "integer",
-    "next": "string",
-    "previous": "string",
-    "results": [
-        {
-            "id": "integer",
-            "playground": "integer",
-            "playground_details": {
-                "id": "integer",
-                "name": "string",
-                "description": "string",
-                "price_per_hour": "decimal",
-                "city": "string",
-                "address": "string",
-                "type": "string",
-                "deposit_amount": "decimal",
-                "images": [
-                    {
-                        "id": "integer",
-                        "image": "string"
-                    }
-                ]
-            },
-            "user": "integer",
-            "user_details": {
-                "id": "integer",
-                "username": "string",
-                "email": "string"
-            },
-            "start_time": "datetime",
-            "end_time": "datetime",
-            "status": "string",
-            "payment_status": "string",
-            "payment_url": "string",
-            "qr_code": "string",
-            "total_price": "decimal",
-            "deposit_amount": "decimal",
-            "created_at": "datetime",
-            "updated_at": "datetime",
-            "session_key": "string"
-        }
-    ]
-}
-```
 
 ### Создание бронирования
 ```http
 POST /api/bookings/
 ```
 
-**Заголовки (опционально):**
-```
-Authorization: Bearer <token>
-```
-
 **Тело запроса:**
 ```json
 {
     "playground": "integer",
-    "start_time": "datetime", // YYYY-MM-DD HH:MM:SS
-    "end_time": "datetime"    // YYYY-MM-DD HH:MM:SS
-}
-```
-
-**Важные замечания:**
-- Время должно быть кратно 30 минутам
-- Бронирование возможно только с 8:00 до 22:30
-- Максимальная длительность бронирования - 24 часа
-- Нельзя бронировать время в прошлом
-- Нельзя бронировать уже забронированное время
-- Для неавторизованных пользователей бронирование будет привязано к сессии
-- Для авторизованных пользователей бронирование будет привязано к их аккаунту
-
-**Ответ (201 Created):**
-```json
-{
-    "id": "integer",
-    "playground": "integer",
-    "playground_details": {
-        "id": "integer",
-        "name": "string",
-        "description": "string",
-        "price_per_hour": "decimal",
-        "city": "string",
-        "address": "string",
-        "type": "string",
-        "deposit_amount": "decimal",
-        "images": [
-            {
-                "id": "integer",
-                "image": "string"
-            }
-        ]
-    },
-    "user": "integer",
-    "user_details": {
-        "id": "integer",
-        "username": "string",
-        "email": "string"
-    },
     "start_time": "datetime",
-    "end_time": "datetime",
-    "status": "PENDING",
-    "payment_status": "PENDING",
-    "payment_url": "string",
-    "qr_code": "string",
-    "total_price": "decimal",
-    "deposit_amount": "decimal",
-    "created_at": "datetime",
-    "updated_at": "datetime",
-    "session_key": "string"
+    "end_time": "datetime"
 }
 ```
 
-### Подтверждение бронирования (для продавцов и админов)
+**Важно:**
+- Время должно быть кратно 30 минутам
+- Рабочие часы: 8:00 - 22:30
+- Максимальная длительность: 24 часа
+- Нельзя бронировать прошедшее время
+- Нельзя бронировать занятое время
+
+### Получение списка бронирований
+```http
+GET /api/bookings/
+```
+
+**Параметры фильтрации:**
+- `start_date`: дата начала
+- `end_date`: дата окончания
+- `status`: статус (PENDING, CONFIRMED, CANCELLED, COMPLETED)
+- `playground`: ID поля
+- `user`: ID пользователя
+
+### Подтверждение бронирования (SELLER/ADMIN)
 ```http
 POST /api/bookings/{id}/confirm/
-```
-
-**Заголовки:**
-```
-Authorization: Bearer <token>
-```
-
-**Ответ (200 OK):**
-```json
-{
-    "id": "integer",
-    "status": "CONFIRMED",
-    // ... остальные поля бронирования
-}
 ```
 
 ### Отмена бронирования
@@ -751,61 +217,34 @@ Authorization: Bearer <token>
 POST /api/bookings/{id}/cancel/
 ```
 
-**Заголовки (опционально):**
-```
-Authorization: Bearer <token>
+## Избранное
+
+### Добавление в избранное
+```http
+POST /api/favorites/
 ```
 
-**Ответ (200 OK):**
+**Тело запроса:**
 ```json
 {
-    "id": "integer",
-    "status": "CANCELLED",
-    // ... остальные поля бронирования
+    "playground": "integer"  // ID поля
 }
 ```
 
-## Общие примечания
+### Получение избранного
+```http
+GET /api/favorites/
+```
 
-### Аутентификация
-1. Большинство эндпоинтов требуют аутентификации через JWT токен
-2. Токен нужно передавать в заголовке `Authorization: Bearer <token>`
-3. Некоторые эндпоинты (просмотр полей, проверка доступности) доступны без аутентификации
-4. Создание бронирования доступно как авторизованным, так и неавторизованным пользователям
-
-### Форматы данных
-1. Все даты и время передаются в формате ISO 8601 (YYYY-MM-DD HH:MM:SS)
-2. Время работы полей: с 8:00 до 22:30
-3. Все цены передаются в виде десятичных чисел с двумя знаками после запятой
-4. Изображения передаются как multipart/form-data
-
-### Бронирования
-1. Слоты разбиты по 30 минут
-2. Нельзя бронировать время в прошлом
-3. Нельзя бронировать уже забронированное время
-4. Максимальная длительность бронирования - 24 часа
-5. Бронирования неавторизованных пользователей привязываются к сессии
-6. Бронирования авторизованных пользователей привязываются к их аккаунту
-
-### Пагинация
-1. Пагинация включена по умолчанию (10 элементов на страницу)
-2. Можно изменить количество элементов через параметр `page_size`
-3. Максимальный размер страницы - 100 элементов
-
-### Роли пользователей
-1. `USER` - обычный пользователь
-2. `SELLER` - продавец (владелец полей)
-3. `ADMIN` - администратор системы
-
-### Ограничения
-1. Продавцы могут управлять только своими полями
-2. Админы имеют доступ ко всем данным
-3. Пользователи видят только свои бронирования
-4. Неавторизованные пользователи видят только свои бронирования по сессии
+### Удаление из избранного
+```http
+DELETE /api/favorites/{id}/
+```
 
 ## Коды ошибок
 
 ### 400 Bad Request
+Некорректные данные в запросе
 ```json
 {
     "detail": "string",
@@ -814,6 +253,7 @@ Authorization: Bearer <token>
 ```
 
 ### 401 Unauthorized
+Требуется аутентификация
 ```json
 {
     "detail": "Authentication credentials were not provided."
@@ -821,6 +261,7 @@ Authorization: Bearer <token>
 ```
 
 ### 403 Forbidden
+Нет прав на действие
 ```json
 {
     "detail": "У вас нет прав на выполнение этого действия"
@@ -828,8 +269,55 @@ Authorization: Bearer <token>
 ```
 
 ### 404 Not Found
+Ресурс не найден
 ```json
 {
     "detail": "Not found."
 }
+```
+
+## Примеры использования
+
+### Пример создания бронирования
+```javascript
+// Получение токена
+const response = await fetch('/api/token/', {
+    method: 'POST',
+    body: JSON.stringify({
+        username: 'user',
+        password: 'password'
+    })
+});
+const { access } = await response.json();
+
+// Создание бронирования
+const booking = await fetch('/api/bookings/', {
+    method: 'POST',
+    headers: {
+        'Authorization': `Bearer ${access}`,
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        playground: 1,
+        start_time: '2024-03-20 10:00:00',
+        end_time: '2024-03-20 11:00:00'
+    })
+});
+```
+
+### Пример загрузки изображений
+```javascript
+const formData = new FormData();
+formData.append('name', 'Новое поле');
+formData.append('price_per_hour', '1000');
+formData.append('images', file1);
+formData.append('images', file2);
+
+const response = await fetch('/api/playgrounds/', {
+    method: 'POST',
+    headers: {
+        'Authorization': `Bearer ${access}`
+    },
+    body: formData
+});
 ``` 
