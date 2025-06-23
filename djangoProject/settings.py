@@ -72,6 +72,20 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'polya_top_bot_database',
+#         'USER': 'polya_top_bot_database_user',
+#         'PASSWORD': 'eybXRoSMtLfEAr8raoDNZXLuTQCDeR2d',
+#         'HOST': 'dpg-d1ciikadbo4c73ct7hlg-a.oregon-postgres.render.com',
+#         'PORT': '5432',
+#         'OPTIONS': {
+#             'sslmode': 'require',
+#         },
+#     }
+# }
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
