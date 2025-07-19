@@ -4,7 +4,7 @@ from .views import UserViewSet, TelegramAuthViewSet
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
-router.register(r'telegram-auth', TelegramAuthViewSet, basename='telegram-auth')
+router.register(r'', TelegramAuthViewSet, basename='telegram-auth')
 
 urlpatterns = [
     path('', include(router.urls)),
