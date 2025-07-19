@@ -21,6 +21,7 @@ def check_webapp_signature(token: str, init_data: str) -> bool:
     """
     try:
         parsed_data = dict(parse_qsl(init_data))
+        print(parse_qsl)
     except ValueError:
         return False
     if "hash" not in parsed_data:
