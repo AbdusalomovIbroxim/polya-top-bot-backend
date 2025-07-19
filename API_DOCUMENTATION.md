@@ -1,164 +1,421 @@
-# API Documentation - Playground Booking System
+# API Documentation
 
-## Содержание
-1. [Общая информация](#общая-информация)
-2. [Аутентификация](#аутентификация)
-3. [Пользователи](#пользователи)
-4. [Игровые поля](#игровые-поля)
-5. [Бронирования](#бронирования)
-6. [Избранное](#избранное)
-
-## Общая информация
-
-### Базовый URL
+## Base URL
 ```
-http://your-domain.com/api/
+https://your-domain.com/api/
 ```
 
-### Форматы данных
-- Все даты и время: `YYYY-MM-DD HH:MM:SS`
-- Цены: десятичные числа с двумя знаками после запятой
-- Изображения: `multipart/form-data`
-- JSON для всех остальных данных
+## Authentication
 
-### Заголовки
-```http
-Content-Type: application/json
-Authorization: Bearer <token>  # где <token> - JWT токен
+### JWT Tokens
+API использует JWT токены для авторизации. Добавляйте токен в заголовок запроса:
+```
+Authorization: Bearer <access_token>
 ```
 
-### Пагинация
-Все списки поддерживают пагинацию:
-- `page`: номер страницы (по умолчанию 1)
-- `page_size`: количество элементов на странице (по умолчанию 10, максимум 100)
+---
 
-### Роли пользователей
-- `USER`: обычный пользователь
-- `SELLER`: владелец полей
-- `ADMIN`: администратор системы
+## Authentication Endpoints
 
-## Аутентификация
+### 1. Telegram Web App Authentication
 
-### Регистрация
-```http
-POST /api/users/
-```
-Создает нового пользователя.
+**POST** `/telegram-auth/telegram_auth/`
 
-**Тело запроса:**
+Авторизация через Telegram Web App.
+
+**Request Body:**
 ```json
 {
-    "username": "string",     // уникальное имя пользователя
-    "email": "string",        // email
-    "password": "string",     // пароль
-    "role": "USER"           // роль (USER, SELLER, ADMIN)
+    "init_data": "query_id=AAHdF6IQAAAAAN0XohDhrOrc&user=%7B%22id%22%3A123456789%2C%22first_name%22%3A%22John%22%2C%22last_name%22%3A%22Doe%22%2C%22username%22%3A%22johndoe%22%7D&auth_date=1234567890&hash=abc123..."
 }
 ```
 
-### Вход
-```http
-POST /api/token/
-```
-Получение JWT токенов.
-
-**Тело запроса:**
+**Success Response (200):**
 ```json
 {
-    "username": "string",
-    "password": "string"
+    "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+    "user": {
+        "id": 1,
+        "username": "johndoe",
+        "email": "123456789@telegram.user",
+        "first_name": "John",
+        "last_name": "Doe",
+        "role": "USER",
+        "telegram_id": 123456789
+    }
 }
 ```
 
-**Ответ:**
+**Error Response (400):**
 ```json
 {
-    "access": "string",   // токен для доступа
-    "refresh": "string"   // токен для обновления
+    "error": "init_data is required"
 }
 ```
 
-### Обновление токена
-```http
-POST /api/token/refresh/
-```
-Получение нового access токена.
+### 2. Standard JWT Authentication
 
-**Тело запроса:**
+**POST** `/token/`
+
+Стандартная авторизация по логину и паролю.
+
+**Request Body:**
 ```json
 {
-    "refresh": "string"  // refresh токен
+    "username": "user@example.com",
+    "password": "password123"
 }
 ```
 
-## Пользователи
-
-### Получение профиля
-```http
-GET /api/users/me/
-```
-Получение данных текущего пользователя.
-
-### Обновление профиля
-```http
-PATCH /api/users/update_me/
-```
-Обновление данных пользователя.
-
-**Тело запроса:**
+**Success Response (200):**
 ```json
 {
-    "first_name": "string",
-    "last_name": "string",
-    "phone": "string",
-    "address": "string"
+    "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
 }
 ```
 
-## Игровые поля
+### 3. Refresh Token
 
-### Получение списка полей
-```http
-GET /api/playgrounds/
-```
+**POST** `/token/refresh/`
 
-**Параметры фильтрации:**
-- `city`: фильтр по городу
-- `type`: тип поля (FOOTBALL, BASKETBALL, TENNIS, VOLLEYBALL, OTHER)
-- `min_price`: минимальная цена
-- `max_price`: максимальная цена
-- `company`: ID компании
+Обновление access токена с помощью refresh токена.
 
-### Создание поля (SELLER)
-```http
-POST /api/playgrounds/
-```
-
-**Тело запроса:**
+**Request Body:**
 ```json
 {
-    "name": "string",
-    "description": "string",
-    "price_per_hour": "decimal",
-    "city": "string",
-    "address": "string",
-    "type": "string",
-    "deposit_amount": "decimal",
-    "images": ["file1", "file2"]  // изображения
+    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
 }
 ```
 
-### Проверка доступности
-```http
-GET /api/playgrounds/{id}/check_availability/
-```
-
-**Параметры:**
-- `date`: дата для проверки (YYYY-MM-DD)
-
-**Ответ:**
+**Success Response (200):**
 ```json
 {
-    "date": "2024-03-20",
+    "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+}
+```
+
+### 4. Verify Token
+
+**POST** `/token/verify/`
+
+Проверка валидности access токена.
+
+**Request Body:**
+```json
+{
+    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+}
+```
+
+**Success Response (200):**
+```json
+{
+    "token_type": "access",
+    "exp": 1234567890,
+    "iat": 1234567890,
+    "jti": "abc123",
+    "user_id": 1
+}
+```
+
+---
+
+## User Management
+
+### 1. Get Current User
+
+**GET** `/users/me/`
+
+Получить информацию о текущем пользователе.
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Success Response (200):**
+```json
+{
+    "id": 1,
+    "username": "johndoe",
+    "email": "john@example.com",
+    "first_name": "John",
+    "last_name": "Doe",
+    "role": "USER",
+    "phone": "+1234567890",
+    "telegram_id": 123456789,
+    "telegram_username": "johndoe",
+    "telegram_first_name": "John",
+    "telegram_last_name": "Doe"
+}
+```
+
+### 2. Update Current User
+
+**PUT** `/users/update_me/`
+
+Обновить данные текущего пользователя.
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Request Body:**
+```json
+{
+    "first_name": "John Updated",
+    "last_name": "Doe Updated",
+    "phone": "+1234567890"
+}
+```
+
+**Success Response (200):**
+```json
+{
+    "id": 1,
+    "username": "johndoe",
+    "email": "john@example.com",
+    "first_name": "John Updated",
+    "last_name": "Doe Updated",
+    "role": "USER",
+    "phone": "+1234567890"
+}
+```
+
+### 3. Create User
+
+**POST** `/users/`
+
+Создать нового пользователя (только для админов).
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Request Body:**
+```json
+{
+    "username": "newuser",
+    "email": "newuser@example.com",
+    "password": "password123",
+    "first_name": "New",
+    "last_name": "User",
+    "role": "USER"
+}
+```
+
+**Success Response (201):**
+```json
+{
+    "id": 2,
+    "username": "newuser",
+    "email": "newuser@example.com",
+    "first_name": "New",
+    "last_name": "User",
+    "role": "USER"
+}
+```
+
+---
+
+## Sport Venues
+
+### 1. List Sport Venues
+
+**GET** `/sport-venues/`
+
+Получить список всех спортивных площадок.
+
+**Query Parameters:**
+- `min_price` - минимальная цена за час
+- `max_price` - максимальная цена за час
+- `company` - ID компании
+- `page` - номер страницы
+- `page_size` - размер страницы
+
+**Success Response (200):**
+```json
+{
+    "count": 10,
+    "next": "http://api.example.com/sport-venues/?page=2",
+    "previous": null,
+    "results": [
+        {
+            "id": 1,
+            "name": "Футбольное поле Центральное",
+            "description": "Профессиональное футбольное поле",
+            "price_per_hour": "50.00",
+            "city": "Ташкент",
+            "address": "ул. Спортивная, 1",
+            "latitude": "41.2995",
+            "longitude": "69.2401",
+            "yandex_map_url": "https://yandex.ru/maps/...",
+            "sport_venue_type": {
+                "id": 1,
+                "name": "Футбол",
+                "description": "Футбольные поля"
+            },
+            "region": {
+                "id": 1,
+                "name_ru": "Ташкент",
+                "name_uz": "Toshkent",
+                "name_en": "Tashkent"
+            },
+            "deposit_amount": "50.00",
+            "company": {
+                "id": 1,
+                "username": "company1",
+                "email": "company@example.com"
+            },
+            "images": [
+                {
+                    "id": 1,
+                    "image": "http://api.example.com/media/sport_venue_images/field1.jpg",
+                    "created_at": "2024-01-01T10:00:00Z"
+                }
+            ],
+            "created_at": "2024-01-01T10:00:00Z",
+            "updated_at": "2024-01-01T10:00:00Z"
+        }
+    ]
+}
+```
+
+### 2. Get Sport Venue Details
+
+**GET** `/sport-venues/{id}/`
+
+Получить детальную информацию о спортивной площадке.
+
+**Success Response (200):**
+```json
+{
+    "id": 1,
+    "name": "Футбольное поле Центральное",
+    "description": "Профессиональное футбольное поле",
+    "price_per_hour": "50.00",
+    "city": "Ташкент",
+    "address": "ул. Спортивная, 1",
+    "latitude": "41.2995",
+    "longitude": "69.2401",
+    "yandex_map_url": "https://yandex.ru/maps/...",
+    "sport_venue_type": {
+        "id": 1,
+        "name": "Футбол",
+        "description": "Футбольные поля"
+    },
+    "region": {
+        "id": 1,
+        "name_ru": "Ташкент",
+        "name_uz": "Toshkent",
+        "name_en": "Tashkent"
+    },
+    "deposit_amount": "50.00",
+    "company": {
+        "id": 1,
+        "username": "company1",
+        "email": "company@example.com"
+    },
+    "images": [
+        {
+            "id": 1,
+            "image": "http://api.example.com/media/sport_venue_images/field1.jpg",
+            "created_at": "2024-01-01T10:00:00Z"
+        }
+    ],
+    "created_at": "2024-01-01T10:00:00Z",
+    "updated_at": "2024-01-01T10:00:00Z"
+}
+```
+
+### 3. Create Sport Venue
+
+**POST** `/sport-venues/`
+
+Создать новую спортивную площадку (только для продавцов).
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+Content-Type: multipart/form-data
+```
+
+**Request Body (multipart/form-data):**
+```
+name: Футбольное поле
+description: Описание поля
+price_per_hour: 50.00
+city: Ташкент
+address: ул. Спортивная, 1
+latitude: 41.2995
+longitude: 69.2401
+sport_venue_type: 1
+region: 1
+deposit_amount: 50.00
+images: [file1, file2, ...]
+```
+
+**Success Response (201):**
+```json
+{
+    "id": 1,
+    "name": "Футбольное поле",
+    "description": "Описание поля",
+    "price_per_hour": "50.00",
+    "city": "Ташкент",
+    "address": "ул. Спортивная, 1",
+    "latitude": "41.2995",
+    "longitude": "69.2401",
+    "sport_venue_type": 1,
+    "region": 1,
+    "deposit_amount": "50.00",
+    "company": 1,
+    "images": [],
+    "created_at": "2024-01-01T10:00:00Z",
+    "updated_at": "2024-01-01T10:00:00Z"
+}
+```
+
+### 4. Update Sport Venue
+
+**PUT** `/sport-venues/{id}/`
+
+Обновить спортивную площадку (только владелец).
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+Content-Type: multipart/form-data
+```
+
+### 5. Delete Sport Venue
+
+**DELETE** `/sport-venues/{id}/`
+
+Удалить спортивную площадку (только владелец).
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+### 6. Check Availability
+
+**GET** `/sport-venues/{id}/check_availability/`
+
+Проверить доступность площадки на определенную дату.
+
+**Query Parameters:**
+- `date` - дата в формате YYYY-MM-DD
+
+**Success Response (200):**
+```json
+{
+    "date": "2024-01-15",
     "working_hours": {
         "start": "08:00",
         "end": "22:30"
@@ -167,157 +424,339 @@ GET /api/playgrounds/{id}/check_availability/
         {
             "time": "08:00",
             "is_available": true
+        },
+        {
+            "time": "08:30",
+            "is_available": false
+        },
+        {
+            "time": "09:00",
+            "is_available": true
         }
     ]
 }
 ```
 
-## Бронирования
+---
 
-### Создание бронирования
-```http
-POST /api/bookings/
+## Sport Venue Types
+
+### 1. List Sport Venue Types
+
+**GET** `/types/`
+
+Получить список всех типов спортивных площадок.
+
+**Success Response (200):**
+```json
+[
+    {
+        "id": 1,
+        "name": "Футбол",
+        "description": "Футбольные поля",
+        "icon": "http://api.example.com/media/playground_type_icons/football.png",
+        "created_at": "2024-01-01T10:00:00Z",
+        "updated_at": "2024-01-01T10:00:00Z"
+    }
+]
 ```
 
-**Тело запроса:**
+### 2. Create Sport Venue Type
+
+**POST** `/types/`
+
+Создать новый тип спортивной площадки.
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+Content-Type: multipart/form-data
+```
+
+**Request Body:**
+```
+name: Баскетбол
+description: Баскетбольные площадки
+icon: [file]
+```
+
+---
+
+## Favorites
+
+### 1. List Favorites
+
+**GET** `/favorites/`
+
+Получить список избранных площадок текущего пользователя.
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Success Response (200):**
+```json
+[
+    {
+        "id": 1,
+        "sport_venue": 1,
+        "sport_venue_details": {
+            "id": 1,
+            "name": "Футбольное поле Центральное",
+            "price_per_hour": "50.00",
+            "city": "Ташкент"
+        },
+        "created_at": "2024-01-01T10:00:00Z"
+    }
+]
+```
+
+### 2. Add to Favorites
+
+**POST** `/favorites/`
+
+Добавить площадку в избранное.
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Request Body:**
 ```json
 {
-    "playground": "integer",
-    "start_time": "datetime",
-    "end_time": "datetime"
+    "sport_venue": 1
 }
 ```
 
-**Важно:**
-- Время должно быть кратно 30 минутам
-- Рабочие часы: 8:00 - 22:30
-- Максимальная длительность: 24 часа
-- Нельзя бронировать прошедшее время
-- Нельзя бронировать занятое время
+### 3. Remove from Favorites
 
-### Получение списка бронирований
-```http
-GET /api/bookings/
+**DELETE** `/favorites/{id}/`
+
+Удалить площадку из избранного.
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
 ```
 
-**Параметры фильтрации:**
-- `start_date`: дата начала
-- `end_date`: дата окончания
-- `status`: статус (PENDING, CONFIRMED, CANCELLED, COMPLETED)
-- `playground`: ID поля
-- `user`: ID пользователя
+---
 
-### Подтверждение бронирования (SELLER/ADMIN)
-```http
-POST /api/bookings/{id}/confirm/
+## Bookings
+
+### 1. List Bookings
+
+**GET** `/bookings/`
+
+Получить список бронирований.
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
 ```
 
-### Отмена бронирования
-```http
-POST /api/bookings/{id}/cancel/
-```
+**Query Parameters:**
+- `start_date` - дата начала (YYYY-MM-DDTHH:MM:SS)
+- `end_date` - дата окончания (YYYY-MM-DDTHH:MM:SS)
+- `status` - статус бронирования (PENDING, CONFIRMED, CANCELLED, COMPLETED)
+- `sport_venue` - ID спортивной площадки
+- `user` - ID пользователя
 
-## Избранное
-
-### Добавление в избранное
-```http
-POST /api/favorites/
-```
-
-**Тело запроса:**
+**Success Response (200):**
 ```json
 {
-    "playground": "integer"  // ID поля
+    "count": 5,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 1,
+            "sport_venue": 1,
+            "sport_venue_details": {
+                "id": 1,
+                "name": "Футбольное поле Центральное",
+                "price_per_hour": "50.00"
+            },
+            "user": 1,
+            "user_details": {
+                "id": 1,
+                "username": "johndoe",
+                "first_name": "John"
+            },
+            "start_time": "2024-01-15T10:00:00Z",
+            "end_time": "2024-01-15T12:00:00Z",
+            "status": "CONFIRMED",
+            "payment_status": "PAID",
+            "payment_url": "https://payment.example.com/...",
+            "qr_code": "http://api.example.com/media/qr_codes/qr1.png",
+            "total_price": "100.00",
+            "deposit_amount": "50.00",
+            "created_at": "2024-01-01T10:00:00Z",
+            "updated_at": "2024-01-01T10:00:00Z"
+        }
+    ]
 }
 ```
 
-### Получение избранного
-```http
-GET /api/favorites/
+### 2. Create Booking
+
+**POST** `/bookings/`
+
+Создать новое бронирование.
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
 ```
 
-### Удаление из избранного
-```http
-DELETE /api/favorites/{id}/
-```
-
-## Коды ошибок
-
-### 400 Bad Request
-Некорректные данные в запросе
+**Request Body:**
 ```json
 {
-    "detail": "string",
-    "field_name": ["string"]
+    "sport_venue": 1,
+    "start_time": "2024-01-15T10:00:00Z",
+    "end_time": "2024-01-15T12:00:00Z"
 }
 ```
 
-### 401 Unauthorized
-Требуется аутентификация
+**Success Response (201):**
+```json
+{
+    "id": 1,
+    "sport_venue": 1,
+    "sport_venue_details": {
+        "id": 1,
+        "name": "Футбольное поле Центральное",
+        "price_per_hour": "50.00"
+    },
+    "user": 1,
+    "user_details": {
+        "id": 1,
+        "username": "johndoe",
+        "first_name": "John"
+    },
+    "start_time": "2024-01-15T10:00:00Z",
+    "end_time": "2024-01-15T12:00:00Z",
+    "status": "PENDING",
+    "payment_status": "PENDING",
+    "total_price": "100.00",
+    "deposit_amount": "50.00",
+    "created_at": "2024-01-01T10:00:00Z",
+    "updated_at": "2024-01-01T10:00:00Z"
+}
+```
+
+### 3. Confirm Booking
+
+**POST** `/bookings/{id}/confirm/`
+
+Подтвердить бронирование (только продавцы и админы).
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Success Response (200):**
+```json
+{
+    "id": 1,
+    "status": "CONFIRMED",
+    "updated_at": "2024-01-01T10:00:00Z"
+}
+```
+
+### 4. Cancel Booking
+
+**POST** `/bookings/{id}/cancel/`
+
+Отменить бронирование.
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Success Response (200):**
+```json
+{
+    "id": 1,
+    "status": "CANCELLED",
+    "updated_at": "2024-01-01T10:00:00Z"
+}
+```
+
+---
+
+## Error Responses
+
+### Common Error Codes
+
+**400 Bad Request:**
+```json
+{
+    "error": "Validation error message"
+}
+```
+
+**401 Unauthorized:**
 ```json
 {
     "detail": "Authentication credentials were not provided."
 }
 ```
 
-### 403 Forbidden
-Нет прав на действие
+**403 Forbidden:**
 ```json
 {
-    "detail": "У вас нет прав на выполнение этого действия"
+    "detail": "You do not have permission to perform this action."
 }
 ```
 
-### 404 Not Found
-Ресурс не найден
+**404 Not Found:**
 ```json
 {
     "detail": "Not found."
 }
 ```
 
-## Примеры использования
-
-### Пример создания бронирования
-```javascript
-// Получение токена
-const response = await fetch('/api/token/', {
-    method: 'POST',
-    body: JSON.stringify({
-        username: 'user',
-        password: 'password'
-    })
-});
-const { access } = await response.json();
-
-// Создание бронирования
-const booking = await fetch('/api/bookings/', {
-    method: 'POST',
-    headers: {
-        'Authorization': `Bearer ${access}`,
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-        playground: 1,
-        start_time: '2024-03-20 10:00:00',
-        end_time: '2024-03-20 11:00:00'
-    })
-});
+**500 Internal Server Error:**
+```json
+{
+    "detail": "Internal server error."
+}
 ```
 
-### Пример загрузки изображений
-```javascript
-const formData = new FormData();
-formData.append('name', 'Новое поле');
-formData.append('price_per_hour', '1000');
-formData.append('images', file1);
-formData.append('images', file2);
+---
 
-const response = await fetch('/api/playgrounds/', {
-    method: 'POST',
-    headers: {
-        'Authorization': `Bearer ${access}`
-    },
-    body: formData
-});
-``` 
+## Rate Limiting
+
+API имеет ограничения на количество запросов:
+- 1000 запросов в час для авторизованных пользователей
+- 100 запросов в час для неавторизованных пользователей
+
+---
+
+## Pagination
+
+Списки объектов поддерживают пагинацию:
+- `page` - номер страницы (по умолчанию 1)
+- `page_size` - размер страницы (по умолчанию 10, максимум 100)
+
+---
+
+## File Upload
+
+Для загрузки файлов используйте `multipart/form-data`:
+- Изображения площадок: `images`
+- Иконки типов площадок: `icon`
+- QR-коды: генерируются автоматически
+
+---
+
+## WebSocket (для будущих обновлений)
+
+Планируется добавление WebSocket для:
+- Уведомлений о статусе бронирования
+- Обновлений в реальном времени
+- Чат между пользователем и продавцом 

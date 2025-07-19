@@ -29,12 +29,20 @@ class Region(models.Model):
             return self.name_en
         return self.name_ru
 
+    @classmethod
+    def ensure_test_regions(cls):
+        if not cls.objects.exists():
+            test_data = [
+                dict(name_ru='Ташкент', name_uz='Toshkent', name_en='Tashkent', slug='tashkent'),
+                dict(name_ru='Самарканд', name_uz='Samarqand', name_en='Samarkand', slug='samarkand'),
+                dict(name_ru='Бухара', name_uz='Buxoro', name_en='Bukhara', slug='bukhara'),
+            ]
+            for data in test_data:
+                cls.objects.create(**data)
 
 
 class SportVenueType(models.Model):
     name = models.CharField(max_length=100, verbose_name='Название типа')
-    description = models.TextField(verbose_name='Описание', blank=True)
-    icon = models.ImageField(upload_to='playground_type_icons/', verbose_name='Иконка', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -45,6 +53,18 @@ class SportVenueType(models.Model):
 
     def __str__(self):
         return self.name
+
+    @classmethod
+    def ensure_test_types(cls):
+        if not cls.objects.exists():
+            test_data = [
+                dict(name='Футбол'),
+                dict(name='Баскетбол'),
+                dict(name='Теннис'),
+            ]
+            for data in test_data:
+                cls.objects.create(**data)
+
 
 class SportVenue(models.Model):
     name = models.CharField(max_length=200, verbose_name='Название')
@@ -111,6 +131,7 @@ class SportVenue(models.Model):
     class Meta:
         verbose_name = 'Спортивная площадка'
         verbose_name_plural = 'Спортивные площадки'
+        ordering = ['-created_at']
 
     def __str__(self):
         return self.name
@@ -119,6 +140,36 @@ class SportVenue(models.Model):
         if not self.deposit_amount:
             self.deposit_amount = self.price_per_hour
         super().save(*args, **kwargs)
+
+    @classmethod
+    def ensure_test_venues(cls):
+        if not cls.objects.exists():
+            from django.contrib.auth import get_user_model
+            from .models import SportVenueType, Region
+            User = get_user_model()
+            company = User.objects.filter(role='SELLER').first()
+            venue_type = SportVenueType.objects.first()
+            region = Region.objects.first()
+            if not (company and venue_type and region):
+                return
+            test_data = [
+                dict(
+                    name='Центральный стадион',
+                    description='Главный стадион города',
+                    price_per_hour=1000,
+                    city='Ташкент',
+                    address='ул. Центральная, 1',
+                    latitude=41.2995,
+                    longitude=69.2401,
+                    sport_venue_type=venue_type,
+                    region=region,
+                    deposit_amount=500,
+                    company=company
+                ),
+            ]
+            for data in test_data:
+                cls.objects.create(**data)
+
 
 class SportVenueImage(models.Model):
     sport_venue = models.ForeignKey(SportVenue, related_name='images', on_delete=models.CASCADE)

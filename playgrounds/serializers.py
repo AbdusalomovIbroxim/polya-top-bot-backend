@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import SportVenue, SportVenueImage, FavoriteSportVenue, SportVenueType
+from .models import SportVenue, SportVenueImage, FavoriteSportVenue, SportVenueType, Region
 from accounts.serializers import UserSerializer
 from datetime import datetime, timedelta
 from django.utils import timezone
@@ -60,4 +60,10 @@ class FavoriteSportVenueSerializer(serializers.ModelSerializer):
 class SportVenueTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = SportVenueType
+        fields = '__all__'
+
+
+class RegionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Region
         fields = '__all__'

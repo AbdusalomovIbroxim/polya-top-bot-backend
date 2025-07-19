@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import SportVenue, SportVenueImage, SportVenueType
+from .models import SportVenue, SportVenueImage, SportVenueType, Region
 
 
 class SportVenueImageInline(admin.TabularInline):
@@ -46,7 +46,14 @@ class SportVenueAdmin(admin.ModelAdmin):
 
 @admin.register(SportVenueType)
 class SportVenueTypeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description', 'created_at', 'updated_at')
-    search_fields = ('name', 'description')
+    list_display = ('name', 'created_at', 'updated_at')
+    search_fields = ('name',)
     list_filter = ('created_at', 'updated_at')
     ordering = ('name',)
+
+
+@admin.register(Region)
+class RegionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name_ru', 'name_uz', 'name_en', 'slug', 'created_at', 'updated_at')
+    search_fields = ('name_ru', 'name_uz', 'name_en', 'slug')
+    ordering = ('name_ru',)

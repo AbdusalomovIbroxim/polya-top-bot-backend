@@ -9,12 +9,13 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 
 from bookings.models import Booking
-from .models import SportVenue, SportVenueImage, FavoriteSportVenue, SportVenueType
+from .models import SportVenue, SportVenueImage, FavoriteSportVenue, SportVenueType, Region
 from .serializers import (
     SportVenueSerializer,
     SportVenueImageSerializer,
     FavoriteSportVenueSerializer,
-    SportVenueTypeSerializer
+    SportVenueTypeSerializer,
+    RegionSerializer
 )
 from djangoProject.utils import csrf_exempt_api
 
@@ -30,7 +31,7 @@ class SportVenueFilter(filters.FilterSet):
 
 
 class SportVenueViewSet(viewsets.ModelViewSet):
-    queryset = SportVenue.objects.all()
+    queryset = SportVenue.objects.select_related('sport_venue_type', 'region', 'company').prefetch_related('images').all()
     serializer_class = SportVenueSerializer
     filterset_class = SportVenueFilter
     parser_classes = (MultiPartParser, FormParser)
@@ -309,3 +310,9 @@ class SportVenueTypeViewSet(viewsets.ModelViewSet):
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+
+class RegionViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Region.objects.all()
+    serializer_class = RegionSerializer
+    permission_classes = [permissions.AllowAny]
