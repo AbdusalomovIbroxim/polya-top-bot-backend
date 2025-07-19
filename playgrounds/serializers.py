@@ -1,27 +1,24 @@
 from rest_framework import serializers
-from .models import Playground, PlaygroundImage, FavoritePlayground, PlaygroundType
+from .models import SportVenue, SportVenueImage, FavoriteSportVenue, SportVenueType
 from accounts.serializers import UserSerializer
 from datetime import datetime, timedelta
 from django.utils import timezone
 
 
-class PlaygroundImageSerializer(serializers.ModelSerializer):
+class SportVenueImageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PlaygroundImage
-        fields = ['id', 'image', 'created_at']
-        read_only_fields = ['created_at']
+        model = SportVenueImage
+        fields = '__all__'
 
 
-class PlaygroundSerializer(serializers.ModelSerializer):
-    images = PlaygroundImageSerializer(many=True, read_only=True)
+class SportVenueSerializer(serializers.ModelSerializer):
+    images = SportVenueImageSerializer(many=True, read_only=True)
     company = UserSerializer(read_only=True)
     company_id = serializers.IntegerField(write_only=True)
 
     class Meta:
-        model = Playground
-        fields = ['id', 'name', 'description', 'price_per_hour', 'images', 'company', 'company_id', 'created_at',
-                  'updated_at', 'city', 'address', 'latitude', 'longitude', 'deposit_amount', 'yandex_map_url']
-        read_only_fields = ['created_at', 'updated_at']
+        model = SportVenue
+        fields = '__all__'
 
     def validate_company_id(self, value):
         from accounts.models import User
@@ -52,17 +49,15 @@ class AvailabilityResponseSerializer(serializers.Serializer):
     timezone_offset = serializers.IntegerField(required=False)
 
 
-class FavoritePlaygroundSerializer(serializers.ModelSerializer):
-    playground_details = PlaygroundSerializer(source='playground', read_only=True)
+class FavoriteSportVenueSerializer(serializers.ModelSerializer):
+    sport_venue_details = SportVenueSerializer(source='sport_venue', read_only=True)
 
     class Meta:
-        model = FavoritePlayground
-        fields = ['id', 'playground', 'playground_details', 'created_at']
-        read_only_fields = ['created_at']
+        model = FavoriteSportVenue
+        fields = '__all__'
 
 
-class PlaygroundTypeSerializer(serializers.ModelSerializer):
+class SportVenueTypeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PlaygroundType
-        fields = ['id', 'name', 'description', 'icon', 'created_at', 'updated_at']
-        read_only_fields = ['created_at', 'updated_at']
+        model = SportVenueType
+        fields = '__all__'

@@ -9,30 +9,30 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 
 from bookings.models import Booking
-from .models import Playground, PlaygroundImage, FavoritePlayground, PlaygroundType
+from .models import SportVenue, SportVenueImage, FavoriteSportVenue, SportVenueType
 from .serializers import (
-    PlaygroundSerializer,
-    PlaygroundImageSerializer,
-    FavoritePlaygroundSerializer,
-    PlaygroundTypeSerializer
+    SportVenueSerializer,
+    SportVenueImageSerializer,
+    FavoriteSportVenueSerializer,
+    SportVenueTypeSerializer
 )
 from djangoProject.utils import csrf_exempt_api
 
 
-class PlaygroundFilter(filters.FilterSet):
+class SportVenueFilter(filters.FilterSet):
     min_price = filters.NumberFilter(field_name="price_per_hour", lookup_expr='gte')
     max_price = filters.NumberFilter(field_name="price_per_hour", lookup_expr='lte')
     company = filters.NumberFilter(field_name="company__id")
 
     class Meta:
-        model = Playground
+        model = SportVenue
         fields = ['min_price', 'max_price', 'company']
 
 
-class PlaygroundViewSet(viewsets.ModelViewSet):
-    queryset = Playground.objects.all()
-    serializer_class = PlaygroundSerializer
-    filterset_class = PlaygroundFilter
+class SportVenueViewSet(viewsets.ModelViewSet):
+    queryset = SportVenue.objects.all()
+    serializer_class = SportVenueSerializer
+    filterset_class = SportVenueFilter
     parser_classes = (MultiPartParser, FormParser)
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
@@ -59,57 +59,57 @@ class PlaygroundViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def add_image(self, request, pk=None):
-        playground = self.get_object()
-        if request.user.role != 'seller' or playground.company != request.user:
+        sport_venue = self.get_object()
+        if request.user.role != 'seller' or sport_venue.company != request.user:
             raise permissions.PermissionDenied("Only the owner can add images")
 
-        serializer = PlaygroundImageSerializer(data=request.data)
+        serializer = SportVenueImageSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(playground=playground)
+            serializer.save(sport_venue=sport_venue)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['delete'])
     def remove_image(self, request, pk=None):
-        playground = self.get_object()
-        if request.user.role != 'seller' or playground.company != request.user:
+        sport_venue = self.get_object()
+        if request.user.role != 'seller' or sport_venue.company != request.user:
             raise permissions.PermissionDenied("Only the owner can remove images")
 
         image_id = request.data.get('image_id')
         try:
-            image = playground.images.get(id=image_id)
+            image = sport_venue.images.get(id=image_id)
             image.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        except PlaygroundImage.DoesNotExist:
+        except SportVenueImage.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
     @swagger_auto_schema(
-        operation_description="Создает новое игровое поле с возможностью загрузки нескольких изображений",
-        request_body=PlaygroundSerializer,
+        operation_description="Создает новую спортивную площадку с возможностью загрузки нескольких изображений",
+        request_body=SportVenueSerializer,
         responses={
-            201: PlaygroundSerializer,
+            201: SportVenueSerializer,
             400: "Bad Request"
         }
     )
     def create(self, request, *args, **kwargs):
-        playground_data = request.data.copy()
+        sport_venue_data = request.data.copy()
         images = request.FILES.getlist('images', [])
 
-        serializer = self.get_serializer(data=playground_data)
+        serializer = self.get_serializer(data=sport_venue_data)
         serializer.is_valid(raise_exception=True)
-        playground = serializer.save()
+        sport_venue = serializer.save()
 
         # Сохраняем изображения
         for image in images:
-            PlaygroundImage.objects.create(playground=playground, image=image)
+            SportVenueImage.objects.create(sport_venue=sport_venue, image=image)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @swagger_auto_schema(
-        operation_description="Обновляет существующее игровое поле и позволяет добавить новые изображения",
-        request_body=PlaygroundSerializer,
+        operation_description="Обновляет существующую спортивную площадку и позволяет добавить новые изображения",
+        request_body=SportVenueSerializer,
         responses={
-            200: PlaygroundSerializer,
+            200: SportVenueSerializer,
             400: "Bad Request",
             404: "Not Found"
         }
@@ -117,23 +117,23 @@ class PlaygroundViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        playground_data = request.data.copy()
+        sport_venue_data = request.data.copy()
         images = request.FILES.getlist('images', [])
 
-        serializer = self.get_serializer(instance, data=playground_data, partial=partial)
+        serializer = self.get_serializer(instance, data=sport_venue_data, partial=partial)
         serializer.is_valid(raise_exception=True)
-        playground = serializer.save()
+        sport_venue = serializer.save()
 
         # Добавляем новые изображения
         for image in images:
-            PlaygroundImage.objects.create(playground=playground, image=image)
+            SportVenueImage.objects.create(sport_venue=sport_venue, image=image)
 
         return Response(serializer.data)
 
     @swagger_auto_schema(
         operation_description="Возвращает список всех доступных игровых полей",
         responses={
-            200: PlaygroundSerializer(many=True)
+            200: SportVenueSerializer(many=True)
         }
     )
     def list(self, request, *args, **kwargs):
@@ -142,7 +142,7 @@ class PlaygroundViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Возвращает детальную информацию о конкретном игровом поле",
         responses={
-            200: PlaygroundSerializer,
+            200: SportVenueSerializer,
             404: "Not Found"
         }
     )
@@ -161,7 +161,7 @@ class PlaygroundViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'])
     def check_availability(self, request, pk=None):
-        playground = self.get_object()
+        sport_venue = self.get_object()
         date_str = request.query_params.get('date')
 
         try:
@@ -184,7 +184,7 @@ class PlaygroundViewSet(viewsets.ModelViewSet):
 
         # Найти бронирования, пересекающиеся с этим днём
         existing_bookings = Booking.objects.filter(
-            playground=playground,
+            sport_venue=sport_venue,
             status__in=['PENDING', 'CONFIRMED'],
             start_time__lt=end_of_day,
             end_time__gt=start_of_day
@@ -241,25 +241,25 @@ class PlaygroundViewSet(viewsets.ModelViewSet):
         })
 
 
-class FavoritePlaygroundViewSet(viewsets.ModelViewSet):
-    serializer_class = FavoritePlaygroundSerializer
+class FavoriteSportVenueViewSet(viewsets.ModelViewSet):
+    serializer_class = FavoriteSportVenueSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         if not self.request.user.is_authenticated:
-            return FavoritePlayground.objects.none()
-        return FavoritePlayground.objects.filter(user=self.request.user)
+            return FavoriteSportVenue.objects.none()
+        return FavoriteSportVenue.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        playground_id = self.request.data.get('playground')
-        if FavoritePlayground.objects.filter(user=self.request.user, playground_id=playground_id).exists():
-            raise serializers.ValidationError("Это поле уже добавлено в избранное")
+        sport_venue_id = self.request.data.get('sport_venue')
+        if FavoriteSportVenue.objects.filter(user=self.request.user, sport_venue_id=sport_venue_id).exists():
+            raise serializers.ValidationError("Эта площадка уже добавлена в избранное")
         serializer.save(user=self.request.user)
 
     @swagger_auto_schema(
         operation_description="Добавляет поле в избранное",
         responses={
-            201: FavoritePlaygroundSerializer,
+            201: FavoriteSportVenueSerializer,
             400: "Bad Request"
         }
     )
@@ -269,7 +269,7 @@ class FavoritePlaygroundViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Возвращает список избранных полей пользователя",
         responses={
-            200: FavoritePlaygroundSerializer(many=True)
+            200: FavoriteSportVenueSerializer(many=True)
         }
     )
     def list(self, request, *args, **kwargs):
@@ -286,15 +286,15 @@ class FavoritePlaygroundViewSet(viewsets.ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
-class PlaygroundTypeViewSet(viewsets.ModelViewSet):
-    queryset = PlaygroundType.objects.all()
-    serializer_class = PlaygroundTypeSerializer
+class SportVenueTypeViewSet(viewsets.ModelViewSet):
+    queryset = SportVenueType.objects.all()
+    serializer_class = SportVenueTypeSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     @swagger_auto_schema(
         operation_description="Создает новый тип поля",
         responses={
-            201: PlaygroundTypeSerializer,
+            201: SportVenueTypeSerializer,
             400: "Bad Request"
         }
     )
@@ -304,7 +304,7 @@ class PlaygroundTypeViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Возвращает список всех типов полей",
         responses={
-            200: PlaygroundTypeSerializer(many=True)
+            200: SportVenueTypeSerializer(many=True)
         }
     )
     def list(self, request, *args, **kwargs):

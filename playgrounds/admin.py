@@ -1,10 +1,10 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Playground, PlaygroundImage, PlaygroundType
+from .models import SportVenue, SportVenueImage, SportVenueType
 
 
-class PlaygroundImageInline(admin.TabularInline):
-    model = PlaygroundImage
+class SportVenueImageInline(admin.TabularInline):
+    model = SportVenueImage
     extra = 1
     fields = ('image', 'preview_image', 'created_at')
     readonly_fields = ('preview_image', 'created_at')
@@ -17,17 +17,17 @@ class PlaygroundImageInline(admin.TabularInline):
     preview_image.allow_tags = True
 
 
-@admin.register(Playground)
-class PlaygroundAdmin(admin.ModelAdmin):
+@admin.register(SportVenue)
+class SportVenueAdmin(admin.ModelAdmin):
     list_display = ('name', 'company', 'price_per_hour', 'image_preview', 'created_at', 'updated_at')
     list_filter = ('created_at', 'updated_at', 'price_per_hour', 'company')
     search_fields = ('name', 'description', 'company__username', 'company__email')
     readonly_fields = ('created_at', 'updated_at')
-    inlines = [PlaygroundImageInline]
+    inlines = [SportVenueImageInline]
     
     fieldsets = (
         ('Основная информация', {
-            'fields': ('name', 'description', 'price_per_hour', 'company', 'type', 'deposit_amount')
+            'fields': ('name', 'description', 'price_per_hour', 'company', 'sport_venue_type', 'deposit_amount')
         }),
         ('Локация', {
             'fields': ('city', 'address', 'latitude', 'longitude', 'yandex_map_url')
@@ -44,8 +44,8 @@ class PlaygroundAdmin(admin.ModelAdmin):
         return 'Нет изображений'
 
 
-@admin.register(PlaygroundType)
-class PlaygroundTypeAdmin(admin.ModelAdmin):
+@admin.register(SportVenueType)
+class SportVenueTypeAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'created_at', 'updated_at')
     search_fields = ('name', 'description')
     list_filter = ('created_at', 'updated_at')

@@ -4,12 +4,14 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from .serializers import UserSerializer, UserCreateSerializer
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 import hashlib
 import hmac
 import json
+from urllib.parse import parse_qs, urlparse
 from django.conf import settings
 
 User = get_user_model()
@@ -98,55 +100,183 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.save()
         return Response(serializer.data)
 
-class TelegramAuthView(APIView):
-    def post(self, request):
+class TelegramAuthViewSet(viewsets.ViewSet):
+    """
+    ViewSet для авторизации через Telegram Web App
+    """
+    
+    def _verify_telegram_data(self, init_data):
+        """
+        Проверяет подлинность данных от Telegram Web App
+        """
         try:
-            init_data = request.data.get('initData')
-            if not init_data:
-                return Response({'error': 'No initData provided'}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Verify the data from Telegram
-            data_check_string = '\n'.join(sorted(init_data.split('&')))
+            # Парсим init_data
+            parsed_data = parse_qs(init_data)
+            
+            # Извлекаем hash для проверки
+            received_hash = parsed_data.get('hash', [None])[0]
+            if not received_hash:
+                return False, "Hash not found in init_data"
+            
+            # Удаляем hash из данных для проверки
+            data_check_string = init_data.replace(f'&hash={received_hash}', '')
+            
+            # Создаем секретный ключ из токена бота
             secret_key = hmac.new(
-                "WebAppData".encode(),
+                b'WebAppData',
                 settings.TELEGRAM_BOT_TOKEN.encode(),
                 hashlib.sha256
             ).digest()
             
-            hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
+            # Вычисляем hash
+            calculated_hash = hmac.new(
+                secret_key,
+                data_check_string.encode(),
+                hashlib.sha256
+            ).hexdigest()
             
-            if hash != init_data.split('hash=')[1]:
-                return Response({'error': 'Invalid hash'}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Parse user data
-            user_data = json.loads(init_data.split('user=')[1].split('&')[0])
-            
-            # Get or create user
-            user, created = User.objects.get_or_create(
-                telegram_id=user_data['id'],
-                defaults={
-                    'username': f"tg_{user_data['id']}",
-                    'telegram_username': user_data.get('username', ''),
-                    'telegram_first_name': user_data.get('first_name', ''),
-                    'telegram_last_name': user_data.get('last_name', ''),
-                }
-            )
-
-            # Generate JWT tokens
-            refresh = RefreshToken.for_user(user)
-            
-            return Response({
-                'access': str(refresh.access_token),
-                'refresh': str(refresh),
-                'user': {
-                    'id': user.id,
-                    'username': user.username,
-                    'telegram_username': user.telegram_username,
-                    'first_name': user.telegram_first_name,
-                    'last_name': user.telegram_last_name,
-                    'role': user.role,
-                }
-            })
-
+            # Сравниваем hash
+            if calculated_hash == received_hash:
+                return True, parsed_data
+            else:
+                return False, "Hash verification failed"
+                
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return False, f"Error verifying data: {str(e)}"
+    
+    def _extract_user_data(self, parsed_data):
+        """
+        Извлекает данные пользователя из Telegram данных
+        """
+        user_data = parsed_data.get('user', [None])[0]
+        if user_data:
+            try:
+                return json.loads(user_data)
+            except json.JSONDecodeError:
+                return None
+        return None
+    
+    @swagger_auto_schema(
+        operation_description="Авторизация через Telegram Web App",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['init_data'],
+            properties={
+                'init_data': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='Данные инициализации от Telegram Web App'
+                )
+            }
+        ),
+        responses={
+            200: openapi.Response(
+                description="Успешная авторизация",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'access': openapi.Schema(type=openapi.TYPE_STRING),
+                        'refresh': openapi.Schema(type=openapi.TYPE_STRING),
+                        'user': openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                'username': openapi.Schema(type=openapi.TYPE_STRING),
+                                'email': openapi.Schema(type=openapi.TYPE_STRING),
+                                'first_name': openapi.Schema(type=openapi.TYPE_STRING),
+                                'last_name': openapi.Schema(type=openapi.TYPE_STRING),
+                                'role': openapi.Schema(type=openapi.TYPE_STRING),
+                                'telegram_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                            }
+                        )
+                    }
+                )
+            ),
+            400: openapi.Response(
+                description="Ошибка валидации",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'error': openapi.Schema(type=openapi.TYPE_STRING)
+                    }
+                )
+            )
+        }
+    )
+    @action(detail=False, methods=['post'])
+    def telegram_auth(self, request):
+        """
+        Авторизация через Telegram Web App
+        """
+        init_data = request.data.get('init_data')
+        if not init_data:
+            return Response(
+                {'error': 'init_data is required'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Проверяем подлинность данных
+        is_valid, result = self._verify_telegram_data(init_data)
+        if not is_valid:
+            return Response(
+                {'error': result}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        parsed_data = result
+        user_data = self._extract_user_data(parsed_data)
+        
+        if not user_data:
+            return Response(
+                {'error': 'User data not found'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Получаем или создаем пользователя
+        telegram_id = user_data.get('id')
+        username = user_data.get('username')
+        first_name = user_data.get('first_name', '')
+        last_name = user_data.get('last_name', '')
+        
+        if not telegram_id:
+            return Response(
+                {'error': 'Telegram ID not found'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Ищем пользователя по telegram_id
+        try:
+            user = User.objects.get(telegram_id=telegram_id)
+        except User.DoesNotExist:
+            # Создаем нового пользователя
+            username = username or f"tg_{telegram_id}"
+            email = f"{telegram_id}@telegram.user"
+            
+            user = User.objects.create(
+                username=username,
+                email=email,
+                first_name=first_name,
+                last_name=last_name,
+                telegram_id=telegram_id,
+                telegram_username=username,
+                telegram_first_name=first_name,
+                telegram_last_name=last_name,
+                role=User.Role.USER  # По умолчанию обычный пользователь
+            )
+        
+        # Генерируем JWT токены
+        refresh = RefreshToken.for_user(user)
+        access_token = refresh.access_token
+        
+        return Response({
+            'access': str(access_token),
+            'refresh': str(refresh),
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'role': user.role,
+                'telegram_id': user.telegram_id
+            }
+        })

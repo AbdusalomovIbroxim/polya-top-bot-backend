@@ -15,12 +15,12 @@ class BookingFilter(filters.FilterSet):
     start_date = filters.DateTimeFilter(field_name="start_time", lookup_expr='gte')
     end_date = filters.DateTimeFilter(field_name="end_time", lookup_expr='lte')
     status = filters.CharFilter(field_name="status")
-    playground = filters.NumberFilter(field_name="playground__id")
+    sport_venue = filters.NumberFilter(field_name="sport_venue__id")
     user = filters.NumberFilter(field_name="user__id")
 
     class Meta:
         model = Booking
-        fields = ['start_date', 'end_date', 'status', 'playground', 'user']
+        fields = ['start_date', 'end_date', 'status', 'sport_venue', 'user']
 
 @csrf_exempt_api
 class BookingViewSet(viewsets.ModelViewSet):
@@ -37,7 +37,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             return queryset
 
         if user.is_authenticated and user.role == 'seller':
-            return queryset.filter(playground__company=user)
+            return queryset.filter(sport_venue__company=user)
 
         if user.is_authenticated:
             return queryset.filter(user=user)
@@ -59,7 +59,7 @@ class BookingViewSet(viewsets.ModelViewSet):
         
         # Проверяем права на подтверждение
         if request.user.role not in ['admin', 'seller'] or \
-           (request.user.role == 'seller' and booking.playground.company != request.user):
+           (request.user.role == 'seller' and booking.sport_venue.company != request.user):
             return Response(
                 {"detail": "У вас нет прав на подтверждение этого бронирования"},
                 status=status.HTTP_403_FORBIDDEN
@@ -80,7 +80,7 @@ class BookingViewSet(viewsets.ModelViewSet):
         booking = self.get_object()
         
         # Проверяем права на отмену
-        if request.user not in [booking.user, booking.playground.company] and request.user.role != 'admin':
+        if request.user not in [booking.user, booking.sport_venue.company] and request.user.role != 'admin':
             return Response(
                 {"detail": "У вас нет прав на отмену этого бронирования"},
                 status=status.HTTP_403_FORBIDDEN

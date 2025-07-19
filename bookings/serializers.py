@@ -1,18 +1,18 @@
 from rest_framework import serializers
 from .models import Booking
-from playgrounds.serializers import PlaygroundSerializer
+from playgrounds.serializers import SportVenueSerializer
 from accounts.serializers import UserSerializer
 from django.utils import timezone
 from datetime import timedelta
 
 class BookingSerializer(serializers.ModelSerializer):
-    playground_details = PlaygroundSerializer(source='playground', read_only=True)
+    sport_venue_details = SportVenueSerializer(source='sport_venue', read_only=True)
     user_details = UserSerializer(source='user', read_only=True)
 
     class Meta:
         model = Booking
         fields = [
-            'id', 'playground', 'playground_details', 'user', 'user_details',
+            'id', 'sport_venue', 'sport_venue_details', 'user', 'user_details',
             'start_time', 'end_time', 'status', 'payment_status', 'payment_url',
             'qr_code', 'total_price', 'deposit_amount', 'created_at', 'updated_at',
             'session_key'
@@ -50,7 +50,7 @@ class BookingSerializer(serializers.ModelSerializer):
 
         # Проверяем, нет ли пересечений с другими бронированиями
         overlapping_bookings = Booking.objects.filter(
-            playground=data['playground'],
+            sport_venue=data['sport_venue'],
             status__in=['PENDING', 'CONFIRMED'],
             start_time__lt=data['end_time'],
             end_time__gt=data['start_time']

@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from playgrounds.models import Playground
+from playgrounds.models import SportVenue
 from decimal import Decimal
 
 User = get_user_model()
@@ -19,11 +19,12 @@ class Booking(models.Model):
         ('REFUNDED', 'Возвращено'),
     ]
 
-    playground = models.ForeignKey(
-        Playground,
+    sport_venue = models.ForeignKey(
+        SportVenue,
         on_delete=models.CASCADE,
         related_name='bookings',
-        verbose_name='Игровое поле'
+        verbose_name='Игровое поле',
+        null=True,
     )
     user = models.ForeignKey(
         User,
@@ -85,7 +86,7 @@ class Booking(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f'Бронирование {self.playground.name} - {self.user.username} ({self.start_time.date()})'
+        return f'Бронирование {self.sport_venue.name} - {self.user.username} ({self.start_time.date()})'
 
     def save(self, *args, **kwargs):
         if self.start_time and self.end_time:
@@ -94,8 +95,8 @@ class Booking(models.Model):
             duration_hours = Decimal(str(duration.total_seconds() / 3600))
             
             # Вычисляем общую стоимость
-            self.total_price = self.playground.price_per_hour * duration_hours
+            self.total_price = self.sport_venue.price_per_hour * duration_hours
             
             # Устанавливаем сумму депозита
-            self.deposit_amount = self.playground.deposit_amount
+            self.deposit_amount = self.sport_venue.deposit_amount
         super().save(*args, **kwargs)

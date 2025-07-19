@@ -61,30 +61,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'djangoProject.wsgi.application'
 
-DATABASES = { 
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT', '5432'),
-    }
-}
-
-# DATABASES = {
+# DATABASES = { 
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'polya_top_bot_database',
-#         'USER': 'polya_top_bot_database_user',
-#         'PASSWORD': 'eybXRoSMtLfEAr8raoDNZXLuTQCDeR2d',
-#         'HOST': 'dpg-d1ciikadbo4c73ct7hlg-a.oregon-postgres.render.com',
-#         'PORT': '5432',
-#         'OPTIONS': {
-#             'sslmode': 'require',
-#         },
+#         'NAME': os.getenv('DB_NAME'),
+#         'USER': os.getenv('DB_USER'),
+#         'PASSWORD': os.getenv('DB_PASSWORD'),
+#         'HOST': os.getenv('DB_HOST'),
+#         'PORT': os.getenv('DB_PORT', '5432'),
 #     }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'polya_top_bot_database_vcvj',
+        'USER': 'polya_top_bot_database_vcvj_user',
+        'PASSWORD': 'pzOgYhcI2TKAnZgYI4Ttzu3piRxrVfaM',
+        'HOST': 'dpg-d1t2gs3e5dus73e37d80-a.oregon-postgres.render.com',
+        'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
+    }
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -185,35 +185,37 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',')
+CORS_ALLOW_ALL_ORIGINS = True
 
-CSRF_TRUSTED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',')
+# CORS_ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',')
 
-CORS_ALLOW_METHODS = [
-    'DELETE',
-    'GET',
-    'OPTIONS',
-    'PATCH',
-    'POST',
-    'PUT',
-]
+# CSRF_TRUSTED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',')
 
-CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
-    'x-timezone-offset',
-]
+# CORS_ALLOW_METHODS = [
+#     'DELETE',
+#     'GET',
+#     'OPTIONS',
+#     'PATCH',
+#     'POST',
+#     'PUT',
+# ]
 
-CORS_EXPOSE_HEADERS = [
-    'x-timezone-offset',
-]
+# CORS_ALLOW_HEADERS = [
+#     'accept',
+#     'accept-encoding',
+#     'authorization',
+#     'content-type',
+#     'dnt',
+#     'origin',
+#     'user-agent',
+#     'x-csrftoken',
+#     'x-requested-with',
+#     'x-timezone-offset',
+# ]
+
+# CORS_EXPOSE_HEADERS = [
+#     'x-timezone-offset',
+# ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 

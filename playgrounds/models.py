@@ -3,7 +3,35 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-class PlaygroundType(models.Model):
+
+class Region(models.Model):
+    name_ru = models.CharField(max_length=100, verbose_name='Название (русский)')
+    name_uz = models.CharField(max_length=100, verbose_name='Название (узбекский)')
+    name_en = models.CharField(max_length=100, verbose_name='Название (английский)')
+
+    slug = models.SlugField(max_length=100, unique=True, verbose_name='Slug (для URL и фильтрации)')
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+
+    class Meta:
+        verbose_name = 'Регион'
+        verbose_name_plural = 'Регионы'
+        ordering = ['name_ru']
+
+    def __str__(self):
+        return self.name_ru
+
+    def get_name_by_lang(self, lang_code):
+        if lang_code == 'uz':
+            return self.name_uz
+        elif lang_code == 'en':
+            return self.name_en
+        return self.name_ru
+
+
+
+class SportVenueType(models.Model):
     name = models.CharField(max_length=100, verbose_name='Название типа')
     description = models.TextField(verbose_name='Описание', blank=True)
     icon = models.ImageField(upload_to='playground_type_icons/', verbose_name='Иконка', blank=True, null=True)
@@ -11,14 +39,14 @@ class PlaygroundType(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = 'Тип поля'
-        verbose_name_plural = 'Типы полей'
+        verbose_name = 'Тип площадки'
+        verbose_name_plural = 'Типы площадок'
         ordering = ['name']
 
     def __str__(self):
         return self.name
 
-class Playground(models.Model):
+class SportVenue(models.Model):
     name = models.CharField(max_length=200, verbose_name='Название')
     description = models.TextField(verbose_name='Описание')
     price_per_hour = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена за час')
@@ -47,19 +75,21 @@ class Playground(models.Model):
         null=True,
         blank=True
     )
-    type = models.CharField(
-        max_length=20,
-        choices=[
-            ('FOOTBALL', 'Футбол'),
-            ('BASKETBALL', 'Баскетбол'),
-            ('TENNIS', 'Теннис'),
-            ('VOLLEYBALL', 'Волейбол'),
-            ('OTHER', 'Другое'),
-        ],
-        default='FOOTBALL',
-        verbose_name='Тип поля',
+    sport_venue_type = models.ForeignKey(
+        SportVenueType,
+        on_delete=models.SET_NULL,
+        verbose_name='Тип площадки',
         null=True,
-        blank=True
+        blank=True,
+        related_name='sport_venues'
+    )
+    region = models.ForeignKey(
+        Region,
+        on_delete=models.SET_NULL,
+        verbose_name='Регион',
+        null=True,
+        blank=True,
+        related_name='sport_venues'
     )
     deposit_amount = models.DecimalField(
         max_digits=10,
@@ -73,43 +103,40 @@ class Playground(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Компания',
         limit_choices_to={'role': 'SELLER'},
-        related_name='playgrounds'
+        related_name='sport_venues'
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = 'Игровое поле'
-        verbose_name_plural = 'Игровые поля'
+        verbose_name = 'Спортивная площадка'
+        verbose_name_plural = 'Спортивные площадки'
 
     def __str__(self):
         return self.name
 
     def save(self, *args, **kwargs):
-        # Если депозит не указан, устанавливаем его равным цене за час
         if not self.deposit_amount:
             self.deposit_amount = self.price_per_hour
         super().save(*args, **kwargs)
 
-
-class PlaygroundImage(models.Model):
-    playground = models.ForeignKey(Playground, related_name='images', on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='playground_images/', verbose_name='Фотография')
+class SportVenueImage(models.Model):
+    sport_venue = models.ForeignKey(SportVenue, related_name='images', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='sport_venue_images/', verbose_name='Фотография')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Фотография поля'
-        verbose_name_plural = 'Фотографии полей'
+        verbose_name = 'Фотография площадки'
+        verbose_name_plural = 'Фотографии площадок'
 
-
-class FavoritePlayground(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorite_playgrounds')
-    playground = models.ForeignKey(Playground, on_delete=models.CASCADE, related_name='favorited_by')
+class FavoriteSportVenue(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorite_sport_venues')
+    sport_venue = models.ForeignKey(SportVenue, on_delete=models.CASCADE, related_name='favorited_by')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'playground')
+        unique_together = ('user', 'sport_venue')
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.user.username} - {self.playground.name}"
+        return f"{self.user.username} - {self.sport_venue.name}"
