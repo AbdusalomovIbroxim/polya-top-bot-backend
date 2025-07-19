@@ -13,6 +13,7 @@ import hmac
 import json
 from urllib.parse import parse_qs, urlparse
 from django.conf import settings
+from djangoProject.utils import check_webapp_signature
 
 User = get_user_model()
 
@@ -214,17 +215,20 @@ class TelegramAuthViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Проверяем подлинность данных
-        is_valid, result = self._verify_telegram_data(init_data)
-        if not is_valid:
+        # Проверяем подлинность данных через utils
+        if not check_webapp_signature(settings.TELEGRAM_BOT_TOKEN, init_data):
             return Response(
-                {'error': result}, 
+                {'error': 'Hash verification failed'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        parsed_data = result
-        user_data = self._extract_user_data(parsed_data)
-        
+        parsed_data = dict(parse_qs(init_data))
+        user_data = parsed_data.get('user', [None])[0]
+        if user_data:
+            try:
+                user_data = json.loads(user_data)
+            except Exception:
+                user_data = None
         if not user_data:
             return Response(
                 {'error': 'User data not found'}, 
