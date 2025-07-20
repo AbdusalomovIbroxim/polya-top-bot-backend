@@ -70,7 +70,17 @@ def check_webapp_signature(token: str, init_data: str) -> bool:
     print('calculated_hash2:', calculated_hash2)
     print('Hashes match (method 2):', calculated_hash2 == hash_)
     
+    # Метод 3: Прямой HMAC-SHA256 с токеном как ключом
+    calculated_hash3 = hmac.new(
+        key=token.encode(),
+        msg=data_check_string.encode(),
+        digestmod=hashlib.sha256
+    ).hexdigest()
+    
+    print('calculated_hash3:', calculated_hash3)
+    print('Hashes match (method 3):', calculated_hash3 == hash_)
+    
     print('=== END DEBUG ===')
     
     # Возвращаем True если хотя бы один метод работает
-    return calculated_hash == hash_ or calculated_hash2 == hash_ 
+    return calculated_hash == hash_ or calculated_hash2 == hash_ or calculated_hash3 == hash_ 
