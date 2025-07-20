@@ -6,15 +6,15 @@ from .models import User
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'first_name', 'last_name', 'role', 'is_staff', 'is_active', 'date_joined')
+    list_display = ('username', 'email', 'first_name', 'last_name', 'role', 'is_staff', 'is_active', 'date_joined', 'photo')
     list_filter = ('role', 'is_staff', 'is_superuser', 'is_active', 'date_joined')
-    search_fields = ('username', 'first_name', 'last_name', 'email', 'phone')
+    search_fields = ('username', 'first_name', 'last_name', 'email', 'phone', 'photo')
     ordering = ('-date_joined',)
     
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         ('Персональная информация', {
-            'fields': ('first_name', 'last_name', 'email', 'phone'),
+            'fields': ('first_name', 'last_name', 'email', 'phone', 'photo'),
             'classes': ('wide',)
         }),
         ('Роли и разрешения', {
@@ -30,7 +30,7 @@ class CustomUserAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'password1', 'password2', 'role', 'email', 'first_name', 'last_name', 'phone'),
+            'fields': ('username', 'password1', 'password2', 'role', 'email', 'first_name', 'last_name', 'phone', 'photo'),
         }),
     )
 

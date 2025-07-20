@@ -7,7 +7,7 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'phone', 'date_joined')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'phone', 'date_joined', 'photo')
         read_only_fields = ('date_joined',)
 
 
@@ -16,7 +16,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password', 'first_name', 'last_name', 'phone')
+        fields = ('username', 'email', 'password', 'first_name', 'last_name', 'phone', 'photo')
 
     def create(self, validated_data):
         password = validated_data.pop('password')

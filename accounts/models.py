@@ -1,5 +1,5 @@
 from django.contrib.auth.models import AbstractUser
-from django.db.models import TextChoices, CharField, BigIntegerField, Model, ForeignKey, CASCADE, DateTimeField
+from django.db.models import TextChoices, CharField, BigIntegerField, Model, ForeignKey, CASCADE, DateTimeField, ImageField
 
 
 class User(AbstractUser):
@@ -14,6 +14,7 @@ class User(AbstractUser):
         default=Role.USER,
         verbose_name='Роль'
     )
+    photo = ImageField(upload_to='user/profile/', verbose_name='Фотография')
     phone = CharField(max_length=15, blank=True, verbose_name='Телефон')
     telegram_id = BigIntegerField(null=True, blank=True, unique=True)
     telegram_username = CharField(max_length=255, null=True, blank=True)
