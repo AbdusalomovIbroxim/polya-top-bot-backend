@@ -21,7 +21,7 @@ def check_webapp_signature(token: str, init_data: str) -> bool:
     """
     try:
         parsed_data = dict(parse_qsl(init_data))
-        print(parse_qsl)
+        print('parsed_data:', parsed_data)
     except ValueError:
         return False
     if "hash" not in parsed_data:
@@ -31,9 +31,12 @@ def check_webapp_signature(token: str, init_data: str) -> bool:
     data_check_string = "\n".join(
         f"{k}={v}" for k, v in sorted(parsed_data.items(), key=itemgetter(0))
     )
-    # Ключ — SHA256(token)
     secret_key = hashlib.sha256(token.encode()).digest()
     calculated_hash = hmac.new(
         key=secret_key, msg=data_check_string.encode(), digestmod=hashlib.sha256
     ).hexdigest()
+    print('data_check_string:', data_check_string)
+    print('secret_key (hex):', secret_key.hex())
+    print('calculated_hash:', calculated_hash)
+    print('received hash:', hash_)
     return calculated_hash == hash_ 
