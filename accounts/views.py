@@ -117,6 +117,7 @@ class TelegramAuthViewSet(viewsets.ViewSet):
                 return False, "Telegram bot token not configured"
             
             print('Using TELEGRAM_BOT_TOKEN:', settings.TELEGRAM_BOT_TOKEN[:10] + '...' if len(settings.TELEGRAM_BOT_TOKEN) > 10 else settings.TELEGRAM_BOT_TOKEN)
+            print('FULL TELEGRAM_BOT_TOKEN (for debugging):', settings.TELEGRAM_BOT_TOKEN)
             print('About to call check_webapp_signature with init_data:', init_data[:100] + '...' if len(init_data) > 100 else init_data)
             
             is_valid = check_webapp_signature(settings.TELEGRAM_BOT_TOKEN, init_data)
