@@ -111,33 +111,17 @@ class TelegramAuthViewSet(viewsets.ViewSet):
         Проверяет подлинность данных от Telegram Web App
         """
         try:
-            # Парсим init_data
-            parsed_data = parse_qs(init_data)
+            # Используем правильную функцию проверки подписи
+            if not settings.TELEGRAM_BOT_TOKEN:
+                print('TELEGRAM_BOT_TOKEN is empty or not set')
+                return False, "Telegram bot token not configured"
             
-            # Извлекаем hash для проверки
-            received_hash = parsed_data.get('hash', [None])[0]
-            if not received_hash:
-                return False, "Hash not found in init_data"
+            print('Using TELEGRAM_BOT_TOKEN:', settings.TELEGRAM_BOT_TOKEN[:10] + '...' if len(settings.TELEGRAM_BOT_TOKEN) > 10 else settings.TELEGRAM_BOT_TOKEN)
             
-            # Удаляем hash из данных для проверки
-            data_check_string = init_data.replace(f'&hash={received_hash}', '')
-            
-            # Создаем секретный ключ из токена бота
-            secret_key = hmac.new(
-                b'WebAppData',
-                settings.TELEGRAM_BOT_TOKEN.encode(),
-                hashlib.sha256
-            ).digest()
-            
-            # Вычисляем hash
-            calculated_hash = hmac.new(
-                secret_key,
-                data_check_string.encode(),
-                hashlib.sha256
-            ).hexdigest()
-            
-            # Сравниваем hash
-            if calculated_hash == received_hash:
+            is_valid = check_webapp_signature(settings.TELEGRAM_BOT_TOKEN, init_data)
+            if is_valid:
+                # Парсим данные для извлечения информации о пользователе
+                parsed_data = parse_qs(init_data)
                 return True, parsed_data
             else:
                 return False, "Hash verification failed"
@@ -216,19 +200,15 @@ class TelegramAuthViewSet(viewsets.ViewSet):
             )
         
         # Проверяем подлинность данных через utils
-        if not check_webapp_signature(settings.TELEGRAM_BOT_TOKEN, init_data):
+        is_valid, parsed_data = self._verify_telegram_data(init_data)
+        
+        if not is_valid:
             return Response(
                 {'error': 'Hash verification failed'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        parsed_data = dict(parse_qs(init_data))
-        user_data = parsed_data.get('user', [None])[0]
-        if user_data:
-            try:
-                user_data = json.loads(user_data)
-            except Exception:
-                user_data = None
+        user_data = self._extract_user_data(parsed_data)
         if not user_data:
             return Response(
                 {'error': 'User data not found'}, 

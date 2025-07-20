@@ -224,5 +224,6 @@ CORS_ALLOWED_ORIGINS = [
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+# Telegram Bot Settings
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
 WEBAPP_URL = os.getenv('WEBAPP_URL')
