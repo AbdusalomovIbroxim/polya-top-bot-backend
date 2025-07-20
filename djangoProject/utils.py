@@ -41,6 +41,8 @@ def check_webapp_signature(token: str, init_data: str) -> bool:
     data_check_string = "\n".join(
         f"{k}={v}" for k, v in sorted(parsed_data.items(), key=itemgetter(0))
     )
+    
+    # Метод 1: SHA256(token) как секретный ключ (текущий)
     secret_key = hashlib.sha256(token.encode()).digest()
     calculated_hash = hmac.new(
         key=secret_key, msg=data_check_string.encode(), digestmod=hashlib.sha256
@@ -50,7 +52,25 @@ def check_webapp_signature(token: str, init_data: str) -> bool:
     print('secret_key (hex):', secret_key.hex())
     print('calculated_hash:', calculated_hash)
     print('received hash:', hash_)
-    print('Hashes match:', calculated_hash == hash_)
+    print('Hashes match (method 1):', calculated_hash == hash_)
+    
+    # Метод 2: HMAC-SHA256 с ключом 'WebAppData' + токен
+    secret_key2 = hmac.new(
+        key=b'WebAppData',
+        msg=token.encode(),
+        digestmod=hashlib.sha256
+    ).digest()
+    calculated_hash2 = hmac.new(
+        key=secret_key2,
+        msg=data_check_string.encode(),
+        digestmod=hashlib.sha256
+    ).hexdigest()
+    
+    print('secret_key2 (hex):', secret_key2.hex())
+    print('calculated_hash2:', calculated_hash2)
+    print('Hashes match (method 2):', calculated_hash2 == hash_)
+    
     print('=== END DEBUG ===')
     
-    return calculated_hash == hash_ 
+    # Возвращаем True если хотя бы один метод работает
+    return calculated_hash == hash_ or calculated_hash2 == hash_ 
