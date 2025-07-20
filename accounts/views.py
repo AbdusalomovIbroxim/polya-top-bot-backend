@@ -117,8 +117,11 @@ class TelegramAuthViewSet(viewsets.ViewSet):
                 return False, "Telegram bot token not configured"
             
             print('Using TELEGRAM_BOT_TOKEN:', settings.TELEGRAM_BOT_TOKEN[:10] + '...' if len(settings.TELEGRAM_BOT_TOKEN) > 10 else settings.TELEGRAM_BOT_TOKEN)
+            print('About to call check_webapp_signature with init_data:', init_data[:100] + '...' if len(init_data) > 100 else init_data)
             
             is_valid = check_webapp_signature(settings.TELEGRAM_BOT_TOKEN, init_data)
+            print('check_webapp_signature returned:', is_valid)
+            
             if is_valid:
                 # Парсим данные для извлечения информации о пользователе
                 parsed_data = parse_qs(init_data)
@@ -127,6 +130,7 @@ class TelegramAuthViewSet(viewsets.ViewSet):
                 return False, "Hash verification failed"
                 
         except Exception as e:
+            print('Exception in _verify_telegram_data:', str(e))
             return False, f"Error verifying data: {str(e)}"
     
     def _extract_user_data(self, parsed_data):
