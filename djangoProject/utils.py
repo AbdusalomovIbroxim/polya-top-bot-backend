@@ -28,6 +28,10 @@ def check_webapp_signature(token: str, init_data: str) -> bool:
         return False
 
     hash_ = parsed_data.pop('hash')
+    # Исключаем поле 'signature' из проверки подписи
+    if 'signature' in parsed_data:
+        parsed_data.pop('signature')
+    
     data_check_string = "\n".join(
         f"{k}={v}" for k, v in sorted(parsed_data.items(), key=itemgetter(0))
     )
