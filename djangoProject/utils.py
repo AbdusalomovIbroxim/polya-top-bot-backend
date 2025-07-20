@@ -19,12 +19,18 @@ def check_webapp_signature(token: str, init_data: str) -> bool:
     Check incoming WebApp init data signature (Telegram official way)
     https://core.telegram.org/bots/webapps#validating-data-received-via-the-web-app
     """
+    print('=== DEBUG: Telegram WebApp Signature Check ===')
+    print('Original init_data:', init_data)
+    print('Token (first 10 chars):', token[:10] + '...' if len(token) > 10 else token)
+    
     try:
         parsed_data = dict(parse_qsl(init_data))
         print('parsed_data:', parsed_data)
-    except ValueError:
+    except ValueError as e:
+        print('Error parsing init_data:', e)
         return False
     if "hash" not in parsed_data:
+        print('Hash not found in parsed_data')
         return False
 
     hash_ = parsed_data.pop('hash')
@@ -39,8 +45,12 @@ def check_webapp_signature(token: str, init_data: str) -> bool:
     calculated_hash = hmac.new(
         key=secret_key, msg=data_check_string.encode(), digestmod=hashlib.sha256
     ).hexdigest()
-    print('data_check_string:', data_check_string)
+    
+    print('data_check_string:', repr(data_check_string))
     print('secret_key (hex):', secret_key.hex())
     print('calculated_hash:', calculated_hash)
     print('received hash:', hash_)
+    print('Hashes match:', calculated_hash == hash_)
+    print('=== END DEBUG ===')
+    
     return calculated_hash == hash_ 
