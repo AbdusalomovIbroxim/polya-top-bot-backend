@@ -58,4 +58,4 @@ def parse_telegram_init_data(init_data: str):
         user_data = json.loads(user_json)
         return user_data
     except Exception:
-        return None 
+        return None

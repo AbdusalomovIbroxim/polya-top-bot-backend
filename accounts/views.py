@@ -69,6 +69,7 @@ class UserViewSet(viewsets.ViewSet):
 
 
 class TelegramAuthViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.AllowAny]
     @swagger_auto_schema(
         operation_description="Авторизация через Telegram Web App (без токенов)",
         request_body=openapi.Schema(
