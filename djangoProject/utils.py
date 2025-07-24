@@ -19,8 +19,10 @@ def check_webapp_signature(token: str, init_data: str) -> bool:
     try:
         parsed_data = dict(parse_qsl(init_data))
     except ValueError:
+        print('[DEBUG] Ошибка парсинга init_data')
         return False
     if "hash" not in parsed_data:
+        print('[DEBUG] hash не найден в init_data')
         return False
     hash_ = parsed_data.pop('hash')
     if 'signature' in parsed_data:
@@ -47,6 +49,19 @@ def check_webapp_signature(token: str, init_data: str) -> bool:
         msg=data_check_string.encode(),
         digestmod=hashlib.sha256
     ).hexdigest()
+    # DEBUG PRINTS
+    print('=== TELEGRAM SIGNATURE DEBUG ===')
+    print('Token:', token[:4] + '...' + token[-4:])
+    print('init_data:', init_data)
+    print('hash:', hash_)
+    print('data_check_string:', repr(data_check_string))
+    print('calculated_hash:', calculated_hash)
+    print('calculated_hash2:', calculated_hash2)
+    print('calculated_hash3:', calculated_hash3)
+    print('Match1:', calculated_hash == hash_)
+    print('Match2:', calculated_hash2 == hash_)
+    print('Match3:', calculated_hash3 == hash_)
+    print('=== END DEBUG ===')
     return calculated_hash == hash_ or calculated_hash2 == hash_ or calculated_hash3 == hash_
 
 def parse_telegram_init_data(init_data: str):
