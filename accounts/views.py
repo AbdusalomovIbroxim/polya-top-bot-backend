@@ -11,6 +11,7 @@ import json
 from urllib.parse import parse_qs
 from django.conf import settings
 from accounts.models import User
+from djangoProject.utils import check_webapp_signature, parse_telegram_init_data
 
 User = get_user_model()
 
@@ -66,33 +67,8 @@ class UserViewSet(viewsets.ViewSet):
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
+
 class TelegramAuthViewSet(viewsets.ViewSet):
-    """
-    ViewSet для авторизации через Telegram Web App (без JWT токенов)
-    """
-    
-    def _verify_telegram_data(self, init_data):
-        try:
-            if not settings.TELEGRAM_BOT_TOKEN:
-                return False, "Telegram bot token not configured"
-            is_valid = check_webapp_signature(settings.TELEGRAM_BOT_TOKEN, init_data)
-            if is_valid:
-                parsed_data = parse_qs(init_data)
-                return True, parsed_data
-            else:
-                return False, "Hash verification failed"
-        except Exception as e:
-            return False, f"Error verifying data: {str(e)}"
-
-    def _extract_user_data(self, parsed_data):
-        user_data = parsed_data.get('user', [None])[0]
-        if user_data:
-            try:
-                return json.loads(user_data)
-            except json.JSONDecodeError:
-                return None
-        return None
-
     @swagger_auto_schema(
         operation_description="Авторизация через Telegram Web App (без токенов)",
         request_body=openapi.Schema(
@@ -121,6 +97,7 @@ class TelegramAuthViewSet(viewsets.ViewSet):
                                 'last_name': openapi.Schema(type=openapi.TYPE_STRING),
                                 'role': openapi.Schema(type=openapi.TYPE_STRING),
                                 'telegram_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                'photo': openapi.Schema(type=openapi.TYPE_STRING, description='URL фото пользователя'),
                             }
                         )
                     }
@@ -139,45 +116,32 @@ class TelegramAuthViewSet(viewsets.ViewSet):
     )
     @action(detail=False, methods=['post'])
     def telegram_auth(self, request):
-        """
-        Авторизация через Telegram Web App (без токенов)
-        """
         init_data = request.data.get('init_data')
         if not init_data:
-            return Response(
-                {'error': 'init_data is required'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        is_valid, parsed_data = self._verify_telegram_data(init_data)
-        if not is_valid:
-            return Response(
-                {'error': 'Hash verification failed'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        user_data = self._extract_user_data(parsed_data)
+            return Response({'error': 'init_data is required'}, status=status.HTTP_400_BAD_REQUEST)
+        if not check_webapp_signature(settings.TELEGRAM_BOT_TOKEN, init_data):
+            return Response({'error': 'Hash verification failed'}, status=status.HTTP_400_BAD_REQUEST)
+        user_data = parse_telegram_init_data(init_data)
         if not user_data:
-            return Response(
-                {'error': 'User data not found'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({'error': 'User data not found'}, status=status.HTTP_400_BAD_REQUEST)
         telegram_id = user_data.get('id')
-        username = user_data.get('username')
-        first_name = user_data.get('first_name', '')
-        last_name = user_data.get('last_name', '')
         if not telegram_id:
-            return Response(
-                {'error': 'Telegram ID not found'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({'error': 'Telegram ID not found'}, status=status.HTTP_400_BAD_REQUEST)
+        defaults = {
+            'username': user_data.get('username') or f"tg_{telegram_id}",
+            'email': f"{telegram_id}@telegram.user",
+            'first_name': user_data.get('first_name', ''),
+            'last_name': user_data.get('last_name', ''),
+        }
         user, created = User.objects.get_or_create(
             telegram_id=telegram_id,
-            defaults={
-                'username': username or f"tg_{telegram_id}",
-                'email': f"{telegram_id}@telegram.user",
-                'first_name': first_name,
-                'last_name': last_name,
-            }
+            defaults=defaults
         )
+        # Обновить фото, если оно есть и изменилось
+        photo_url = user_data.get('photo_url')
+        if photo_url and (not user.photo or getattr(user.photo, 'url', None) != photo_url):
+            user.photo = photo_url  # если photo = URLField/ImageField
+            user.save()
         return Response({
             'user': {
                 'id': user.id,
@@ -185,9 +149,9 @@ class TelegramAuthViewSet(viewsets.ViewSet):
                 'email': user.email,
                 'first_name': user.first_name,
                 'last_name': user.last_name,
-                'role': user.role,
+                'role': getattr(user, 'role', None),
                 'telegram_id': user.telegram_id,
-                'photo': user.photo.url if user.photo else None
+                'photo': user.photo.url if hasattr(user.photo, 'url') else user.photo if user.photo else None
             }
         })
 
