@@ -140,6 +140,7 @@ REST_FRAMEWORK = {
 }
 
 from datetime import timedelta
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
@@ -226,5 +227,5 @@ CORS_ALLOWED_ORIGINS = [
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Telegram Bot Settings
-TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 WEBAPP_URL = os.getenv('WEBAPP_URL')
