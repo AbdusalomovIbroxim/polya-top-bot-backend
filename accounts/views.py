@@ -10,72 +10,12 @@ from .permission import TelegramWebAppPermission
 import json
 from urllib.parse import parse_qs
 from django.conf import settings
-from djangoProject.utils import check_webapp_signature
 from accounts.models import User
 
 User = get_user_model()
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_serializer_class(self):
-        if self.action == 'create':
-            return UserCreateSerializer
-        return UserSerializer
-
-    def get_permissions(self):
-        if self.action in ['create', 'list', 'retrieve']:
-            return [permissions.AllowAny()]
-        return [permissions.IsAdminUser()]
-
-    @swagger_auto_schema(
-        operation_description="Создать нового пользователя",
-        request_body=UserCreateSerializer,
-        responses={201: UserSerializer, 400: "Bad Request"}
-    )
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
-
-    @swagger_auto_schema(
-        operation_description="Получить список всех пользователей",
-        responses={200: UserSerializer(many=True)}
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    @swagger_auto_schema(
-        operation_description="Получить информацию о пользователе",
-        responses={200: UserSerializer, 404: "Not Found"}
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
-    @swagger_auto_schema(
-        operation_description="Полностью обновить пользователя",
-        request_body=UserSerializer,
-        responses={200: UserSerializer, 400: "Bad Request", 404: "Not Found"}
-    )
-    def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
-
-    @swagger_auto_schema(
-        operation_description="Частично обновить пользователя",
-        request_body=UserSerializer,
-        responses={200: UserSerializer, 400: "Bad Request", 404: "Not Found"}
-    )
-    def partial_update(self, request, *args, **kwargs):
-        return super().partial_update(request, *args, **kwargs)
-
-    @swagger_auto_schema(
-        operation_description="Удалить пользователя",
-        responses={204: "No Content", 404: "Not Found"}
-    )
-    def destroy(self, request, *args, **kwargs):
-        return super().destroy(request, *args, **kwargs)
-
+class UserViewSet(viewsets.ViewSet):
     @swagger_auto_schema(
         operation_description="Получить текущего пользователя через Telegram Web App",
         request_body=openapi.Schema(
@@ -86,11 +26,11 @@ class UserViewSet(viewsets.ModelViewSet):
             }
         ),
         responses={200: UserSerializer},
-        methods=['post']
+        methods=['get']
     )
-    @action(detail=False, methods=['post'], permission_classes=[TelegramWebAppPermission])
+    @action(detail=False, methods=['get'], permission_classes=[TelegramWebAppPermission])
     def me(self, request):
-        serializer = self.get_serializer(request.user)
+        serializer = UserSerializer(request.user)
         return Response(serializer.data)
 
     @swagger_auto_schema(
@@ -101,9 +41,27 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     @action(detail=False, methods=['put', 'patch'], permission_classes=[TelegramWebAppPermission])
     def update_me(self, request):
-        serializer = self.get_serializer(request.user, data=request.data, partial=True)
+        partial = request.method == 'PATCH'
+        serializer = UserSerializer(request.user, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_description="Получить пользователя по telegram_id",
+        manual_parameters=[
+            openapi.Parameter('telegram_id', openapi.IN_PATH, description="Telegram ID пользователя", type=openapi.TYPE_STRING)
+        ],
+        responses={200: UserSerializer, 404: 'Not Found'},
+        methods=['get']
+    )
+    @action(detail=False, methods=['get'], url_path='by_telegram_id/(?P<telegram_id>[^/]+)', permission_classes=[permissions.AllowAny])
+    def by_telegram_id(self, request, telegram_id=None):
+        try:
+            user = User.objects.get(telegram_id=telegram_id)
+        except User.DoesNotExist:
+            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = UserSerializer(user)
         return Response(serializer.data)
 
 class TelegramAuthViewSet(viewsets.ViewSet):
