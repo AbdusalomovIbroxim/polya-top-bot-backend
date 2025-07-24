@@ -120,7 +120,7 @@ class TelegramAuthViewSet(viewsets.ViewSet):
         init_data = request.data.get('init_data')
         if not init_data:
             return Response({'error': 'init_data is required'}, status=status.HTTP_400_BAD_REQUEST)
-        if not check_webapp_signature(settings.TELEGRAM_BOT_TOKEN, init_data):
+        if not check_webapp_signature('7795924675:AAERVFxu9quryzv8cGFGj824Avjp0Nj9n7Y', init_data):
             return Response({'error': 'Hash verification failed'}, status=status.HTTP_400_BAD_REQUEST)
         user_data = parse_telegram_init_data(init_data)
         if not user_data:
