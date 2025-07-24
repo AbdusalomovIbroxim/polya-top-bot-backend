@@ -18,13 +18,15 @@ User = get_user_model()
 class UserViewSet(viewsets.ViewSet):
     @swagger_auto_schema(
         operation_description="Получить текущего пользователя через Telegram Web App",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            required=['init_data'],
-            properties={
-                'init_data': openapi.Schema(type=openapi.TYPE_STRING, description='Данные инициализации от Telegram Web App')
-            }
-        ),
+        manual_parameters=[
+            openapi.Parameter(
+                'init_data',
+                openapi.IN_QUERY,
+                description='Данные инициализации от Telegram Web App',
+                type=openapi.TYPE_STRING,
+                required=True
+            )
+        ],
         responses={200: UserSerializer},
         methods=['get']
     )
