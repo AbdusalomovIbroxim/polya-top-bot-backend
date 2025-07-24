@@ -31,8 +31,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     # 'djangoProject.middleware.RequestTimingMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -189,6 +189,7 @@ CORS_ALLOW_CREDENTIALS = True
 # CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "https://polya-top-boy-frontend.onrender.com",
+    "https://polya-top-bot-backend.onrender.com",
 ]
 # CORS_ALLOW_ALL_ORIGINS = True
 
