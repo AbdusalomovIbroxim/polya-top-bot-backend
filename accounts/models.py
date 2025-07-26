@@ -16,10 +16,10 @@ class User(AbstractUser):
     )
     photo = ImageField(upload_to='user/profile/', verbose_name='Фотография', null=True)
     phone = CharField(max_length=15, blank=True, verbose_name='Телефон')
-    telegram_id = BigIntegerField(null=True, blank=True, unique=True)
-    telegram_username = CharField(max_length=255, null=True, blank=True)
-    telegram_first_name = CharField(max_length=255, null=True, blank=True)
-    telegram_last_name = CharField(max_length=255, null=True, blank=True)
+    # telegram_id = BigIntegerField(null=True, blank=True, unique=True)
+    # telegram_username = CharField(max_length=255, null=True, blank=True)
+    # telegram_first_name = CharField(max_length=255, null=True, blank=True)
+    # telegram_last_name = CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         verbose_name = 'Пользователь'
