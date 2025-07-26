@@ -17,32 +17,35 @@ Authorization: Bearer <access_token>
 
 ## Authentication Endpoints
 
-### 1. Telegram Web App Authentication
+### 1. User Login
 
-**POST** `/telegram-auth/telegram_auth/`
+**POST** `/auth/login/`
 
-Авторизация через Telegram Web App.
+Авторизация пользователя по логину (username или номер телефона) и паролю.
 
 **Request Body:**
 ```json
 {
-    "init_data": "query_id=AAHdF6IQAAAAAN0XohDhrOrc&user=%7B%22id%22%3A123456789%2C%22first_name%22%3A%22John%22%2C%22last_name%22%3A%22Doe%22%2C%22username%22%3A%22johndoe%22%7D&auth_date=1234567890&hash=abc123..."
+    "login": "username или номер телефона",
+    "password": "пароль"
 }
 ```
 
 **Success Response (200):**
 ```json
 {
+    "message": "Успешная авторизация",
     "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
     "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
     "user": {
         "id": 1,
         "username": "johndoe",
-        "email": "123456789@telegram.user",
+        "phone": "+998901234567",
         "first_name": "John",
         "last_name": "Doe",
         "role": "USER",
-        "telegram_id": 123456789
+        "date_joined": "2024-01-01T10:00:00Z",
+        "photo": "http://api.example.com/media/user/profile/photo.jpg"
     }
 }
 ```
@@ -50,33 +53,72 @@ Authorization: Bearer <access_token>
 **Error Response (400):**
 ```json
 {
-    "error": "init_data is required"
+    "login": ["Пользователь с таким логином не найден."],
+    "password": ["Неверный пароль."]
 }
 ```
 
-### 2. Standard JWT Authentication
+### 2. User Registration
 
-**POST** `/token/`
+**POST** `/auth/register/`
 
-Стандартная авторизация по логину и паролю.
+Регистрация нового пользователя.
 
 **Request Body:**
 ```json
 {
-    "username": "user@example.com",
-    "password": "password123"
+    "username": "johndoe",
+    "phone": "+998901234567",
+    "password": "password123",
+    "password_confirm": "password123",
+    "first_name": "John",
+    "last_name": "Doe"
 }
 ```
+
+**Success Response (201):**
+```json
+{
+    "message": "Пользователь успешно зарегистрирован",
+    "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+    "user": {
+        "id": 1,
+        "username": "johndoe",
+        "phone": "+998901234567",
+        "first_name": "John",
+        "last_name": "Doe",
+        "role": "USER",
+        "date_joined": "2024-01-01T10:00:00Z",
+        "photo": null
+    }
+}
+```
+
+**Error Response (400):**
+```json
+{
+    "username": ["Пользователь с таким username уже существует."],
+    "phone": ["Пользователь с таким номером телефона уже существует."],
+    "password": ["Пароль слишком простой."],
+    "password_confirm": ["Пароли не совпадают."]
+}
+```
+
+### 3. User Logout
+
+**POST** `/auth/logout/`
+
+Выход пользователя из системы.
 
 **Success Response (200):**
 ```json
 {
-    "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
-    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+    "message": "Успешный выход из системы"
 }
 ```
 
-### 3. Refresh Token
+### 4. Refresh Token
 
 **POST** `/token/refresh/`
 
@@ -96,7 +138,7 @@ Authorization: Bearer <access_token>
 }
 ```
 
-### 4. Verify Token
+### 5. Verify Token
 
 **POST** `/token/verify/`
 
@@ -140,15 +182,12 @@ Authorization: Bearer <access_token>
 {
     "id": 1,
     "username": "johndoe",
-    "email": "john@example.com",
+    "phone": "+998901234567",
     "first_name": "John",
     "last_name": "Doe",
     "role": "USER",
-    "phone": "+1234567890",
-    "telegram_id": 123456789,
-    "telegram_username": "johndoe",
-    "telegram_first_name": "John",
-    "telegram_last_name": "Doe"
+    "date_joined": "2024-01-01T10:00:00Z",
+    "photo": "http://api.example.com/media/user/profile/photo.jpg"
 }
 ```
 
@@ -156,7 +195,7 @@ Authorization: Bearer <access_token>
 
 **PUT** `/users/update_me/`
 
-Обновить данные текущего пользователя.
+Полное обновление данных текущего пользователя.
 
 **Headers:**
 ```
@@ -168,7 +207,7 @@ Authorization: Bearer <access_token>
 {
     "first_name": "John Updated",
     "last_name": "Doe Updated",
-    "phone": "+1234567890"
+    "phone": "+998901234567"
 }
 ```
 
@@ -177,19 +216,18 @@ Authorization: Bearer <access_token>
 {
     "id": 1,
     "username": "johndoe",
-    "email": "john@example.com",
+    "phone": "+998901234567",
     "first_name": "John Updated",
     "last_name": "Doe Updated",
     "role": "USER",
-    "phone": "+1234567890"
+    "date_joined": "2024-01-01T10:00:00Z",
+    "photo": "http://api.example.com/media/user/profile/photo.jpg"
 }
 ```
 
-### 3. Create User
+**PATCH** `/users/update_me/`
 
-**POST** `/users/`
-
-Создать нового пользователя (только для админов).
+Частичное обновление данных текущего пользователя.
 
 **Headers:**
 ```
@@ -199,24 +237,7 @@ Authorization: Bearer <access_token>
 **Request Body:**
 ```json
 {
-    "username": "newuser",
-    "email": "newuser@example.com",
-    "password": "password123",
-    "first_name": "New",
-    "last_name": "User",
-    "role": "USER"
-}
-```
-
-**Success Response (201):**
-```json
-{
-    "id": 2,
-    "username": "newuser",
-    "email": "newuser@example.com",
-    "first_name": "New",
-    "last_name": "User",
-    "role": "USER"
+    "first_name": "John Updated"
 }
 ```
 

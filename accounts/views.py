@@ -24,6 +24,8 @@ class AuthViewSet(viewsets.ViewSet):
                     type=openapi.TYPE_OBJECT,
                     properties={
                         'message': openapi.Schema(type=openapi.TYPE_STRING),
+                        'access': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Access Token'),
+                        'refresh': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Refresh Token'),
                         'user': UserSerializer
                     }
                 )
@@ -45,10 +47,7 @@ class AuthViewSet(viewsets.ViewSet):
         if serializer.is_valid():
             user = serializer.validated_data['user']
             login(request, user)
-            return Response({
-                'message': 'Успешная авторизация',
-                'user': UserSerializer(user).data
-            })
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
@@ -61,6 +60,8 @@ class AuthViewSet(viewsets.ViewSet):
                     type=openapi.TYPE_OBJECT,
                     properties={
                         'message': openapi.Schema(type=openapi.TYPE_STRING),
+                        'access': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Access Token'),
+                        'refresh': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Refresh Token'),
                         'user': UserSerializer
                     }
                 )
@@ -82,10 +83,7 @@ class AuthViewSet(viewsets.ViewSet):
         if serializer.is_valid():
             user = serializer.save()
             login(request, user)
-            return Response({
-                'message': 'Пользователь успешно зарегистрирован',
-                'user': UserSerializer(user).data
-            }, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(

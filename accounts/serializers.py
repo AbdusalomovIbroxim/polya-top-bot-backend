@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
 
@@ -76,6 +77,17 @@ class LoginSerializer(serializers.Serializer):
 
         return attrs
 
+    def to_representation(self, instance):
+        user = instance['user']
+        refresh = RefreshToken.for_user(user)
+        
+        return {
+            'message': 'Успешная авторизация',
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'user': UserSerializer(user).data
+        }
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
@@ -124,4 +136,14 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User(**validated_data)
         user.set_password(password)
         user.save()
-        return user 
+        return user
+
+    def to_representation(self, instance):
+        refresh = RefreshToken.for_user(instance)
+        
+        return {
+            'message': 'Пользователь успешно зарегистрирован',
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'user': UserSerializer(instance).data
+        } 
