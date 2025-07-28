@@ -213,7 +213,7 @@ class SportVenueViewSet(viewsets.ModelViewSet):
         from bookings.models import Booking
         
         start_day = timezone.make_aware(datetime.combine(date, dt_time(8, 0)))
-        end_day = timezone.make_aware(datetime.combine(date, dt_time(22, 30)))
+        end_day = timezone.make_aware(datetime.combine(date, dt_time(22, 0)))
 
         bookings = Booking.objects.filter(
             sport_venue=sport_venue,
@@ -230,21 +230,21 @@ class SportVenueViewSet(viewsets.ModelViewSet):
             while current < end:
                 local_time = timezone.localtime(current)
                 booked.add(local_time.strftime('%H:%M'))
-                current += timedelta(minutes=30)
+                current += timedelta(hours=1)
 
         slots = []
         current = datetime.combine(date, dt_time(8, 0))
-        end = datetime.combine(date, dt_time(22, 30))
+        end = datetime.combine(date, dt_time(22, 0))  # Изменили на 22:00
         while current <= end:
             aware_time = timezone.make_aware(current)
             time_str = timezone.localtime(aware_time).strftime('%H:%M')
             is_available = aware_time > timezone.now() if date == timezone.now().date() else True
             slots.append({'time': time_str, 'is_available': is_available and time_str not in booked})
-            current += timedelta(minutes=30)
+            current += timedelta(hours=1)
 
         return Response({
             'date': date_str,
-            'working_hours': {'start': '08:00', 'end': '22:30'},
+            'working_hours': {'start': '08:00', 'end': '22:00'},
             'time_points': slots
         })
 
