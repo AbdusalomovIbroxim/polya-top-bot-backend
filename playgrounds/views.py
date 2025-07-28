@@ -185,6 +185,17 @@ class SportVenueViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
 
+    @swagger_auto_schema(
+        operation_description="Проверить доступность площадки на определенную дату",
+        manual_parameters=[
+            openapi.Parameter('date', openapi.IN_QUERY, type=openapi.TYPE_STRING, format='date', 
+                             description='Дата в формате YYYY-MM-DD', required=True)
+        ],
+        responses={
+            200: "Информация о доступности",
+            400: "Неверный формат даты или дата в прошлом"
+        }
+    )
     @action(detail=True, methods=['get'])
     def check_availability(self, request, pk=None):
         sport_venue = self.get_object()
