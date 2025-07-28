@@ -86,57 +86,11 @@ class SportVenueViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         operation_description="Создает новую спортивную площадку с возможностью загрузки нескольких изображений",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'name': openapi.Schema(type=openapi.TYPE_STRING),
-                'description': openapi.Schema(type=openapi.TYPE_STRING),
-                'price_per_hour': openapi.Schema(type=openapi.TYPE_NUMBER),
-                'city': openapi.Schema(type=openapi.TYPE_STRING),
-                'address': openapi.Schema(type=openapi.TYPE_STRING),
-                'latitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
-                'longitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
-                'yandex_map_url': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
-                'sport_venue_type': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
-                'region': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
-                'deposit_amount': openapi.Schema(type=openapi.TYPE_NUMBER),
-                'company_id': openapi.Schema(type=openapi.TYPE_INTEGER)
-            }
-        ),
+        request_body=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные спортивной площадки'),
         responses={
             201: openapi.Response(
                 description="Созданная спортивная площадка",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'name': openapi.Schema(type=openapi.TYPE_STRING),
-                        'description': openapi.Schema(type=openapi.TYPE_STRING),
-                        'price_per_hour': openapi.Schema(type=openapi.TYPE_NUMBER),
-                        'city': openapi.Schema(type=openapi.TYPE_STRING),
-                        'address': openapi.Schema(type=openapi.TYPE_STRING),
-                        'latitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
-                        'longitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
-                        'yandex_map_url': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
-                        'sport_venue_type': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
-                        'region': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
-                        'deposit_amount': openapi.Schema(type=openapi.TYPE_NUMBER),
-                        'company': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                        'updated_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                        'images': openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Schema(
-                                type=openapi.TYPE_OBJECT,
-                                properties={
-                                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                                    'image': openapi.Schema(type=openapi.TYPE_STRING),
-                                    'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time')
-                                }
-                            )
-                        )
-                    }
-                )
+                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные спортивной площадки')
             ),
             400: "Bad Request"
         }
@@ -157,57 +111,11 @@ class SportVenueViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         operation_description="Обновляет существующую спортивную площадку и позволяет добавить новые изображения",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'name': openapi.Schema(type=openapi.TYPE_STRING),
-                'description': openapi.Schema(type=openapi.TYPE_STRING),
-                'price_per_hour': openapi.Schema(type=openapi.TYPE_NUMBER),
-                'city': openapi.Schema(type=openapi.TYPE_STRING),
-                'address': openapi.Schema(type=openapi.TYPE_STRING),
-                'latitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
-                'longitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
-                'yandex_map_url': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
-                'sport_venue_type': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
-                'region': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
-                'deposit_amount': openapi.Schema(type=openapi.TYPE_NUMBER),
-                'company_id': openapi.Schema(type=openapi.TYPE_INTEGER)
-            }
-        ),
+        request_body=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные спортивной площадки'),
         responses={
             200: openapi.Response(
                 description="Обновленная спортивная площадка",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'name': openapi.Schema(type=openapi.TYPE_STRING),
-                        'description': openapi.Schema(type=openapi.TYPE_STRING),
-                        'price_per_hour': openapi.Schema(type=openapi.TYPE_NUMBER),
-                        'city': openapi.Schema(type=openapi.TYPE_STRING),
-                        'address': openapi.Schema(type=openapi.TYPE_STRING),
-                        'latitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
-                        'longitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
-                        'yandex_map_url': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
-                        'sport_venue_type': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
-                        'region': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
-                        'deposit_amount': openapi.Schema(type=openapi.TYPE_NUMBER),
-                        'company': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                        'updated_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                        'images': openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Schema(
-                                type=openapi.TYPE_OBJECT,
-                                properties={
-                                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                                    'image': openapi.Schema(type=openapi.TYPE_STRING),
-                                    'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time')
-                                }
-                            )
-                        )
-                    }
-                )
+                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные спортивной площадки')
             ),
             400: "Bad Request",
             404: "Not Found"
@@ -234,40 +142,7 @@ class SportVenueViewSet(viewsets.ModelViewSet):
         responses={
             200: openapi.Response(
                 description="Список спортивных площадок",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_ARRAY,
-                    items=openapi.Schema(
-                        type=openapi.TYPE_OBJECT,
-                        properties={
-                            'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                            'name': openapi.Schema(type=openapi.TYPE_STRING),
-                            'description': openapi.Schema(type=openapi.TYPE_STRING),
-                            'price_per_hour': openapi.Schema(type=openapi.TYPE_NUMBER),
-                            'city': openapi.Schema(type=openapi.TYPE_STRING),
-                            'address': openapi.Schema(type=openapi.TYPE_STRING),
-                            'latitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
-                            'longitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
-                            'yandex_map_url': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
-                            'sport_venue_type': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
-                            'region': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
-                            'deposit_amount': openapi.Schema(type=openapi.TYPE_NUMBER),
-                            'company': openapi.Schema(type=openapi.TYPE_INTEGER),
-                            'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                            'updated_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                            'images': openapi.Schema(
-                                type=openapi.TYPE_ARRAY,
-                                items=openapi.Schema(
-                                    type=openapi.TYPE_OBJECT,
-                                    properties={
-                                        'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                                        'image': openapi.Schema(type=openapi.TYPE_STRING),
-                                        'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time')
-                                    }
-                                )
-                            )
-                        }
-                    )
-                )
+                schema=openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные спортивной площадки'))
             )
         }
     )
@@ -279,37 +154,7 @@ class SportVenueViewSet(viewsets.ModelViewSet):
         responses={
             200: openapi.Response(
                 description="Детальная информация о спортивной площадке",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'name': openapi.Schema(type=openapi.TYPE_STRING),
-                        'description': openapi.Schema(type=openapi.TYPE_STRING),
-                        'price_per_hour': openapi.Schema(type=openapi.TYPE_NUMBER),
-                        'city': openapi.Schema(type=openapi.TYPE_STRING),
-                        'address': openapi.Schema(type=openapi.TYPE_STRING),
-                        'latitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
-                        'longitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
-                        'yandex_map_url': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
-                        'sport_venue_type': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
-                        'region': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
-                        'deposit_amount': openapi.Schema(type=openapi.TYPE_NUMBER),
-                        'company': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                        'updated_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                        'images': openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Schema(
-                                type=openapi.TYPE_OBJECT,
-                                properties={
-                                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                                    'image': openapi.Schema(type=openapi.TYPE_STRING),
-                                    'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time')
-                                }
-                            )
-                        )
-                    }
-                )
+                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные спортивной площадки')
             ),
             404: "Not Found"
         }
@@ -429,46 +274,7 @@ class FavoriteSportVenueViewSet(viewsets.ModelViewSet):
         responses={
             201: openapi.Response(
                 description="Добавленное в избранное поле",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'user': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'sport_venue': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                        'sport_venue_details': openapi.Schema(
-                            type=openapi.TYPE_OBJECT,
-                            properties={
-                                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                                'name': openapi.Schema(type=openapi.TYPE_STRING),
-                                'description': openapi.Schema(type=openapi.TYPE_STRING),
-                                'price_per_hour': openapi.Schema(type=openapi.TYPE_NUMBER),
-                                'city': openapi.Schema(type=openapi.TYPE_STRING),
-                                'address': openapi.Schema(type=openapi.TYPE_STRING),
-                                'latitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
-                                'longitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
-                                'yandex_map_url': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
-                                'sport_venue_type': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
-                                'region': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
-                                'deposit_amount': openapi.Schema(type=openapi.TYPE_NUMBER),
-                                'company': openapi.Schema(type=openapi.TYPE_INTEGER),
-                                'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                                'updated_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                                'images': openapi.Schema(
-                                    type=openapi.TYPE_ARRAY,
-                                    items=openapi.Schema(
-                                        type=openapi.TYPE_OBJECT,
-                                        properties={
-                                            'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                                            'image': openapi.Schema(type=openapi.TYPE_STRING),
-                                            'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time')
-                                        }
-                                    )
-                                )
-                            }
-                        )
-                    }
-                )
+                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные избранного поля')
             ),
             400: "Bad Request"
         }
@@ -481,49 +287,7 @@ class FavoriteSportVenueViewSet(viewsets.ModelViewSet):
         responses={
             200: openapi.Response(
                 description="Список избранных полей",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_ARRAY,
-                    items=openapi.Schema(
-                        type=openapi.TYPE_OBJECT,
-                        properties={
-                            'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                            'user': openapi.Schema(type=openapi.TYPE_INTEGER),
-                            'sport_venue': openapi.Schema(type=openapi.TYPE_INTEGER),
-                            'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                            'sport_venue_details': openapi.Schema(
-                                type=openapi.TYPE_OBJECT,
-                                properties={
-                                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                                    'name': openapi.Schema(type=openapi.TYPE_STRING),
-                                    'description': openapi.Schema(type=openapi.TYPE_STRING),
-                                    'price_per_hour': openapi.Schema(type=openapi.TYPE_NUMBER),
-                                    'city': openapi.Schema(type=openapi.TYPE_STRING),
-                                    'address': openapi.Schema(type=openapi.TYPE_STRING),
-                                    'latitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
-                                    'longitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
-                                    'yandex_map_url': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
-                                    'sport_venue_type': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
-                                    'region': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
-                                    'deposit_amount': openapi.Schema(type=openapi.TYPE_NUMBER),
-                                    'company': openapi.Schema(type=openapi.TYPE_INTEGER),
-                                    'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                                    'updated_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                                    'images': openapi.Schema(
-                                        type=openapi.TYPE_ARRAY,
-                                        items=openapi.Schema(
-                                            type=openapi.TYPE_OBJECT,
-                                            properties={
-                                                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                                                'image': openapi.Schema(type=openapi.TYPE_STRING),
-                                                'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time')
-                                            }
-                                        )
-                                    )
-                                }
-                            )
-                        }
-                    )
-                )
+                schema=openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные избранного поля'))
             )
         }
     )
@@ -551,15 +315,7 @@ class SportVenueTypeViewSet(viewsets.ModelViewSet):
         responses={
             201: openapi.Response(
                 description="Созданный тип поля",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'name': openapi.Schema(type=openapi.TYPE_STRING),
-                        'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                        'updated_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time')
-                    }
-                )
+                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные типа поля')
             ),
             400: "Bad Request"
         }
@@ -572,18 +328,7 @@ class SportVenueTypeViewSet(viewsets.ModelViewSet):
         responses={
             200: openapi.Response(
                 description="Список типов полей",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_ARRAY,
-                    items=openapi.Schema(
-                        type=openapi.TYPE_OBJECT,
-                        properties={
-                            'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                            'name': openapi.Schema(type=openapi.TYPE_STRING),
-                            'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                            'updated_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time')
-                        }
-                    )
-                )
+                schema=openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные типа поля'))
             )
         }
     )

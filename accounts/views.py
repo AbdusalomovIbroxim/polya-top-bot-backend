@@ -10,7 +10,6 @@ from accounts.models import User
 
 User = get_user_model()
 
-# Новые views для системы авторизации по телефону/username
 class AuthViewSet(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
 
@@ -33,19 +32,7 @@ class AuthViewSet(viewsets.ViewSet):
                         'message': openapi.Schema(type=openapi.TYPE_STRING),
                         'access': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Access Token'),
                         'refresh': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Refresh Token'),
-                        'user': openapi.Schema(
-                            type=openapi.TYPE_OBJECT,
-                            properties={
-                                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                                'username': openapi.Schema(type=openapi.TYPE_STRING),
-                                'phone': openapi.Schema(type=openapi.TYPE_STRING),
-                                'first_name': openapi.Schema(type=openapi.TYPE_STRING),
-                                'last_name': openapi.Schema(type=openapi.TYPE_STRING),
-                                'date_joined': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                                'photo': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
-                                'role': openapi.Schema(type=openapi.TYPE_STRING)
-                            }
-                        )
+                        'user': openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные пользователя')
                     }
                 )
             ),
@@ -92,19 +79,7 @@ class AuthViewSet(viewsets.ViewSet):
                         'message': openapi.Schema(type=openapi.TYPE_STRING),
                         'access': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Access Token'),
                         'refresh': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Refresh Token'),
-                        'user': openapi.Schema(
-                            type=openapi.TYPE_OBJECT,
-                            properties={
-                                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                                'username': openapi.Schema(type=openapi.TYPE_STRING),
-                                'phone': openapi.Schema(type=openapi.TYPE_STRING),
-                                'first_name': openapi.Schema(type=openapi.TYPE_STRING),
-                                'last_name': openapi.Schema(type=openapi.TYPE_STRING),
-                                'date_joined': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                                'photo': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
-                                'role': openapi.Schema(type=openapi.TYPE_STRING)
-                            }
-                        )
+                        'user': openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные пользователя')
                     }
                 )
             ),
@@ -156,19 +131,7 @@ class UserViewSet(viewsets.ViewSet):
         responses={
             200: openapi.Response(
                 description="Данные пользователя",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'username': openapi.Schema(type=openapi.TYPE_STRING),
-                        'phone': openapi.Schema(type=openapi.TYPE_STRING),
-                        'first_name': openapi.Schema(type=openapi.TYPE_STRING),
-                        'last_name': openapi.Schema(type=openapi.TYPE_STRING),
-                        'date_joined': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                        'photo': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
-                        'role': openapi.Schema(type=openapi.TYPE_STRING)
-                    }
-                )
+                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные пользователя')
             )
         }
     )
@@ -179,64 +142,22 @@ class UserViewSet(viewsets.ViewSet):
 
     @swagger_auto_schema(
         operation_description="Обновить данные текущего пользователя",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'username': openapi.Schema(type=openapi.TYPE_STRING),
-                'phone': openapi.Schema(type=openapi.TYPE_STRING),
-                'first_name': openapi.Schema(type=openapi.TYPE_STRING),
-                'last_name': openapi.Schema(type=openapi.TYPE_STRING),
-                'photo': openapi.Schema(type=openapi.TYPE_STRING, nullable=True)
-            }
-        ),
+        request_body=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные для обновления'),
         responses={
             200: openapi.Response(
                 description="Обновленные данные пользователя",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'username': openapi.Schema(type=openapi.TYPE_STRING),
-                        'phone': openapi.Schema(type=openapi.TYPE_STRING),
-                        'first_name': openapi.Schema(type=openapi.TYPE_STRING),
-                        'last_name': openapi.Schema(type=openapi.TYPE_STRING),
-                        'date_joined': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                        'photo': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
-                        'role': openapi.Schema(type=openapi.TYPE_STRING)
-                    }
-                )
+                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные пользователя')
             )
         },
         methods=['put']
     )
     @swagger_auto_schema(
         operation_description="Частично обновить данные текущего пользователя",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'username': openapi.Schema(type=openapi.TYPE_STRING),
-                'phone': openapi.Schema(type=openapi.TYPE_STRING),
-                'first_name': openapi.Schema(type=openapi.TYPE_STRING),
-                'last_name': openapi.Schema(type=openapi.TYPE_STRING),
-                'photo': openapi.Schema(type=openapi.TYPE_STRING, nullable=True)
-            }
-        ),
+        request_body=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные для обновления'),
         responses={
             200: openapi.Response(
                 description="Обновленные данные пользователя",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'username': openapi.Schema(type=openapi.TYPE_STRING),
-                        'phone': openapi.Schema(type=openapi.TYPE_STRING),
-                        'first_name': openapi.Schema(type=openapi.TYPE_STRING),
-                        'last_name': openapi.Schema(type=openapi.TYPE_STRING),
-                        'date_joined': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                        'photo': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
-                        'role': openapi.Schema(type=openapi.TYPE_STRING)
-                    }
-                )
+                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные пользователя')
             )
         },
         methods=['patch']
