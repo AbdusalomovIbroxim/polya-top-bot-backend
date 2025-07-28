@@ -3,13 +3,21 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters import rest_framework as filters
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, BasePermission
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from .models import Booking
 from .serializers import BookingSerializer
 from djangoProject.utils import csrf_exempt_api
+
+
+class IsAuthenticatedOrAdmin(BasePermission):
+    """
+    Разрешает доступ только авторизованным пользователям и админам.
+    """
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated
 
 
 class BookingFilter(filters.FilterSet):
@@ -29,30 +37,27 @@ class BookingViewSet(viewsets.ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
     filterset_class = BookingFilter
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrAdmin]
 
     def get_queryset(self):
         queryset = super().get_queryset()
         user = self.request.user
 
-        if user.is_authenticated and user.role == 'admin':
+        # Админы видят все бронирования
+        if user.role == 'admin':
             return queryset
 
-        if user.is_authenticated and user.role == 'seller':
+        # Продавцы видят бронирования своих площадок
+        if user.role == 'seller':
             return queryset.filter(sport_venue__company=user)
 
-        if user.is_authenticated:
-            return queryset.filter(user=user)
-
-        return queryset.none()
+        # Обычные пользователи видят только свои бронирования
+        user_bookings = queryset.filter(user=user)
+        print(f"User {user.username} (role: {user.role}) - found {user_bookings.count()} bookings")
+        return user_bookings
 
     def perform_create(self, serializer):
-        if self.request.user.is_authenticated:
-            serializer.save(user=self.request.user)
-        else:
-            if not self.request.session.session_key:
-                self.request.session.create()
-            serializer.save(session_key=self.request.session.session_key)
+        serializer.save(user=self.request.user)
 
     @swagger_auto_schema(
         operation_description="Подтвердить бронирование (только для продавца или админа)",
@@ -131,7 +136,7 @@ class BookingViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        operation_description="Список доступных бронирований",
+        operation_description="Список бронирований пользователя. Админы видят все бронирования, продавцы - бронирования своих площадок, обычные пользователи - только свои бронирования.",
         responses={
             200: "Список бронирований"
         }
@@ -148,3 +153,53 @@ class BookingViewSet(viewsets.ModelViewSet):
     )
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Обновить бронирование",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'sport_venue': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID спортивной площадки'),
+                'start_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time', description='Дата и время начала'),
+                'end_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time', description='Дата и время окончания'),
+                'status': openapi.Schema(type=openapi.TYPE_STRING, description='Статус бронирования')
+            }
+        ),
+        responses={
+            200: "Обновленное бронирование",
+            400: "Bad Request",
+            404: "Not Found"
+        }
+    )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Частично обновить бронирование",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'sport_venue': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID спортивной площадки'),
+                'start_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time', description='Дата и время начала'),
+                'end_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time', description='Дата и время окончания'),
+                'status': openapi.Schema(type=openapi.TYPE_STRING, description='Статус бронирования')
+            }
+        ),
+        responses={
+            200: "Обновленное бронирование",
+            400: "Bad Request",
+            404: "Not Found"
+        }
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Удалить бронирование",
+        responses={
+            204: "No Content",
+            404: "Not Found"
+        }
+    )
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
