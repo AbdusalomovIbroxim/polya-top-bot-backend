@@ -31,7 +31,7 @@ class AuthViewSet(viewsets.ViewSet):
                         'message': openapi.Schema(type=openapi.TYPE_STRING),
                         'access': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Access Token'),
                         'refresh': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Refresh Token'),
-                        'user': UserSerializer()
+                        'user': openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные пользователя')
                     }
                 )
             ),
@@ -78,7 +78,7 @@ class AuthViewSet(viewsets.ViewSet):
                         'message': openapi.Schema(type=openapi.TYPE_STRING),
                         'access': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Access Token'),
                         'refresh': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Refresh Token'),
-                        'user': UserSerializer()
+                        'user': openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные пользователя')
                     }
                 )
             ),
@@ -130,7 +130,7 @@ class UserViewSet(viewsets.ViewSet):
         responses={
             200: openapi.Response(
                 description="Данные пользователя",
-                schema=UserSerializer()
+                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные пользователя')
             )
         }
     )
@@ -141,11 +141,11 @@ class UserViewSet(viewsets.ViewSet):
 
     @swagger_auto_schema(
         operation_description="Обновить данные текущего пользователя (PUT/PATCH)",
-        request_body=UserSerializer,
+        request_body=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные для обновления'),
         responses={
             200: openapi.Response(
                 description="Обновленные данные пользователя",
-                schema=UserSerializer()
+                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные пользователя')
             )
         },
         methods=['put', 'patch']

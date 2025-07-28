@@ -86,7 +86,31 @@ class SportVenueViewSet(viewsets.ModelViewSet):
         except SportVenueImage.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-    @swagger_auto_schema(...)
+    @swagger_auto_schema(
+        operation_description="Создает новую спортивную площадку с возможностью загрузки нескольких изображений",
+        manual_parameters=[
+            openapi.Parameter('name', openapi.IN_FORM, type=openapi.TYPE_STRING, description='Название площадки'),
+            openapi.Parameter('description', openapi.IN_FORM, type=openapi.TYPE_STRING, description='Описание площадки'),
+            openapi.Parameter('price_per_hour', openapi.IN_FORM, type=openapi.TYPE_NUMBER, description='Цена за час'),
+            openapi.Parameter('city', openapi.IN_FORM, type=openapi.TYPE_STRING, description='Город'),
+            openapi.Parameter('address', openapi.IN_FORM, type=openapi.TYPE_STRING, description='Адрес'),
+            openapi.Parameter('latitude', openapi.IN_FORM, type=openapi.TYPE_NUMBER, required=False, description='Широта'),
+            openapi.Parameter('longitude', openapi.IN_FORM, type=openapi.TYPE_NUMBER, required=False, description='Долгота'),
+            openapi.Parameter('yandex_map_url', openapi.IN_FORM, type=openapi.TYPE_STRING, required=False, description='URL Яндекс карты'),
+            openapi.Parameter('sport_venue_type', openapi.IN_FORM, type=openapi.TYPE_INTEGER, required=False, description='Тип площадки'),
+            openapi.Parameter('region', openapi.IN_FORM, type=openapi.TYPE_INTEGER, required=False, description='Регион'),
+            openapi.Parameter('deposit_amount', openapi.IN_FORM, type=openapi.TYPE_NUMBER, description='Сумма депозита'),
+            openapi.Parameter('company_id', openapi.IN_FORM, type=openapi.TYPE_INTEGER, description='ID компании'),
+            openapi.Parameter('images', openapi.IN_FORM, type=openapi.TYPE_FILE, required=False, description='Изображения площадки')
+        ],
+        responses={
+            201: openapi.Response(
+                description="Созданная спортивная площадка",
+                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные спортивной площадки')
+            ),
+            400: "Bad Request"
+        }
+    )
     def create(self, request, *args, **kwargs):
         images = request.FILES.getlist('images', [])
         serializer = self.get_serializer(data=request.data)
@@ -98,7 +122,32 @@ class SportVenueViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @swagger_auto_schema(...)
+    @swagger_auto_schema(
+        operation_description="Обновляет существующую спортивную площадку и позволяет добавить новые изображения",
+        manual_parameters=[
+            openapi.Parameter('name', openapi.IN_FORM, type=openapi.TYPE_STRING, description='Название площадки'),
+            openapi.Parameter('description', openapi.IN_FORM, type=openapi.TYPE_STRING, description='Описание площадки'),
+            openapi.Parameter('price_per_hour', openapi.IN_FORM, type=openapi.TYPE_NUMBER, description='Цена за час'),
+            openapi.Parameter('city', openapi.IN_FORM, type=openapi.TYPE_STRING, description='Город'),
+            openapi.Parameter('address', openapi.IN_FORM, type=openapi.TYPE_STRING, description='Адрес'),
+            openapi.Parameter('latitude', openapi.IN_FORM, type=openapi.TYPE_NUMBER, required=False, description='Широта'),
+            openapi.Parameter('longitude', openapi.IN_FORM, type=openapi.TYPE_NUMBER, required=False, description='Долгота'),
+            openapi.Parameter('yandex_map_url', openapi.IN_FORM, type=openapi.TYPE_STRING, required=False, description='URL Яндекс карты'),
+            openapi.Parameter('sport_venue_type', openapi.IN_FORM, type=openapi.TYPE_INTEGER, required=False, description='Тип площадки'),
+            openapi.Parameter('region', openapi.IN_FORM, type=openapi.TYPE_INTEGER, required=False, description='Регион'),
+            openapi.Parameter('deposit_amount', openapi.IN_FORM, type=openapi.TYPE_NUMBER, description='Сумма депозита'),
+            openapi.Parameter('company_id', openapi.IN_FORM, type=openapi.TYPE_INTEGER, description='ID компании'),
+            openapi.Parameter('images', openapi.IN_FORM, type=openapi.TYPE_FILE, required=False, description='Изображения площадки')
+        ],
+        responses={
+            200: openapi.Response(
+                description="Обновленная спортивная площадка",
+                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные спортивной площадки')
+            ),
+            400: "Bad Request",
+            404: "Not Found"
+        }
+    )
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
@@ -112,15 +161,38 @@ class SportVenueViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
-    @swagger_auto_schema(...)
+    @swagger_auto_schema(
+        operation_description="Возвращает список всех доступных игровых полей",
+        responses={
+            200: openapi.Response(
+                description="Список спортивных площадок",
+                schema=openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные спортивной площадки'))
+            )
+        }
+    )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    @swagger_auto_schema(...)
+    @swagger_auto_schema(
+        operation_description="Возвращает детальную информацию о конкретном игровом поле",
+        responses={
+            200: openapi.Response(
+                description="Детальная информация о спортивной площадке",
+                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные спортивной площадки')
+            ),
+            404: "Not Found"
+        }
+    )
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
-    @swagger_auto_schema(...)
+    @swagger_auto_schema(
+        operation_description="Удаляет игровое поле и все связанные с ним изображения",
+        responses={
+            204: "No Content",
+            404: "Not Found"
+        }
+    )
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
 
@@ -179,6 +251,10 @@ class FavoriteSportVenueViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return FavoriteSportVenue.objects.none()
+        if not self.request.user.is_authenticated:
+            return FavoriteSportVenue.objects.none()
         return FavoriteSportVenue.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
@@ -187,15 +263,38 @@ class FavoriteSportVenueViewSet(viewsets.ModelViewSet):
             raise serializers.ValidationError("Эта площадка уже добавлена в избранное")
         serializer.save(user=self.request.user)
 
-    @swagger_auto_schema(...)
+    @swagger_auto_schema(
+        operation_description="Добавляет поле в избранное",
+        responses={
+            201: openapi.Response(
+                description="Добавленное в избранное поле",
+                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные избранного поля')
+            ),
+            400: "Bad Request"
+        }
+    )
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
 
-    @swagger_auto_schema(...)
+    @swagger_auto_schema(
+        operation_description="Возвращает список избранных полей пользователя",
+        responses={
+            200: openapi.Response(
+                description="Список избранных полей",
+                schema=openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные избранного поля'))
+            )
+        }
+    )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    @swagger_auto_schema(...)
+    @swagger_auto_schema(
+        operation_description="Удаляет поле из избранного",
+        responses={
+            204: "No Content",
+            404: "Not Found"
+        }
+    )
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
 
@@ -205,11 +304,28 @@ class SportVenueTypeViewSet(viewsets.ModelViewSet):
     serializer_class = SportVenueTypeSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    @swagger_auto_schema(...)
+    @swagger_auto_schema(
+        operation_description="Создает новый тип поля",
+        responses={
+            201: openapi.Response(
+                description="Созданный тип поля",
+                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные типа поля')
+            ),
+            400: "Bad Request"
+        }
+    )
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
 
-    @swagger_auto_schema(...)
+    @swagger_auto_schema(
+        operation_description="Возвращает список всех типов полей",
+        responses={
+            200: openapi.Response(
+                description="Список типов полей",
+                schema=openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные типа поля'))
+            )
+        }
+    )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 

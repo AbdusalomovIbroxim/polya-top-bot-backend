@@ -57,7 +57,10 @@ class BookingViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Подтвердить бронирование (только для продавца или админа)",
         responses={
-            200: openapi.Response("Успешно подтверждено", BookingSerializer()),
+                         200: openapi.Response(
+                 description="Успешно подтверждено",
+                 schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные бронирования')
+             ),
             400: openapi.Response("Невозможно подтвердить", openapi.Schema(
                 type=openapi.TYPE_OBJECT,
                 properties={"detail": openapi.Schema(type=openapi.TYPE_STRING)}
@@ -92,7 +95,10 @@ class BookingViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Отменить бронирование (пользователь, продавец или админ)",
         responses={
-            200: openapi.Response("Успешно отменено", BookingSerializer()),
+                         200: openapi.Response(
+                 description="Успешно отменено",
+                 schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные бронирования')
+             ),
             400: openapi.Response("Невозможно отменить", openapi.Schema(
                 type=openapi.TYPE_OBJECT,
                 properties={"detail": openapi.Schema(type=openapi.TYPE_STRING)}
@@ -126,7 +132,10 @@ class BookingViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Создает новое бронирование",
         responses={
-            201: openapi.Response("Создано", BookingSerializer()),
+                         201: openapi.Response(
+                 description="Созданное бронирование",
+                 schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные бронирования')
+             ),
             400: "Bad Request"
         }
     )
@@ -136,7 +145,10 @@ class BookingViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Список доступных бронирований",
         responses={
-            200: openapi.Response("OK", BookingSerializer(many=True))
+                         200: openapi.Response(
+                 description="Список бронирований",
+                 schema=openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные бронирования'))
+             )
         }
     )
     def list(self, request, *args, **kwargs):
@@ -145,7 +157,10 @@ class BookingViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Детали одного бронирования",
         responses={
-            200: openapi.Response("OK", BookingSerializer()),
+                         200: openapi.Response(
+                 description="Детальная информация о бронировании",
+                 schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные бронирования')
+             ),
             404: "Not Found"
         }
     )
