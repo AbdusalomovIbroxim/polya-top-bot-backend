@@ -8,8 +8,8 @@ from rest_framework import viewsets, status, permissions, serializers
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from bookings.models import Booking
 from .models import SportVenue, SportVenueImage, FavoriteSportVenue, SportVenueType, Region
 from .serializers import (
     SportVenueSerializer,
@@ -31,12 +31,13 @@ class SportVenueFilter(filters.FilterSet):
         fields = ['min_price', 'max_price', 'company']
 
 
+@csrf_exempt_api
 class SportVenueViewSet(viewsets.ModelViewSet):
     queryset = SportVenue.objects.select_related('sport_venue_type', 'region', 'company').prefetch_related('images').all()
     serializer_class = SportVenueSerializer
     filterset_class = SportVenueFilter
     parser_classes = (MultiPartParser, FormParser)
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -104,10 +105,7 @@ class SportVenueViewSet(viewsets.ModelViewSet):
             openapi.Parameter('images', openapi.IN_FORM, type=openapi.TYPE_FILE, required=False, description='Изображения площадки')
         ],
         responses={
-            201: openapi.Response(
-                description="Созданная спортивная площадка",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные спортивной площадки')
-            ),
+            201: "Созданная спортивная площадка",
             400: "Bad Request"
         }
     )
@@ -140,10 +138,7 @@ class SportVenueViewSet(viewsets.ModelViewSet):
             openapi.Parameter('images', openapi.IN_FORM, type=openapi.TYPE_FILE, required=False, description='Изображения площадки')
         ],
         responses={
-            200: openapi.Response(
-                description="Обновленная спортивная площадка",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные спортивной площадки')
-            ),
+            200: "Обновленная спортивная площадка",
             400: "Bad Request",
             404: "Not Found"
         }
@@ -164,10 +159,7 @@ class SportVenueViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Возвращает список всех доступных игровых полей",
         responses={
-            200: openapi.Response(
-                description="Список спортивных площадок",
-                schema=openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные спортивной площадки'))
-            )
+            200: "Список спортивных площадок"
         }
     )
     def list(self, request, *args, **kwargs):
@@ -176,10 +168,7 @@ class SportVenueViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Возвращает детальную информацию о конкретном игровом поле",
         responses={
-            200: openapi.Response(
-                description="Детальная информация о спортивной площадке",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные спортивной площадки')
-            ),
+            200: "Детальная информация о спортивной площадке",
             404: "Not Found"
         }
     )
@@ -209,6 +198,9 @@ class SportVenueViewSet(viewsets.ModelViewSet):
         except (ValueError, TypeError):
             return Response({'error': 'Неверный формат даты. Используйте формат YYYY-MM-DD'}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Импортируем Booking здесь, чтобы избежать циклических импортов
+        from bookings.models import Booking
+        
         start_day = timezone.make_aware(datetime.combine(date, dt_time(8, 0)))
         end_day = timezone.make_aware(datetime.combine(date, dt_time(22, 30)))
 
@@ -246,9 +238,10 @@ class SportVenueViewSet(viewsets.ModelViewSet):
         })
 
 
+@csrf_exempt_api
 class FavoriteSportVenueViewSet(viewsets.ModelViewSet):
     serializer_class = FavoriteSportVenueSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         if getattr(self, 'swagger_fake_view', False):
@@ -264,12 +257,16 @@ class FavoriteSportVenueViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
     @swagger_auto_schema(
-        operation_description="Добавляет поле в избранное",
+        operation_description="Добавить площадку в избранное",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'sport_venue': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID спортивной площадки')
+            },
+            required=['sport_venue']
+        ),
         responses={
-            201: openapi.Response(
-                description="Добавленное в избранное поле",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные избранного поля')
-            ),
+            201: "Площадка добавлена в избранное",
             400: "Bad Request"
         }
     )
@@ -277,12 +274,9 @@ class FavoriteSportVenueViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        operation_description="Возвращает список избранных полей пользователя",
+        operation_description="Список избранных площадок пользователя",
         responses={
-            200: openapi.Response(
-                description="Список избранных полей",
-                schema=openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные избранного поля'))
-            )
+            200: "Список избранных площадок"
         }
     )
     def list(self, request, *args, **kwargs):
@@ -299,18 +293,23 @@ class FavoriteSportVenueViewSet(viewsets.ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
+@csrf_exempt_api
 class SportVenueTypeViewSet(viewsets.ModelViewSet):
     queryset = SportVenueType.objects.all()
     serializer_class = SportVenueTypeSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [AllowAny]
 
     @swagger_auto_schema(
-        operation_description="Создает новый тип поля",
+        operation_description="Создать новый тип спортивной площадки",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'name': openapi.Schema(type=openapi.TYPE_STRING, description='Название типа')
+            },
+            required=['name']
+        ),
         responses={
-            201: openapi.Response(
-                description="Созданный тип поля",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные типа поля')
-            ),
+            201: "Тип площадки создан",
             400: "Bad Request"
         }
     )
@@ -318,19 +317,43 @@ class SportVenueTypeViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        operation_description="Возвращает список всех типов полей",
+        operation_description="Список всех типов спортивных площадок",
         responses={
-            200: openapi.Response(
-                description="Список типов полей",
-                schema=openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные типа поля'))
-            )
+            200: "Список типов площадок"
         }
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
 
-class RegionViewSet(viewsets.ReadOnlyModelViewSet):
+@csrf_exempt_api
+class RegionViewSet(viewsets.ModelViewSet):
     queryset = Region.objects.all()
     serializer_class = RegionSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        operation_description="Создать новый регион",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'name': openapi.Schema(type=openapi.TYPE_STRING, description='Название региона')
+            },
+            required=['name']
+        ),
+        responses={
+            201: "Регион создан",
+            400: "Bad Request"
+        }
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Список всех регионов",
+        responses={
+            200: "Список регионов"
+        }
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)

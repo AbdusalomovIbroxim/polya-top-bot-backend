@@ -57,18 +57,9 @@ class BookingViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Подтвердить бронирование (только для продавца или админа)",
         responses={
-                         200: openapi.Response(
-                 description="Успешно подтверждено",
-                 schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные бронирования')
-             ),
-            400: openapi.Response("Невозможно подтвердить", openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={"detail": openapi.Schema(type=openapi.TYPE_STRING)}
-            )),
-            403: openapi.Response("Нет доступа", openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={"detail": openapi.Schema(type=openapi.TYPE_STRING)}
-            )),
+            200: "Успешно подтверждено",
+            400: "Невозможно подтвердить",
+            403: "Нет доступа"
         }
     )
     @action(detail=True, methods=['post'])
@@ -95,18 +86,9 @@ class BookingViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Отменить бронирование (пользователь, продавец или админ)",
         responses={
-                         200: openapi.Response(
-                 description="Успешно отменено",
-                 schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные бронирования')
-             ),
-            400: openapi.Response("Невозможно отменить", openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={"detail": openapi.Schema(type=openapi.TYPE_STRING)}
-            )),
-            403: openapi.Response("Нет доступа", openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={"detail": openapi.Schema(type=openapi.TYPE_STRING)}
-            )),
+            200: "Успешно отменено",
+            400: "Невозможно отменить",
+            403: "Нет доступа"
         }
     )
     @action(detail=True, methods=['post'])
@@ -131,11 +113,17 @@ class BookingViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         operation_description="Создает новое бронирование",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'sport_venue': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID спортивной площадки'),
+                'start_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time', description='Дата и время начала'),
+                'end_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time', description='Дата и время окончания')
+            },
+            required=['sport_venue', 'start_time', 'end_time']
+        ),
         responses={
-                         201: openapi.Response(
-                 description="Созданное бронирование",
-                 schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные бронирования')
-             ),
+            201: "Созданное бронирование",
             400: "Bad Request"
         }
     )
@@ -145,10 +133,7 @@ class BookingViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Список доступных бронирований",
         responses={
-                         200: openapi.Response(
-                 description="Список бронирований",
-                 schema=openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные бронирования'))
-             )
+            200: "Список бронирований"
         }
     )
     def list(self, request, *args, **kwargs):
@@ -157,10 +142,7 @@ class BookingViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Детали одного бронирования",
         responses={
-                         200: openapi.Response(
-                 description="Детальная информация о бронировании",
-                 schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные бронирования')
-             ),
+            200: "Детальная информация о бронировании",
             404: "Not Found"
         }
     )
