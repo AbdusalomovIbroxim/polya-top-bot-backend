@@ -16,7 +16,7 @@ class AuthViewSet(viewsets.ViewSet):
 
     @swagger_auto_schema(
         operation_description="Авторизация пользователя по логину (username/телефон) и паролю",
-        request_body=LoginSerializer,
+        request_body=LoginSerializer(),
         responses={
             200: openapi.Response(
                 description="Успешная авторизация",
@@ -26,7 +26,7 @@ class AuthViewSet(viewsets.ViewSet):
                         'message': openapi.Schema(type=openapi.TYPE_STRING),
                         'access': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Access Token'),
                         'refresh': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Refresh Token'),
-                        'user': UserSerializer
+                        'user': UserSerializer()
                     }
                 )
             ),
@@ -52,7 +52,7 @@ class AuthViewSet(viewsets.ViewSet):
 
     @swagger_auto_schema(
         operation_description="Регистрация нового пользователя",
-        request_body=RegisterSerializer,
+        request_body=RegisterSerializer(),
         responses={
             201: openapi.Response(
                 description="Пользователь успешно зарегистрирован",
@@ -62,7 +62,7 @@ class AuthViewSet(viewsets.ViewSet):
                         'message': openapi.Schema(type=openapi.TYPE_STRING),
                         'access': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Access Token'),
                         'refresh': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Refresh Token'),
-                        'user': UserSerializer
+                        'user': UserSerializer()
                     }
                 )
             ),
@@ -111,7 +111,7 @@ class UserViewSet(viewsets.ViewSet):
 
     @swagger_auto_schema(
         operation_description="Получить данные текущего пользователя",
-        responses={200: UserSerializer}
+        responses={200: UserSerializer()}
     )
     @action(detail=False, methods=['get'])
     def me(self, request):
@@ -120,14 +120,14 @@ class UserViewSet(viewsets.ViewSet):
 
     @swagger_auto_schema(
         operation_description="Обновить данные текущего пользователя",
-        request_body=UserSerializer,
-        responses={200: UserSerializer},
+        request_body=UserSerializer(),
+        responses={200: UserSerializer()},
         methods=['put']
     )
     @swagger_auto_schema(
         operation_description="Частично обновить данные текущего пользователя",
-        request_body=UserSerializer,
-        responses={200: UserSerializer},
+        request_body=UserSerializer(),
+        responses={200: UserSerializer()},
         methods=['patch']
     )
     @action(detail=False, methods=['put', 'patch'])

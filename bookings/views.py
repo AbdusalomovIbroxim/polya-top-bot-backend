@@ -99,7 +99,7 @@ class BookingViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Создает новое бронирование",
         responses={
-            201: BookingSerializer,
+            201: BookingSerializer(),
             400: "Bad Request"
         }
     )
@@ -118,7 +118,7 @@ class BookingViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Возвращает детальную информацию о конкретном бронировании",
         responses={
-            200: BookingSerializer,
+            200: BookingSerializer(),
             404: "Not Found"
         }
     )

@@ -86,9 +86,9 @@ class SportVenueViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         operation_description="Создает новую спортивную площадку с возможностью загрузки нескольких изображений",
-        request_body=SportVenueSerializer,
+        request_body=SportVenueSerializer(),
         responses={
-            201: SportVenueSerializer,
+            201: SportVenueSerializer(),
             400: "Bad Request"
         }
     )
@@ -108,9 +108,9 @@ class SportVenueViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         operation_description="Обновляет существующую спортивную площадку и позволяет добавить новые изображения",
-        request_body=SportVenueSerializer,
+        request_body=SportVenueSerializer(),
         responses={
-            200: SportVenueSerializer,
+            200: SportVenueSerializer(),
             400: "Bad Request",
             404: "Not Found"
         }
@@ -143,7 +143,7 @@ class SportVenueViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Возвращает детальную информацию о конкретном игровом поле",
         responses={
-            200: SportVenueSerializer,
+            200: SportVenueSerializer(),
             404: "Not Found"
         }
     )
@@ -260,7 +260,7 @@ class FavoriteSportVenueViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Добавляет поле в избранное",
         responses={
-            201: FavoriteSportVenueSerializer,
+            201: FavoriteSportVenueSerializer(),
             400: "Bad Request"
         }
     )
@@ -295,7 +295,7 @@ class SportVenueTypeViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Создает новый тип поля",
         responses={
-            201: SportVenueTypeSerializer,
+            201: SportVenueTypeSerializer(),
             400: "Bad Request"
         }
     )
