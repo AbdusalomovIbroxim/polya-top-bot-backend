@@ -1,4 +1,3 @@
-from django.contrib.auth import authenticate, login, logout
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -61,9 +60,6 @@ class AuthViewSet(viewsets.ViewSet):
             refresh = RefreshToken.for_user(user)
             access_token = refresh.access_token
 
-            # Авторизуем пользователя
-            login(request, user)
-
             return Response({
                 'message': 'Успешная авторизация',
                 'access': str(access_token),
@@ -123,7 +119,6 @@ class AuthViewSet(viewsets.ViewSet):
     )
     @action(detail=False, methods=['post'])
     def logout(self, request):
-        logout(request)
         return Response({'message': 'Успешный выход'})
 
 
