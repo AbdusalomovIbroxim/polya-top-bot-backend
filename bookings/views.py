@@ -99,7 +99,72 @@ class BookingViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Создает новое бронирование",
         responses={
-            201: BookingSerializer(),
+            201: openapi.Response(
+                description="Созданное бронирование",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'sport_venue': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'sport_venue_details': openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                'name': openapi.Schema(type=openapi.TYPE_STRING),
+                                'description': openapi.Schema(type=openapi.TYPE_STRING),
+                                'price_per_hour': openapi.Schema(type=openapi.TYPE_NUMBER),
+                                'city': openapi.Schema(type=openapi.TYPE_STRING),
+                                'address': openapi.Schema(type=openapi.TYPE_STRING),
+                                'latitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
+                                'longitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
+                                'yandex_map_url': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
+                                'sport_venue_type': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
+                                'region': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
+                                'deposit_amount': openapi.Schema(type=openapi.TYPE_NUMBER),
+                                'company': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                                'updated_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                                'images': openapi.Schema(
+                                    type=openapi.TYPE_ARRAY,
+                                    items=openapi.Schema(
+                                        type=openapi.TYPE_OBJECT,
+                                        properties={
+                                            'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                            'image': openapi.Schema(type=openapi.TYPE_STRING),
+                                            'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time')
+                                        }
+                                    )
+                                )
+                            }
+                        ),
+                        'user': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'user_details': openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                'username': openapi.Schema(type=openapi.TYPE_STRING),
+                                'phone': openapi.Schema(type=openapi.TYPE_STRING),
+                                'first_name': openapi.Schema(type=openapi.TYPE_STRING),
+                                'last_name': openapi.Schema(type=openapi.TYPE_STRING),
+                                'date_joined': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                                'photo': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
+                                'role': openapi.Schema(type=openapi.TYPE_STRING)
+                            }
+                        ),
+                        'start_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                        'end_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                        'status': openapi.Schema(type=openapi.TYPE_STRING),
+                        'payment_status': openapi.Schema(type=openapi.TYPE_STRING),
+                        'payment_url': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
+                        'qr_code': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
+                        'total_price': openapi.Schema(type=openapi.TYPE_NUMBER),
+                        'deposit_amount': openapi.Schema(type=openapi.TYPE_NUMBER),
+                        'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                        'updated_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                        'session_key': openapi.Schema(type=openapi.TYPE_STRING, nullable=True)
+                    }
+                )
+            ),
             400: "Bad Request"
         }
     )
@@ -109,7 +174,75 @@ class BookingViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Возвращает список всех доступных бронирований",
         responses={
-            200: BookingSerializer(many=True)
+            200: openapi.Response(
+                description="Список бронирований",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                            'sport_venue': openapi.Schema(type=openapi.TYPE_INTEGER),
+                            'sport_venue_details': openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                    'name': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'description': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'price_per_hour': openapi.Schema(type=openapi.TYPE_NUMBER),
+                                    'city': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'address': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'latitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
+                                    'longitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
+                                    'yandex_map_url': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
+                                    'sport_venue_type': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
+                                    'region': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
+                                    'deposit_amount': openapi.Schema(type=openapi.TYPE_NUMBER),
+                                    'company': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                    'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                                    'updated_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                                    'images': openapi.Schema(
+                                        type=openapi.TYPE_ARRAY,
+                                        items=openapi.Schema(
+                                            type=openapi.TYPE_OBJECT,
+                                            properties={
+                                                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                                'image': openapi.Schema(type=openapi.TYPE_STRING),
+                                                'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time')
+                                            }
+                                        )
+                                    )
+                                }
+                            ),
+                            'user': openapi.Schema(type=openapi.TYPE_INTEGER),
+                            'user_details': openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                    'username': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'phone': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'first_name': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'last_name': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'date_joined': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                                    'photo': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
+                                    'role': openapi.Schema(type=openapi.TYPE_STRING)
+                                }
+                            ),
+                            'start_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                            'end_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                            'status': openapi.Schema(type=openapi.TYPE_STRING),
+                            'payment_status': openapi.Schema(type=openapi.TYPE_STRING),
+                            'payment_url': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
+                            'qr_code': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
+                            'total_price': openapi.Schema(type=openapi.TYPE_NUMBER),
+                            'deposit_amount': openapi.Schema(type=openapi.TYPE_NUMBER),
+                            'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                            'updated_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                            'session_key': openapi.Schema(type=openapi.TYPE_STRING, nullable=True)
+                        }
+                    )
+                )
+            )
         }
     )
     def list(self, request, *args, **kwargs):
@@ -118,7 +251,72 @@ class BookingViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Возвращает детальную информацию о конкретном бронировании",
         responses={
-            200: BookingSerializer(),
+            200: openapi.Response(
+                description="Детальная информация о бронировании",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'sport_venue': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'sport_venue_details': openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                'name': openapi.Schema(type=openapi.TYPE_STRING),
+                                'description': openapi.Schema(type=openapi.TYPE_STRING),
+                                'price_per_hour': openapi.Schema(type=openapi.TYPE_NUMBER),
+                                'city': openapi.Schema(type=openapi.TYPE_STRING),
+                                'address': openapi.Schema(type=openapi.TYPE_STRING),
+                                'latitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
+                                'longitude': openapi.Schema(type=openapi.TYPE_NUMBER, nullable=True),
+                                'yandex_map_url': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
+                                'sport_venue_type': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
+                                'region': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
+                                'deposit_amount': openapi.Schema(type=openapi.TYPE_NUMBER),
+                                'company': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                                'updated_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                                'images': openapi.Schema(
+                                    type=openapi.TYPE_ARRAY,
+                                    items=openapi.Schema(
+                                        type=openapi.TYPE_OBJECT,
+                                        properties={
+                                            'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                            'image': openapi.Schema(type=openapi.TYPE_STRING),
+                                            'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time')
+                                        }
+                                    )
+                                )
+                            }
+                        ),
+                        'user': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'user_details': openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                'username': openapi.Schema(type=openapi.TYPE_STRING),
+                                'phone': openapi.Schema(type=openapi.TYPE_STRING),
+                                'first_name': openapi.Schema(type=openapi.TYPE_STRING),
+                                'last_name': openapi.Schema(type=openapi.TYPE_STRING),
+                                'date_joined': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                                'photo': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
+                                'role': openapi.Schema(type=openapi.TYPE_STRING)
+                            }
+                        ),
+                        'start_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                        'end_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                        'status': openapi.Schema(type=openapi.TYPE_STRING),
+                        'payment_status': openapi.Schema(type=openapi.TYPE_STRING),
+                        'payment_url': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
+                        'qr_code': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
+                        'total_price': openapi.Schema(type=openapi.TYPE_NUMBER),
+                        'deposit_amount': openapi.Schema(type=openapi.TYPE_NUMBER),
+                        'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                        'updated_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                        'session_key': openapi.Schema(type=openapi.TYPE_STRING, nullable=True)
+                    }
+                )
+            ),
             404: "Not Found"
         }
     )

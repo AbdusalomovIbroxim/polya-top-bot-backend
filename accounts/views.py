@@ -16,7 +16,14 @@ class AuthViewSet(viewsets.ViewSet):
 
     @swagger_auto_schema(
         operation_description="Авторизация пользователя по логину (username/телефон) и паролю",
-        request_body=LoginSerializer(),
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'login': openapi.Schema(type=openapi.TYPE_STRING, description='Логин (username или телефон)'),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='Пароль')
+            },
+            required=['login', 'password']
+        ),
         responses={
             200: openapi.Response(
                 description="Успешная авторизация",
@@ -26,7 +33,19 @@ class AuthViewSet(viewsets.ViewSet):
                         'message': openapi.Schema(type=openapi.TYPE_STRING),
                         'access': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Access Token'),
                         'refresh': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Refresh Token'),
-                        'user': UserSerializer()
+                        'user': openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                'username': openapi.Schema(type=openapi.TYPE_STRING),
+                                'phone': openapi.Schema(type=openapi.TYPE_STRING),
+                                'first_name': openapi.Schema(type=openapi.TYPE_STRING),
+                                'last_name': openapi.Schema(type=openapi.TYPE_STRING),
+                                'date_joined': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                                'photo': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
+                                'role': openapi.Schema(type=openapi.TYPE_STRING)
+                            }
+                        )
                     }
                 )
             ),
@@ -52,7 +71,18 @@ class AuthViewSet(viewsets.ViewSet):
 
     @swagger_auto_schema(
         operation_description="Регистрация нового пользователя",
-        request_body=RegisterSerializer(),
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING),
+                'phone': openapi.Schema(type=openapi.TYPE_STRING),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='Минимум 8 символов'),
+                'password_confirm': openapi.Schema(type=openapi.TYPE_STRING),
+                'first_name': openapi.Schema(type=openapi.TYPE_STRING),
+                'last_name': openapi.Schema(type=openapi.TYPE_STRING)
+            },
+            required=['username', 'phone', 'password', 'password_confirm', 'first_name', 'last_name']
+        ),
         responses={
             201: openapi.Response(
                 description="Пользователь успешно зарегистрирован",
@@ -62,7 +92,19 @@ class AuthViewSet(viewsets.ViewSet):
                         'message': openapi.Schema(type=openapi.TYPE_STRING),
                         'access': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Access Token'),
                         'refresh': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Refresh Token'),
-                        'user': UserSerializer()
+                        'user': openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                'username': openapi.Schema(type=openapi.TYPE_STRING),
+                                'phone': openapi.Schema(type=openapi.TYPE_STRING),
+                                'first_name': openapi.Schema(type=openapi.TYPE_STRING),
+                                'last_name': openapi.Schema(type=openapi.TYPE_STRING),
+                                'date_joined': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                                'photo': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
+                                'role': openapi.Schema(type=openapi.TYPE_STRING)
+                            }
+                        )
                     }
                 )
             ),
@@ -111,7 +153,24 @@ class UserViewSet(viewsets.ViewSet):
 
     @swagger_auto_schema(
         operation_description="Получить данные текущего пользователя",
-        responses={200: UserSerializer()}
+        responses={
+            200: openapi.Response(
+                description="Данные пользователя",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'username': openapi.Schema(type=openapi.TYPE_STRING),
+                        'phone': openapi.Schema(type=openapi.TYPE_STRING),
+                        'first_name': openapi.Schema(type=openapi.TYPE_STRING),
+                        'last_name': openapi.Schema(type=openapi.TYPE_STRING),
+                        'date_joined': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                        'photo': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
+                        'role': openapi.Schema(type=openapi.TYPE_STRING)
+                    }
+                )
+            )
+        }
     )
     @action(detail=False, methods=['get'])
     def me(self, request):
@@ -120,14 +179,66 @@ class UserViewSet(viewsets.ViewSet):
 
     @swagger_auto_schema(
         operation_description="Обновить данные текущего пользователя",
-        request_body=UserSerializer(),
-        responses={200: UserSerializer()},
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING),
+                'phone': openapi.Schema(type=openapi.TYPE_STRING),
+                'first_name': openapi.Schema(type=openapi.TYPE_STRING),
+                'last_name': openapi.Schema(type=openapi.TYPE_STRING),
+                'photo': openapi.Schema(type=openapi.TYPE_STRING, nullable=True)
+            }
+        ),
+        responses={
+            200: openapi.Response(
+                description="Обновленные данные пользователя",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'username': openapi.Schema(type=openapi.TYPE_STRING),
+                        'phone': openapi.Schema(type=openapi.TYPE_STRING),
+                        'first_name': openapi.Schema(type=openapi.TYPE_STRING),
+                        'last_name': openapi.Schema(type=openapi.TYPE_STRING),
+                        'date_joined': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                        'photo': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
+                        'role': openapi.Schema(type=openapi.TYPE_STRING)
+                    }
+                )
+            )
+        },
         methods=['put']
     )
     @swagger_auto_schema(
         operation_description="Частично обновить данные текущего пользователя",
-        request_body=UserSerializer(),
-        responses={200: UserSerializer()},
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING),
+                'phone': openapi.Schema(type=openapi.TYPE_STRING),
+                'first_name': openapi.Schema(type=openapi.TYPE_STRING),
+                'last_name': openapi.Schema(type=openapi.TYPE_STRING),
+                'photo': openapi.Schema(type=openapi.TYPE_STRING, nullable=True)
+            }
+        ),
+        responses={
+            200: openapi.Response(
+                description="Обновленные данные пользователя",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'username': openapi.Schema(type=openapi.TYPE_STRING),
+                        'phone': openapi.Schema(type=openapi.TYPE_STRING),
+                        'first_name': openapi.Schema(type=openapi.TYPE_STRING),
+                        'last_name': openapi.Schema(type=openapi.TYPE_STRING),
+                        'date_joined': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                        'photo': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
+                        'role': openapi.Schema(type=openapi.TYPE_STRING)
+                    }
+                )
+            )
+        },
         methods=['patch']
     )
     @action(detail=False, methods=['put', 'patch'])
