@@ -2,8 +2,9 @@ from datetime import datetime, timedelta, time as dt_time
 
 from django.utils import timezone
 from django_filters import rest_framework as filters
+from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import viewsets, status, permissions
+from rest_framework import viewsets, status, permissions, serializers
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
@@ -39,8 +40,9 @@ class SportVenueViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        if self.request.user.is_authenticated and self.request.user.role == 'seller':
-            return queryset.filter(company=self.request.user)
+        user = self.request.user
+        if user.is_authenticated and user.role == 'seller':
+            return queryset.filter(company=user)
         return queryset
 
     def perform_create(self, serializer):
@@ -84,91 +86,41 @@ class SportVenueViewSet(viewsets.ModelViewSet):
         except SportVenueImage.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-    @swagger_auto_schema(
-        operation_description="Создает новую спортивную площадку с возможностью загрузки нескольких изображений",
-        request_body=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные спортивной площадки'),
-        responses={
-            201: openapi.Response(
-                description="Созданная спортивная площадка",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные спортивной площадки')
-            ),
-            400: "Bad Request"
-        }
-    )
+    @swagger_auto_schema(...)
     def create(self, request, *args, **kwargs):
-        sport_venue_data = request.data.copy()
         images = request.FILES.getlist('images', [])
-
-        serializer = self.get_serializer(data=sport_venue_data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         sport_venue = serializer.save()
 
-        # Сохраняем изображения
         for image in images:
             SportVenueImage.objects.create(sport_venue=sport_venue, image=image)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @swagger_auto_schema(
-        operation_description="Обновляет существующую спортивную площадку и позволяет добавить новые изображения",
-        request_body=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные спортивной площадки'),
-        responses={
-            200: openapi.Response(
-                description="Обновленная спортивная площадка",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные спортивной площадки')
-            ),
-            400: "Bad Request",
-            404: "Not Found"
-        }
-    )
+    @swagger_auto_schema(...)
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        sport_venue_data = request.data.copy()
         images = request.FILES.getlist('images', [])
-
-        serializer = self.get_serializer(instance, data=sport_venue_data, partial=partial)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         sport_venue = serializer.save()
 
-        # Добавляем новые изображения
         for image in images:
             SportVenueImage.objects.create(sport_venue=sport_venue, image=image)
 
         return Response(serializer.data)
 
-    @swagger_auto_schema(
-        operation_description="Возвращает список всех доступных игровых полей",
-        responses={
-            200: openapi.Response(
-                description="Список спортивных площадок",
-                schema=openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные спортивной площадки'))
-            )
-        }
-    )
+    @swagger_auto_schema(...)
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    @swagger_auto_schema(
-        operation_description="Возвращает детальную информацию о конкретном игровом поле",
-        responses={
-            200: openapi.Response(
-                description="Детальная информация о спортивной площадке",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные спортивной площадки')
-            ),
-            404: "Not Found"
-        }
-    )
+    @swagger_auto_schema(...)
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
-    @swagger_auto_schema(
-        operation_description="Удаляет игровое поле и все связанные с ним изображения",
-        responses={
-            204: "No Content",
-            404: "Not Found"
-        }
-    )
+    @swagger_auto_schema(...)
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
 
@@ -179,78 +131,46 @@ class SportVenueViewSet(viewsets.ModelViewSet):
 
         try:
             date = datetime.strptime(date_str, '%Y-%m-%d').date()
-            current_time = timezone.now()
-            if date < current_time.date():
-                return Response(
-                    {'error': 'Нельзя забронировать дату в прошлом'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+            now = timezone.now()
+            if date < now.date():
+                return Response({'error': 'Нельзя забронировать дату в прошлом'}, status=status.HTTP_400_BAD_REQUEST)
         except (ValueError, TypeError):
-            return Response(
-                {'error': 'Неверный формат даты. Используйте формат YYYY-MM-DD'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({'error': 'Неверный формат даты. Используйте формат YYYY-MM-DD'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Время начала и конца дня в UTC
-        start_of_day = timezone.make_aware(datetime.combine(date, dt_time(8, 0)))
-        end_of_day = timezone.make_aware(datetime.combine(date, dt_time(22, 30)))
+        start_day = timezone.make_aware(datetime.combine(date, dt_time(8, 0)))
+        end_day = timezone.make_aware(datetime.combine(date, dt_time(22, 30)))
 
-        # Найти бронирования, пересекающиеся с этим днём
-        existing_bookings = Booking.objects.filter(
+        bookings = Booking.objects.filter(
             sport_venue=sport_venue,
             status__in=['PENDING', 'CONFIRMED'],
-            start_time__lt=end_of_day,
-            end_time__gt=start_of_day
+            start_time__lt=end_day,
+            end_time__gt=start_day
         )
 
-        booked_slots = set()
-
-        for booking in existing_bookings:
-            # Берем максимум начала (между бронью и началом дня) и минимум конца (между бронью и концом дня)
-            booking_start = max(booking.start_time, start_of_day)
-            booking_end = min(booking.end_time, end_of_day)
-
-            # Округляем до 30 минут
-            current = booking_start
-            while current < booking_end:
-                # Конвертируем время в локальную временную зону
+        booked = set()
+        for booking in bookings:
+            start = max(booking.start_time, start_day)
+            end = min(booking.end_time, end_day)
+            current = start
+            while current < end:
                 local_time = timezone.localtime(current)
-                booked_slots.add(local_time.strftime('%H:%M'))
+                booked.add(local_time.strftime('%H:%M'))
                 current += timedelta(minutes=30)
 
-        # Рабочие часы
-        working_hours = {
-            'start': '08:00',
-            'end': '22:30'
-        }
-
-        time_points = []
-        current_slot = datetime.combine(date, dt_time(8, 0))
-        end_slot = datetime.combine(date, dt_time(22, 30))
-
-        while current_slot <= end_slot:
-            slot_time = timezone.make_aware(current_slot)
-            # Конвертируем время в локальную временную зону
-            local_slot_time = timezone.localtime(slot_time)
-            time_str = local_slot_time.strftime('%H:%M')
-
-            is_available = True
-            if date == current_time.date():
-                is_available = slot_time > current_time
-            if time_str in booked_slots:
-                is_available = False
-
-            time_points.append({
-                'time': time_str,
-                'is_available': is_available
-            })
-
-            current_slot += timedelta(minutes=30)
+        slots = []
+        current = datetime.combine(date, dt_time(8, 0))
+        end = datetime.combine(date, dt_time(22, 30))
+        while current <= end:
+            aware_time = timezone.make_aware(current)
+            time_str = timezone.localtime(aware_time).strftime('%H:%M')
+            is_available = aware_time > timezone.now() if date == timezone.now().date() else True
+            slots.append({'time': time_str, 'is_available': is_available and time_str not in booked})
+            current += timedelta(minutes=30)
 
         return Response({
             'date': date_str,
-            'working_hours': working_hours,
-            'time_points': time_points
+            'working_hours': {'start': '08:00', 'end': '22:30'},
+            'time_points': slots
         })
 
 
@@ -259,8 +179,6 @@ class FavoriteSportVenueViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        if not self.request.user.is_authenticated:
-            return FavoriteSportVenue.objects.none()
         return FavoriteSportVenue.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
@@ -269,38 +187,15 @@ class FavoriteSportVenueViewSet(viewsets.ModelViewSet):
             raise serializers.ValidationError("Эта площадка уже добавлена в избранное")
         serializer.save(user=self.request.user)
 
-    @swagger_auto_schema(
-        operation_description="Добавляет поле в избранное",
-        responses={
-            201: openapi.Response(
-                description="Добавленное в избранное поле",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные избранного поля')
-            ),
-            400: "Bad Request"
-        }
-    )
+    @swagger_auto_schema(...)
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
 
-    @swagger_auto_schema(
-        operation_description="Возвращает список избранных полей пользователя",
-        responses={
-            200: openapi.Response(
-                description="Список избранных полей",
-                schema=openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные избранного поля'))
-            )
-        }
-    )
+    @swagger_auto_schema(...)
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    @swagger_auto_schema(
-        operation_description="Удаляет поле из избранного",
-        responses={
-            204: "No Content",
-            404: "Not Found"
-        }
-    )
+    @swagger_auto_schema(...)
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
 
@@ -310,28 +205,11 @@ class SportVenueTypeViewSet(viewsets.ModelViewSet):
     serializer_class = SportVenueTypeSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    @swagger_auto_schema(
-        operation_description="Создает новый тип поля",
-        responses={
-            201: openapi.Response(
-                description="Созданный тип поля",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные типа поля')
-            ),
-            400: "Bad Request"
-        }
-    )
+    @swagger_auto_schema(...)
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
 
-    @swagger_auto_schema(
-        operation_description="Возвращает список всех типов полей",
-        responses={
-            200: openapi.Response(
-                description="Список типов полей",
-                schema=openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные типа поля'))
-            )
-        }
-    )
+    @swagger_auto_schema(...)
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 

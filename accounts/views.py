@@ -1,14 +1,13 @@
-from django.shortcuts import render
+from django.contrib.auth import get_user_model, login, logout
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.contrib.auth import get_user_model, login, logout
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from .serializers import UserSerializer, LoginSerializer, RegisterSerializer
-from accounts.models import User
 
 User = get_user_model()
+
 
 class AuthViewSet(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
@@ -32,7 +31,7 @@ class AuthViewSet(viewsets.ViewSet):
                         'message': openapi.Schema(type=openapi.TYPE_STRING),
                         'access': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Access Token'),
                         'refresh': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Refresh Token'),
-                        'user': openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные пользователя')
+                        'user': UserSerializer()
                     }
                 )
             ),
@@ -79,7 +78,7 @@ class AuthViewSet(viewsets.ViewSet):
                         'message': openapi.Schema(type=openapi.TYPE_STRING),
                         'access': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Access Token'),
                         'refresh': openapi.Schema(type=openapi.TYPE_STRING, description='JWT Refresh Token'),
-                        'user': openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные пользователя')
+                        'user': UserSerializer()
                     }
                 )
             ),
@@ -131,7 +130,7 @@ class UserViewSet(viewsets.ViewSet):
         responses={
             200: openapi.Response(
                 description="Данные пользователя",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные пользователя')
+                schema=UserSerializer()
             )
         }
     )
@@ -141,26 +140,15 @@ class UserViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     @swagger_auto_schema(
-        operation_description="Обновить данные текущего пользователя",
-        request_body=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные для обновления'),
+        operation_description="Обновить данные текущего пользователя (PUT/PATCH)",
+        request_body=UserSerializer,
         responses={
             200: openapi.Response(
                 description="Обновленные данные пользователя",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные пользователя')
+                schema=UserSerializer()
             )
         },
-        methods=['put']
-    )
-    @swagger_auto_schema(
-        operation_description="Частично обновить данные текущего пользователя",
-        request_body=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные для обновления'),
-        responses={
-            200: openapi.Response(
-                description="Обновленные данные пользователя",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные пользователя')
-            )
-        },
-        methods=['patch']
+        methods=['put', 'patch']
     )
     @action(detail=False, methods=['put', 'patch'])
     def update_me(self, request):
@@ -168,4 +156,4 @@ class UserViewSet(viewsets.ViewSet):
         serializer = UserSerializer(request.user, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data) 
+        return Response(serializer.data)

@@ -1,15 +1,16 @@
 from django.shortcuts import render
-from rest_framework import viewsets, status, permissions
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters import rest_framework as filters
+from rest_framework.permissions import IsAuthenticated
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
 from .models import Booking
 from .serializers import BookingSerializer
-from drf_yasg.utils import swagger_auto_schema
 from djangoProject.utils import csrf_exempt_api
-from rest_framework.permissions import IsAuthenticated
 
-# Create your views here.
 
 class BookingFilter(filters.FilterSet):
     start_date = filters.DateTimeFilter(field_name="start_time", lookup_expr='gte')
@@ -21,6 +22,7 @@ class BookingFilter(filters.FilterSet):
     class Meta:
         model = Booking
         fields = ['start_date', 'end_date', 'status', 'sport_venue', 'user']
+
 
 @csrf_exempt_api
 class BookingViewSet(viewsets.ModelViewSet):
@@ -41,23 +43,35 @@ class BookingViewSet(viewsets.ModelViewSet):
 
         if user.is_authenticated:
             return queryset.filter(user=user)
-            
+
         return queryset.none()
 
     def perform_create(self, serializer):
         if self.request.user.is_authenticated:
             serializer.save(user=self.request.user)
         else:
-            # Для неавторизованных пользователей сохраняем ключ сессии
             if not self.request.session.session_key:
                 self.request.session.create()
             serializer.save(session_key=self.request.session.session_key)
 
+    @swagger_auto_schema(
+        operation_description="Подтвердить бронирование (только для продавца или админа)",
+        responses={
+            200: openapi.Response("Успешно подтверждено", BookingSerializer()),
+            400: openapi.Response("Невозможно подтвердить", openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={"detail": openapi.Schema(type=openapi.TYPE_STRING)}
+            )),
+            403: openapi.Response("Нет доступа", openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={"detail": openapi.Schema(type=openapi.TYPE_STRING)}
+            )),
+        }
+    )
     @action(detail=True, methods=['post'])
     def confirm(self, request, pk=None):
         booking = self.get_object()
-        
-        # Проверяем права на подтверждение
+
         if request.user.role not in ['admin', 'seller'] or \
            (request.user.role == 'seller' and booking.sport_venue.company != request.user):
             return Response(
@@ -75,11 +89,24 @@ class BookingViewSet(viewsets.ModelViewSet):
         booking.save()
         return Response(BookingSerializer(booking).data)
 
+    @swagger_auto_schema(
+        operation_description="Отменить бронирование (пользователь, продавец или админ)",
+        responses={
+            200: openapi.Response("Успешно отменено", BookingSerializer()),
+            400: openapi.Response("Невозможно отменить", openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={"detail": openapi.Schema(type=openapi.TYPE_STRING)}
+            )),
+            403: openapi.Response("Нет доступа", openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={"detail": openapi.Schema(type=openapi.TYPE_STRING)}
+            )),
+        }
+    )
     @action(detail=True, methods=['post'])
     def cancel(self, request, pk=None):
         booking = self.get_object()
-        
-        # Проверяем права на отмену
+
         if request.user not in [booking.user, booking.sport_venue.company] and request.user.role != 'admin':
             return Response(
                 {"detail": "У вас нет прав на отмену этого бронирования"},
@@ -99,10 +126,7 @@ class BookingViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Создает новое бронирование",
         responses={
-            201: openapi.Response(
-                description="Созданное бронирование",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные бронирования')
-            ),
+            201: openapi.Response("Создано", BookingSerializer()),
             400: "Bad Request"
         }
     )
@@ -110,24 +134,18 @@ class BookingViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        operation_description="Возвращает список всех доступных бронирований",
+        operation_description="Список доступных бронирований",
         responses={
-            200: openapi.Response(
-                description="Список бронирований",
-                schema=openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные бронирования'))
-            )
+            200: openapi.Response("OK", BookingSerializer(many=True))
         }
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        operation_description="Возвращает детальную информацию о конкретном бронировании",
+        operation_description="Детали одного бронирования",
         responses={
-            200: openapi.Response(
-                description="Детальная информация о бронировании",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, description='Данные бронирования')
-            ),
+            200: openapi.Response("OK", BookingSerializer()),
             404: "Not Found"
         }
     )
