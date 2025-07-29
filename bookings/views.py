@@ -43,6 +43,9 @@ class BookingViewSet(viewsets.ModelViewSet):
         queryset = super().get_queryset()
         user = self.request.user
 
+        # Автоматически обновляем статус истекших броней
+        Booking.update_expired_bookings()
+
         # Админы видят все бронирования
         if user.role == 'admin':
             return queryset
@@ -152,6 +155,12 @@ class BookingViewSet(viewsets.ModelViewSet):
         }
     )
     def retrieve(self, request, *args, **kwargs):
+        # Получаем объект брони
+        booking = self.get_object()
+        
+        # Автоматически обновляем статус, если время прошло
+        booking.update_status_if_expired()
+        
         return super().retrieve(request, *args, **kwargs)
 
     @swagger_auto_schema(

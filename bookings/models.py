@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from playgrounds.models import SportVenue
 from decimal import Decimal
 
@@ -11,6 +12,7 @@ class Booking(models.Model):
         ('CONFIRMED', 'Подтверждено'),
         ('CANCELLED', 'Отменено'),
         ('COMPLETED', 'Завершено'),
+        ('EXPIRED', 'Истекло'),
     ]
 
     PAYMENT_STATUS_CHOICES = [
@@ -100,3 +102,35 @@ class Booking(models.Model):
             # Устанавливаем сумму депозита
             self.deposit_amount = self.sport_venue.deposit_amount
         super().save(*args, **kwargs)
+
+    def update_status_if_expired(self):
+        """
+        Автоматически обновляет статус брони, если время уже прошло
+        """
+        now = timezone.now()
+        
+        # Если время окончания уже прошло и статус не COMPLETED/CANCELLED/EXPIRED
+        if (self.end_time < now and 
+            self.status not in ['COMPLETED', 'CANCELLED', 'EXPIRED']):
+            self.status = 'EXPIRED'
+            self.save(update_fields=['status', 'updated_at'])
+            return True
+        return False
+
+    @classmethod
+    def update_expired_bookings(cls):
+        """
+        Обновляет статус всех истекших броней
+        """
+        now = timezone.now()
+        expired_bookings = cls.objects.filter(
+            end_time__lt=now,
+            status__in=['PENDING', 'CONFIRMED']
+        )
+        
+        updated_count = expired_bookings.update(
+            status='EXPIRED',
+            updated_at=now
+        )
+        
+        return updated_count
