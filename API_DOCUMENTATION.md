@@ -544,7 +544,7 @@ console.log(result);
 - Площадка должна существовать в системе
 - Пользователь может добавить одну площадку в избранное только один раз
 - При повторном добавлении той же площадки вернется ошибка 400
-- Для проверки статуса используйте GET `/favorites/check-favorite/?sport_venue_id=6`
+- Для проверки статуса используйте GET `/favorites/is-favorite/?sport_venue_id=6`
 - Для удаления из избранного используйте DELETE `/favorites/{id}/`
 
 ### 1. List Favorites
@@ -694,51 +694,7 @@ Content-Type: application/json
 }
 ```
 
-### 3. Check if Sport Venue is in Favorites
-
-**GET** `/favorites/check-favorite/`
-
-Проверить, находится ли конкретная площадка в избранном у пользователя.
-
-**Headers:**
-```
-Authorization: Bearer <access_token>
-```
-
-**Query Parameters:**
-- `sport_venue_id` - ID спортивной площадки (обязательный)
-
-**Success Response (200):**
-```json
-{
-    "sport_venue_id": 6,
-    "sport_venue_name": "Футбольное поле Центральное",
-    "is_favorite": true,
-    "user_id": 1
-}
-```
-
-**Error Response (400):**
-```json
-{
-    "error": "Параметр sport_venue_id обязателен"
-}
-```
-
-**Error Response (400):**
-```json
-{
-    "error": "sport_venue_id должен быть числом"
-}
-```
-
-**Error Response (400):**
-```json
-{
-    "error": "Площадка с указанным ID не найдена"
-}
-```
-
+git 
 ### 4. Remove from Favorites
 
 **DELETE** `/favorites/{id}/`

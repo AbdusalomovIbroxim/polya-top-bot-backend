@@ -314,34 +314,31 @@ class FavoriteSportVenueViewSet(viewsets.ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        operation_description="Проверить, находится ли площадка в избранном у пользователя",
+        operation_description="Проверить, находится ли стадион в избранном",
         manual_parameters=[
             openapi.Parameter('sport_venue_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, 
-                             description='ID спортивной площадки', required=True)
+                             description='ID стадиона', required=True)
         ],
         responses={
             200: openapi.Response(
-                description="Информация о том, находится ли площадка в избранном",
+                description="Статус избранного",
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     properties={
-                        'sport_venue_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID спортивной площадки'),
-                        'sport_venue_name': openapi.Schema(type=openapi.TYPE_STRING, description='Название площадки'),
-                        'is_favorite': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Находится ли в избранном'),
-                        'user_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID пользователя')
+                        'is_favorite': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Находится ли в избранном')
                     }
                 )
             ),
-            400: "Bad Request - неверные параметры или площадка не найдена"
+            400: "Bad Request - неверный ID стадиона"
         }
     )
-    @action(detail=False, methods=['get'], url_path='check-favorite')
-    def check_favorite(self, request):
+    @action(detail=False, methods=['get'], url_path='is-favorite')
+    def is_favorite(self, request):
         sport_venue_id = request.query_params.get('sport_venue_id')
         
         if not sport_venue_id:
             return Response(
-                {"error": "Параметр sport_venue_id обязателен"}, 
+                {"error": "ID стадиона обязателен"}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -349,31 +346,18 @@ class FavoriteSportVenueViewSet(viewsets.ModelViewSet):
             sport_venue_id = int(sport_venue_id)
         except ValueError:
             return Response(
-                {"error": "sport_venue_id должен быть числом"}, 
+                {"error": "ID стадиона должен быть числом"}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Проверяем, существует ли площадка
-        try:
-            from .models import SportVenue
-            sport_venue = SportVenue.objects.get(id=sport_venue_id)
-        except SportVenue.DoesNotExist:
-            return Response(
-                {"error": "Площадка с указанным ID не найдена"}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Проверяем, находится ли площадка в избранном
+        # Проверяем, находится ли стадион в избранном
         is_favorite = FavoriteSportVenue.objects.filter(
             user=request.user, 
             sport_venue_id=sport_venue_id
         ).exists()
         
         return Response({
-            "sport_venue_id": sport_venue_id,
-            "sport_venue_name": sport_venue.name,
-            "is_favorite": is_favorite,
-            "user_id": request.user.id
+            "is_favorite": is_favorite
         })
 
 
