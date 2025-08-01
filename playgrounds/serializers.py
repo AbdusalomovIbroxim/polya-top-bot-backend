@@ -51,6 +51,7 @@ class AvailabilityResponseSerializer(serializers.Serializer):
 
 class FavoriteSportVenueSerializer(serializers.ModelSerializer):
     sport_venue_details = SportVenueSerializer(source='sport_venue', read_only=True)
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = FavoriteSportVenue

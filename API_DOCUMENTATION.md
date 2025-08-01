@@ -505,6 +505,47 @@ icon: [file]
 
 ## Favorites
 
+### Как добавить стадион в избранные
+
+Чтобы добавить спортивную площадку в избранное, выполните следующие шаги:
+
+1. **Получите JWT токен** через авторизацию (`/auth/login/`)
+2. **Найдите ID площадки** в списке площадок (`/sport-venues/`)
+3. **Отправьте POST запрос** на `/favorites/` с ID площадки
+
+**Пример запроса:**
+```bash
+curl -X POST "https://your-domain.com/api/favorites/" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sport_venue": 1
+  }'
+```
+
+**Пример на JavaScript:**
+```javascript
+const response = await fetch('https://your-domain.com/api/favorites/', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    sport_venue: 1
+  })
+});
+
+const result = await response.json();
+console.log(result);
+```
+
+**Важные моменты:**
+- Площадка должна существовать в системе
+- Пользователь может добавить одну площадку в избранное только один раз
+- При повторном добавлении той же площадки вернется ошибка 400
+- Для удаления из избранного используйте DELETE `/favorites/{id}/`
+
 ### 1. List Favorites
 
 **GET** `/favorites/`
@@ -521,12 +562,44 @@ Authorization: Bearer <access_token>
 [
     {
         "id": 1,
+        "user": 1,
         "sport_venue": 1,
         "sport_venue_details": {
             "id": 1,
             "name": "Футбольное поле Центральное",
+            "description": "Профессиональное футбольное поле",
             "price_per_hour": "50.00",
-            "city": "Ташкент"
+            "city": "Ташкент",
+            "address": "ул. Спортивная, 1",
+            "latitude": "41.2995",
+            "longitude": "69.2401",
+            "yandex_map_url": "https://yandex.ru/maps/...",
+            "sport_venue_type": {
+                "id": 1,
+                "name": "Футбол",
+                "description": "Футбольные поля"
+            },
+            "region": {
+                "id": 1,
+                "name_ru": "Ташкент",
+                "name_uz": "Toshkent",
+                "name_en": "Tashkent"
+            },
+            "deposit_amount": "50.00",
+            "company": {
+                "id": 1,
+                "username": "company1",
+                "email": "company@example.com"
+            },
+            "images": [
+                {
+                    "id": 1,
+                    "image": "http://api.example.com/media/sport_venue_images/field1.jpg",
+                    "created_at": "2024-01-01T10:00:00Z"
+                }
+            ],
+            "created_at": "2024-01-01T10:00:00Z",
+            "updated_at": "2024-01-01T10:00:00Z"
         },
         "created_at": "2024-01-01T10:00:00Z"
     }
@@ -542,12 +615,81 @@ Authorization: Bearer <access_token>
 **Headers:**
 ```
 Authorization: Bearer <access_token>
+Content-Type: application/json
 ```
 
 **Request Body:**
 ```json
 {
     "sport_venue": 1
+}
+```
+
+**Success Response (201):**
+```json
+{
+    "id": 1,
+    "user": 1,
+    "sport_venue": 1,
+    "sport_venue_details": {
+        "id": 1,
+        "name": "Футбольное поле Центральное",
+        "description": "Профессиональное футбольное поле",
+        "price_per_hour": "50.00",
+        "city": "Ташкент",
+        "address": "ул. Спортивная, 1",
+        "latitude": "41.2995",
+        "longitude": "69.2401",
+        "yandex_map_url": "https://yandex.ru/maps/...",
+        "sport_venue_type": {
+            "id": 1,
+            "name": "Футбол",
+            "description": "Футбольные поля"
+        },
+        "region": {
+            "id": 1,
+            "name_ru": "Ташкент",
+            "name_uz": "Toshkent",
+            "name_en": "Tashkent"
+        },
+        "deposit_amount": "50.00",
+        "company": {
+            "id": 1,
+            "username": "company1",
+            "email": "company@example.com"
+        },
+        "images": [
+            {
+                "id": 1,
+                "image": "http://api.example.com/media/sport_venue_images/field1.jpg",
+                "created_at": "2024-01-01T10:00:00Z"
+            }
+        ],
+        "created_at": "2024-01-01T10:00:00Z",
+        "updated_at": "2024-01-01T10:00:00Z"
+    },
+    "created_at": "2024-01-01T10:00:00Z"
+}
+```
+
+**Error Response (400):**
+```json
+{
+    "sport_venue": ["Эта площадка уже добавлена в избранное"]
+}
+```
+
+**Error Response (400):**
+```json
+{
+    "sport_venue": ["Обязательное поле."]
+}
+```
+
+**Error Response (400):**
+```json
+{
+    "sport_venue": ["Площадка с указанным ID не найдена"]
 }
 ```
 
@@ -560,6 +702,18 @@ Authorization: Bearer <access_token>
 **Headers:**
 ```
 Authorization: Bearer <access_token>
+```
+
+**Success Response (204):**
+```
+No Content
+```
+
+**Error Response (404):**
+```json
+{
+    "detail": "Not found."
+}
 ```
 
 ---

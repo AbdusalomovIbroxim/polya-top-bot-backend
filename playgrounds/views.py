@@ -263,8 +263,18 @@ class FavoriteSportVenueViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         sport_venue_id = self.request.data.get('sport_venue')
+        
+        # Проверяем, что площадка существует
+        try:
+            from .models import SportVenue
+            SportVenue.objects.get(id=sport_venue_id)
+        except SportVenue.DoesNotExist:
+            raise serializers.ValidationError("Площадка с указанным ID не найдена")
+        
+        # Проверяем, что площадка еще не добавлена в избранное
         if FavoriteSportVenue.objects.filter(user=self.request.user, sport_venue_id=sport_venue_id).exists():
             raise serializers.ValidationError("Эта площадка уже добавлена в избранное")
+        
         serializer.save(user=self.request.user)
 
     @swagger_auto_schema(
