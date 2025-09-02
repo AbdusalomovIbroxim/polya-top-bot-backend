@@ -1,5 +1,5 @@
-# Используем официальный Python
-FROM python:3.12
+# Используем официальный Python (через зеркало Google, чтобы обойти rate limit Docker Hub)
+FROM mirror.gcr.io/library/python:3.12
 
 # Устанавливаем зависимости
 RUN apt-get update && apt-get install -y gcc libpq-dev
