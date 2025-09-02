@@ -694,7 +694,41 @@ Content-Type: application/json
 }
 ```
 
-git 
+### 3. Check if Sport Venue is in Favorites
+
+**GET** `/favorites/is-favorite/`
+
+Проверить, находится ли стадион в избранном.
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Query Parameters:**
+- `sport_venue_id` - ID стадиона (обязательный)
+
+**Success Response (200):**
+```json
+{
+    "is_favorite": true
+}
+```
+
+**Error Response (400):**
+```json
+{
+    "error": "ID стадиона обязателен"
+}
+```
+
+**Error Response (400):**
+```json
+{
+    "error": "ID стадиона должен быть числом"
+}
+```
+
 ### 4. Remove from Favorites
 
 **DELETE** `/favorites/{id}/`
