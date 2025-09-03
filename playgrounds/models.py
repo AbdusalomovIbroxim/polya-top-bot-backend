@@ -33,16 +33,15 @@ class Region(models.Model):
         return self.name_ru
 
     def save(self, *args, **kwargs):
-        if (not self.slug or self.slug.strip() == '') and self.name:
-            base = slugify(unidecode(self.name))
-            candidate = base or 'type'
+        if (not self.slug or self.slug.strip() == '') and self.name_ru:
+            base = slugify(unidecode(self.name_ru))
+            candidate = base or 'region'
             suffix = 1
             while Region.objects.exclude(pk=self.pk).filter(slug=candidate).exists():
                 suffix += 1
                 candidate = f"{base}-{suffix}"
             self.slug = candidate
         super().save(*args, **kwargs)
-
 
     @classmethod
     def ensure_test_regions(cls):
@@ -87,7 +86,6 @@ class SportVenueType(models.Model):
             self.slug = candidate
         super().save(*args, **kwargs)
 
-
     @classmethod
     def ensure_test_types(cls):
         if not cls.objects.exists():
@@ -104,6 +102,7 @@ class SportVenue(models.Model):
     name = models.CharField(max_length=200, verbose_name='Название')
     description = models.TextField(verbose_name='Описание')
     price_per_hour = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена за час')
+    deposit_amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Залоговая сумма', null=True, blank=True)
     city = models.CharField(max_length=100, verbose_name='Город', default='Ташкент')
     address = models.CharField(max_length=200, verbose_name='Адрес', default='Адрес не указан')
     latitude = models.DecimalField(
