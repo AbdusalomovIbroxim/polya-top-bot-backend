@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from accounts.models import Role
+from django.utils.text import slugify
 User = get_user_model()
 
 
@@ -46,6 +47,7 @@ class SportVenueType(models.Model):
         max_length=255,
         unique=True,
         blank=True,
+        null=True,
         verbose_name='Slug (URL-идентификатор)'
     )
     name = models.CharField(max_length=100, verbose_name='Название типа')
@@ -59,6 +61,18 @@ class SportVenueType(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if (self.slug is None or self.slug == '') and self.name:
+            base = slugify(self.name)
+            candidate = base or 'type'
+            suffix = 1
+            # Ensure uniqueness
+            while SportVenueType.objects.exclude(pk=self.pk).filter(slug=candidate).exists():
+                suffix += 1
+                candidate = f"{base}-{suffix}"
+            self.slug = candidate
+        super().save(*args, **kwargs)
 
     @classmethod
     def ensure_test_types(cls):
