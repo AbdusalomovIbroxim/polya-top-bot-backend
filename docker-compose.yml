@@ -22,8 +22,6 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
 
   nginx:
     image: ghcr.io/nginxinc/nginx-unprivileged:stable-alpine
