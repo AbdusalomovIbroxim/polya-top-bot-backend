@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from accounts.models import Role
 from django.utils.text import slugify
+from unidecode import unidecode
+
 User = get_user_model()
 
 
@@ -29,6 +31,18 @@ class Region(models.Model):
         elif lang_code == 'en':
             return self.name_en
         return self.name_ru
+
+    def save(self, *args, **kwargs):
+        if (not self.slug or self.slug.strip() == '') and self.name:
+            base = slugify(unidecode(self.name))
+            candidate = base or 'type'
+            suffix = 1
+            while Region.objects.exclude(pk=self.pk).filter(slug=candidate).exists():
+                suffix += 1
+                candidate = f"{base}-{suffix}"
+            self.slug = candidate
+        super().save(*args, **kwargs)
+
 
     @classmethod
     def ensure_test_regions(cls):
@@ -63,16 +77,16 @@ class SportVenueType(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        if (self.slug is None or self.slug == '') and self.name:
-            base = slugify(self.name)
+        if (not self.slug or self.slug.strip() == '') and self.name:
+            base = slugify(unidecode(self.name))
             candidate = base or 'type'
             suffix = 1
-            # Ensure uniqueness
             while SportVenueType.objects.exclude(pk=self.pk).filter(slug=candidate).exists():
                 suffix += 1
                 candidate = f"{base}-{suffix}"
             self.slug = candidate
         super().save(*args, **kwargs)
+
 
     @classmethod
     def ensure_test_types(cls):
