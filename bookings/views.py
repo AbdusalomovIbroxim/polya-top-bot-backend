@@ -45,83 +45,15 @@ class BookingViewSet(mixins.ListModelMixin,       # GET /bookings/
         queryset = super().get_queryset()
         user = self.request.user
 
-        # Автоматически обновляем статус истекших броней
         Booking.update_expired_bookings()
     
-        # Если пользователь не авторизован — вернуть пустой queryset
         if not user.is_authenticated:
             return Booking.objects.none()
-    
-        # Админы видят все бронирования
-        if user.role == Role.SUPERADMIN:
-            return queryset
 
-        # Продавцы видят бронирования своих площадок
-        if user.role == Role.OWNER:
-            return queryset.filter(sport_venue__company=user)
-
-        # Обычные пользователи видят только свои бронирования
         return queryset.filter(user=user)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-
-    # @swagger_auto_schema(
-    #     operation_description="Подтвердить бронирование (только для продавца или админа)",
-    #     responses={
-    #         200: "Успешно подтверждено",
-    #         400: "Невозможно подтвердить",
-    #         403: "Нет доступа"
-    #     }
-    # )
-    # @action(detail=True, methods=['post'])
-    # def confirm(self, request, pk=None):
-        booking = self.get_object()
-
-        if request.user.role not in [Role.SUPERADMIN, Role.OWNER] or \
-           (request.user.role == Role.OWNER and booking.sport_venue.company != request.user):
-            return Response(
-                {"detail": "У вас нет прав на подтверждение этого бронирования"},
-                status=status.HTTP_403_FORBIDDEN
-            )
-
-        if booking.status != 'PENDING':
-            return Response(
-                {"detail": "Можно подтверждать только ожидающие бронирования"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        booking.status = 'CONFIRMED'
-        booking.save()
-        return Response(BookingSerializer(booking).data)
-
-    # @swagger_auto_schema(
-    #     operation_description="Отменить бронирование (пользователь, продавец или админ)",
-    #     responses={
-    #         200: "Успешно отменено",
-    #         400: "Невозможно отменить",
-    #         403: "Нет доступа"
-    #     }
-    # )
-    # @action(detail=True, methods=['post'])
-    # def cancel(self, request, pk=None):
-        booking = self.get_object()
-
-        if request.user not in [booking.user, booking.sport_venue.company] and request.user.role != 'admin':
-            return Response(
-                {"detail": "У вас нет прав на отмену этого бронирования"},
-                status=status.HTTP_403_FORBIDDEN
-            )
-
-        if booking.status not in ['PENDING', 'CONFIRMED']:
-            return Response(
-                {"detail": "Можно отменять только ожидающие или подтвержденные бронирования"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        booking.status = 'CANCELLED'
-        booking.save()
-        return Response(BookingSerializer(booking).data)
 
     @swagger_auto_schema(
         operation_description="Создает новое бронирование",
@@ -164,53 +96,3 @@ class BookingViewSet(mixins.ListModelMixin,       # GET /bookings/
         booking.update_status_if_expired()
         
         return super().retrieve(request, *args, **kwargs)
-
-    # @swagger_auto_schema(
-    #     operation_description="Обновить бронирование",
-    #     request_body=openapi.Schema(
-    #         type=openapi.TYPE_OBJECT,
-    #         properties={
-    #             'sport_venue': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID спортивной площадки'),
-    #             'start_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time', description='Дата и время начала'),
-    #             'end_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time', description='Дата и время окончания'),
-    #             'status': openapi.Schema(type=openapi.TYPE_STRING, description='Статус бронирования')
-    #         }
-    #     ),
-    #     responses={
-    #         200: "Обновленное бронирование",
-    #         400: "Bad Request",
-    #         404: "Not Found"
-    #     }
-    # )
-    # def update(self, request, *args, **kwargs):
-    #     return super().update(request, *args, **kwargs)
-
-    # @swagger_auto_schema(
-    #     operation_description="Частично обновить бронирование",
-    #     request_body=openapi.Schema(
-    #         type=openapi.TYPE_OBJECT,
-    #         properties={
-    #             'sport_venue': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID спортивной площадки'),
-    #             'start_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time', description='Дата и время начала'),
-    #             'end_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time', description='Дата и время окончания'),
-    #             'status': openapi.Schema(type=openapi.TYPE_STRING, description='Статус бронирования')
-    #         }
-    #     ),
-    #     responses={
-    #         200: "Обновленное бронирование",
-    #         400: "Bad Request",
-    #         404: "Not Found"
-    #     }
-    # )
-    # def partial_update(self, request, *args, **kwargs):
-    #     return super().partial_update(request, *args, **kwargs)
-
-    # @swagger_auto_schema(
-    #     operation_description="Удалить бронирование",
-    #     responses={
-    #         204: "No Content",
-    #         404: "Not Found"
-    #     }
-    # )
-    # def destroy(self, request, *args, **kwargs):
-    #     return super().destroy(request, *args, **kwargs)

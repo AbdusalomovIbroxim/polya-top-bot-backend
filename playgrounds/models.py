@@ -174,10 +174,10 @@ class SportVenue(models.Model):
             from django.contrib.auth import get_user_model
             from .models import SportVenueType, Region
             User = get_user_model()
-            company = User.objects.filter(role=Role.OWNER).first()
+            owner = User.objects.filter(role=Role.OWNER).first()
             venue_type = SportVenueType.objects.first()
             region = Region.objects.first()
-            if not (company and venue_type and region):
+            if not (owner and venue_type and region):
                 return
             test_data = [
                 dict(
@@ -191,7 +191,7 @@ class SportVenue(models.Model):
                     sport_venue_type=venue_type,
                     region=region,
                     deposit_amount=500,
-                    company=company
+                    owner=owner
                 ),
             ]
             for data in test_data:

@@ -3,6 +3,7 @@ from .models import SportVenue, SportVenueImage, FavoriteSportVenue, SportVenueT
 from accounts.serializers import UserSerializer
 from datetime import datetime, timedelta
 from django.utils import timezone
+from accounts.models import Role
 
 
 class SportVenueImageSerializer(serializers.ModelSerializer):
@@ -13,19 +14,21 @@ class SportVenueImageSerializer(serializers.ModelSerializer):
 
 class SportVenueSerializer(serializers.ModelSerializer):
     images = SportVenueImageSerializer(many=True, read_only=True)
-    company = UserSerializer(read_only=True)
-    company_id = serializers.IntegerField(write_only=True)
+    owner = UserSerializer(read_only=True)
+    owner_id = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = SportVenue
         fields = '__all__'
 
-    def validate_company_id(self, value):
+    def validate_owner_id(self, value):
         from accounts.models import User
         try:
-            User.objects.get(id=value, role='seller')
+            user = User.objects.get(id=value)
         except User.DoesNotExist:
-            raise serializers.ValidationError("Company must be a seller user")
+            raise serializers.ValidationError("Пользователь-владелец не найден")
+        if getattr(user, 'role', None) != Role.OWNER:
+            raise serializers.ValidationError("Владелец должен иметь роль 'owner'")
         return value
 
     # def validate_type(self, value):
