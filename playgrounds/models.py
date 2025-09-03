@@ -78,9 +78,9 @@ class SportVenueType(models.Model):
     def ensure_test_types(cls):
         if not cls.objects.exists():
             test_data = [
-                dict(name='Футбол'),
-                dict(name='Баскетбол'),
-                dict(name='Теннис'),
+                dict(slug='football', name='Футбол'),
+                dict(slug='basketball', name='Баскетбол'),
+                dict(slug='tennis', name='Теннис'),
             ]
             for data in test_data:
                 cls.objects.create(**data)
