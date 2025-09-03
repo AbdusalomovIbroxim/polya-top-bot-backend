@@ -24,17 +24,18 @@ class Booking(models.Model):
     sport_venue = models.ForeignKey(
         SportVenue,
         on_delete=models.CASCADE,
-        related_name='bookings',
-        verbose_name='Игровое поле',
         null=True,
+        blank=True,
+        related_name='bookings',
+        verbose_name='Игровое поле'
     )
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='bookings',
-        verbose_name='Пользователь',
         null=True,
-        blank=True
+        blank=True,
+        related_name='bookings',
+        verbose_name='Пользователь'
     )
     session_key = models.CharField(
         max_length=40,

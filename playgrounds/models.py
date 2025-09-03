@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-
+from accounts.models import Role
 User = get_user_model()
 
 
@@ -9,7 +9,7 @@ class Region(models.Model):
     name_uz = models.CharField(max_length=100, verbose_name='Название (узбекский)')
     name_en = models.CharField(max_length=100, verbose_name='Название (английский)')
 
-    slug = models.SlugField(max_length=100, unique=True, verbose_name='Slug (для URL и фильтрации)')
+    slug = models.SlugField(max_length=100, unique=True, verbose_name='Slug (для URL и фильтрации)', blank=True, null=True, help_text='Если оставить пустым, будет сгенерирован автоматически')
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
@@ -42,6 +42,12 @@ class Region(models.Model):
 
 
 class SportVenueType(models.Model):
+    slug = models.SlugField(
+        max_length=255,
+        unique=True,
+        blank=True,
+        verbose_name='Slug (URL-идентификатор)'
+    )
     name = models.CharField(max_length=100, verbose_name='Название типа')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -111,18 +117,12 @@ class SportVenue(models.Model):
         blank=True,
         related_name='sport_venues'
     )
-    deposit_amount = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        verbose_name='Сумма депозита',
-        help_text='Сумма депозита для бронирования',
-        default=0
-    )
-    company = models.ForeignKey(
+    owner = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name='Компания',
-        limit_choices_to={'role': 'SELLER'},
+        null=True,
+        blank=True,
+        verbose_name='Владелец',
         related_name='sport_venues'
     )
     created_at = models.DateTimeField(auto_now_add=True)
@@ -147,7 +147,7 @@ class SportVenue(models.Model):
             from django.contrib.auth import get_user_model
             from .models import SportVenueType, Region
             User = get_user_model()
-            company = User.objects.filter(role='SELLER').first()
+            company = User.objects.filter(role=Role.OWNER).first()
             venue_type = SportVenueType.objects.first()
             region = Region.objects.first()
             if not (company and venue_type and region):
@@ -179,6 +179,7 @@ class SportVenueImage(models.Model):
     class Meta:
         verbose_name = 'Фотография площадки'
         verbose_name_plural = 'Фотографии площадок'
+
 
 class FavoriteSportVenue(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorite_sport_venues')

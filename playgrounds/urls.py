@@ -1,10 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import SportVenueViewSet, FavoriteSportVenueViewSet, SportVenueTypeViewSet, RegionViewSet
+from .views import ClientSportVenueViewSet, FavoriteSportVenueViewSet, SportVenueTypeViewSet, RegionViewSet
 
 router = DefaultRouter()
 router.register(r'types', SportVenueTypeViewSet)
-router.register(r'sport-venues', SportVenueViewSet)
+router.register(r'sport-venues', ClientSportVenueViewSet)
 router.register(r'favorites', FavoriteSportVenueViewSet, basename='favorite')
 router.register(r'regions', RegionViewSet)
 

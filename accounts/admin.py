@@ -6,9 +6,9 @@ from .models import User
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'first_name', 'last_name', 'role', 'is_staff', 'is_active', 'date_joined', 'photo')
-    list_filter = ('role', 'is_staff', 'is_superuser', 'is_active', 'date_joined')
-    search_fields = ('username', 'first_name', 'last_name', 'email', 'phone', 'photo')
+    list_display = ('username', 'is_active', 'id')
+    list_filter = ('role', 'is_active', 'date_joined')
+    search_fields = ('username', ) # 'first_name', 'last_name', 'email', 'phone', 'photo')
     ordering = ('-date_joined',)
     
     fieldsets = (
@@ -18,13 +18,13 @@ class CustomUserAdmin(UserAdmin):
             'classes': ('wide',)
         }),
         ('Роли и разрешения', {
-            'fields': ('role', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
-            'classes': ('collapse',)
+            'fields': ('role', ), # 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
+            # 'classes': ('collapse',)
         }),
-        ('Важные даты', {
-            'fields': ('last_login', 'date_joined'),
-            'classes': ('collapse',)
-        }),
+        # ('Важные даты', {
+        #     'fields': ('last_login', 'date_joined'),
+        #     'classes': ('collapse',)
+        # }),
     )
     
     add_fieldsets = (

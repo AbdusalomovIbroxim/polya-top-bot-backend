@@ -19,15 +19,15 @@ class SportVenueImageInline(admin.TabularInline):
 
 @admin.register(SportVenue)
 class SportVenueAdmin(admin.ModelAdmin):
-    list_display = ('name', 'company', 'price_per_hour', 'image_preview', 'created_at', 'updated_at')
-    list_filter = ('created_at', 'updated_at', 'price_per_hour', 'company')
-    search_fields = ('name', 'description', 'company__username', 'company__email')
+    list_display = ('name', 'price_per_hour', 'image_preview', 'created_at', 'updated_at')
+    list_filter = ('created_at', 'updated_at', 'price_per_hour')
+    search_fields = ('name', 'description')
     readonly_fields = ('created_at', 'updated_at')
     inlines = [SportVenueImageInline]
     
     fieldsets = (
         ('Основная информация', {
-            'fields': ('name', 'description', 'price_per_hour', 'company', 'sport_venue_type', 'deposit_amount')
+            'fields': ('name', 'description', 'price_per_hour','sport_venue_type', 'deposit_amount')
         }),
         ('Локация', {
             'fields': ('city', 'address', 'latitude', 'longitude', 'yandex_map_url')
