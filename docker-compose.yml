@@ -3,6 +3,8 @@ services:
     build: .
     container_name: backend
     restart: always
+    env_file:
+      - .env
     volumes:
       - .:/app
     expose:
