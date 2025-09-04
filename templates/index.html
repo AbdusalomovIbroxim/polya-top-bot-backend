@@ -1,197 +1,213 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Polyatop</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;600;800&display=swap');
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Polyatop</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;600;800&display=swap');
 
-        :root {
-            --dark-bg: #0d1117;
-            --accent-color: #00bcd4;
-            --text-light: #f5f5f5;
-            --secondary-bg: #1a202c;
-        }
+    :root {
+      --dark-bg: #0d1117;
+      --accent-color: #00bcd4;
+      --text-light: #f5f5f5;
+      --secondary-bg: #1a202c;
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
 
-        body {
-            background: var(--dark-bg);
-            color: var(--text-light);
-            overflow-x: hidden;
-            position: relative;
-        }
+    body {
+      background: var(--dark-bg);
+      color: var(--text-light);
+      overflow-x: hidden;
+      position: relative;
+    }
 
-        /* 3D-сцена */
-        #webgl-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-        }
+    /* === 3D-сцена === */
+    #webgl-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
 
-        /* Навигация */
-        header {
-            position: fixed;
-            width: 100%;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 30px 50px;
-            backdrop-filter: blur(10px);
-            background: rgba(13, 17, 23, 0.4);
-        }
-        
-        .logo {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--accent-color);
-        }
-        
-        nav ul {
-            list-style: none;
-            display: flex;
-            gap: 20px;
-        }
-        
-        nav a {
-            color: var(--text-light);
-            text-decoration: none;
-            font-weight: 600;
-            position: relative;
-        }
+    /* === Навигация === */
+    header {
+      position: fixed;
+      width: 100%;
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 30px;
+      backdrop-filter: blur(10px);
+      background: rgba(13, 17, 23, 0.5);
+    }
+    
+    .logo {
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-weight: 800;
+      color: var(--accent-color);
+    }
+    
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+    }
+    
+    nav a {
+      color: var(--text-light);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: clamp(0.9rem, 2vw, 1rem);
+    }
 
-        /* Основной контент */
-        #page-container {
-            position: relative;
-            z-index: 1;
-        }
+    /* === Контент === */
+    #page-container {
+      position: relative;
+      z-index: 1;
+    }
 
-        .content-block {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 100px 50px;
-            text-align: center;
-        }
+    .content-block {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: clamp(60px, 8vw, 100px) clamp(20px, 6vw, 50px);
+      text-align: center;
+    }
 
-        .content-block h2 {
-            font-size: 6rem;
-            font-weight: 800;
-            line-height: 1;
-            margin-bottom: 20px;
-            color: var(--text-light);
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
-        }
-        
-        .content-block p {
-            font-size: 1.5rem;
-            font-weight: 200;
-            max-width: 800px;
-            margin-top: 20px;
-            color: var(--text-light);
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
-        }
+    .content-block h2 {
+      font-size: clamp(2rem, 8vw, 6rem);
+      font-weight: 800;
+      margin-bottom: 20px;
+      color: var(--text-light);
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+    }
+    
+    .content-block p {
+      font-size: clamp(1rem, 3vw, 1.5rem);
+      font-weight: 200;
+      max-width: 800px;
+      margin-top: 20px;
+      color: var(--text-light);
+    }
 
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px;
-            margin-top: 80px;
-            width: 100%;
-            max-width: 1200px;
-        }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 25px;
+      margin-top: 60px;
+      width: 100%;
+      max-width: 1200px;
+    }
 
-        .feature-item {
-            padding: 30px;
-            background: var(--secondary-bg);
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
-        }
+    .feature-item {
+      padding: 25px;
+      background: var(--secondary-bg);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+    }
 
-    </style>
+    /* === Мобильная адаптация === */
+    @media (max-width: 768px) {
+      nav ul {
+        display: none;
+        flex-direction: column;
+        gap: 15px;
+        background: rgba(13, 17, 23, 0.95);
+        position: absolute;
+        top: 70px;
+        right: 20px;
+        padding: 20px;
+        border-radius: 8px;
+      }
+      nav ul.active {
+        display: flex;
+      }
+      .burger {
+        display: block;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--text-light);
+      }
+    }
+
+    @media (min-width: 769px) {
+      .burger {
+        display: none;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div id="webgl-container"></div>
 
-    <div id="webgl-container"></div>
+  <header>
+    <div class="logo">Polyatop</div>
+    <nav>
+      <i class="fas fa-bars burger"></i>
+      <ul>
+        <li><a href="#about">О проекте</a></li>
+        <li><a href="#features">Возможности</a></li>
+        <li><a href="#contacts">Контакты</a></li>
+      </ul>
+    </nav>
+  </header>
 
-    <header>
-        <div class="logo">Polyatop</div>
-        <nav>
-            <ul>
-                <li><a href="#about">О проекте</a></li>
-                <li><a href="#features">Возможности</a></li>
-                <li><a href="#contacts">Контакты</a></li>
-            </ul>
-        </nav>
-    </header>
+  <div id="page-container">
+    <section id="hero" class="content-block">
+      <h2>Polyatop</h2>
+      <p>Платформа для онлайн-бронирования спортивных площадок</p>
+    </section>
 
-    <div id="page-container">
-        <section id="hero" class="content-block">
-            <h2>Polyatop</h2>
-            <p>Платформа для онлайн-бронирования спортивных площадок</p>
-        </section>
+    <section id="about" class="content-block">
+      <h2>О проекте</h2>
+      <p>
+        Polyatop — это цифровая платформа, которая объединяет владельцев спортивных площадок и пользователей, предоставляя удобный способ поиска, бронирования и оплаты аренды.
+      </p>
+    </section>
 
-        <section id="about" class="content-block">
-            <h2>О проекте</h2>
-            <p>
-                Polyatop — это цифровая платформа, которая объединяет владельцев спортивных площадок и пользователей, предоставляя удобный способ поиска, бронирования и оплаты аренды. Проект создан для того, чтобы сделать аренду спортивных объектов прозрачной, простой и быстрой.
-            </p>
-        </section>
+    <section id="features" class="content-block">
+      <h2>Возможности</h2>
+      <div class="feature-grid">
+        <div class="feature-item"><i class="fas fa-search-plus"></i> Каталог площадок</div>
+        <div class="feature-item"><i class="fas fa-calendar-check"></i> Онлайн-бронирование</div>
+        <div class="feature-item"><i class="fas fa-cogs"></i> Управление</div>
+        <div class="feature-item"><i class="fas fa-credit-card"></i> Оплаты</div>
+        <div class="feature-item"><i class="fas fa-globe"></i> Локализация</div>
+        <div class="feature-item"><i class="fas fa-code"></i> API интеграция</div>
+      </div>
+    </section>
 
-        <section id="features" class="content-block">
-            <h2>Возможности</h2>
-            <div class="feature-grid">
-                <div class="feature-item">
-                    <i class="fas fa-search-plus"></i>
-                    <h3>Каталог площадок</h3>
-                </div>
-                <div class="feature-item">
-                    <i class="fas fa-calendar-check"></i>
-                    <h3>Онлайн-бронирование</h3>
-                </div>
-                <div class="feature-item">
-                    <i class="fas fa-cogs"></i>
-                    <h3>Управление</h3>
-                </div>
-                <div class="feature-item">
-                    <i class="fas fa-credit-card"></i>
-                    <h3>Оплаты</h3>
-                </div>
-                <div class="feature-item">
-                    <i class="fas fa-globe"></i>
-                    <h3>Локализация</h3>
-                </div>
-                <div class="feature-item">
-                    <i class="fas fa-code"></i>
-                    <h3>API интеграция</h3>
-                </div>
-            </div>
-        </section>
-
-        <section id="contacts" class="content-block">
-            <h2>Контакты</h2>
-            <p>Telegram: <a href="https://t.me/ibr6xim" style="color: var(--accent-color); text-decoration: none;">@ibr6xim</a></p>
-        </section>
-    </div>
+    <section id="contacts" class="content-block">
+      <h2>Контакты</h2>
+      <p>Telegram: <a href="https://t.me/ibr6xim" style="color: var(--accent-color); text-decoration: none;">@ibr6xim</a></p>
+    </section>
+  </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollToPlugin.min.js"></script>
     <script>
+
+        const burger = document.querySelector('.burger');
+        const navMenu = document.querySelector('nav ul');
+        burger.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+        });
+
         gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
         // === 3D-сцена с объектами ===
