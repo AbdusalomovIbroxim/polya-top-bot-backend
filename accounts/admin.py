@@ -18,7 +18,7 @@ class CustomUserAdmin(UserAdmin):
             'classes': ('wide',)
         }),
         ('Роли и разрешения', {
-            'fields': ('role', ), # 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
+            'fields': ('role', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
             # 'classes': ('collapse',)
         }),
         # ('Важные даты', {
