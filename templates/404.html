@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 — Страница не найдена</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Poppins', sans-serif;
+      background: #0d1117;
+      color: #fff;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      backdrop-filter: blur(4px);
+    }
+
+    h1 {
+      font-size: 8rem;
+      margin: 0;
+      background: linear-gradient(90deg, #00bcd4, #8a2be2, #ff0080);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: glitch 2s infinite;
+    }
+
+    h2 {
+      font-size: 2rem;
+      margin: 10px 0;
+      color: #f5f5f5;
+    }
+
+    p {
+      max-width: 600px;
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      color: #cbd5e1;
+    }
+
+    a {
+      display: inline-block;
+      padding: 12px 24px;
+      background: #00bcd4;
+      color: #0d1117;
+      text-decoration: none;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: 0.3s;
+    }
+
+    a:hover {
+      background: #08e0e0;
+      transform: translateY(-2px);
+    }
+
+    @keyframes glitch {
+      0% { text-shadow: 2px 2px #ff0080; }
+      20% { text-shadow: -2px -2px #00bcd4; }
+      40% { text-shadow: 2px -2px #8a2be2; }
+      60% { text-shadow: -2px 2px #ff0080; }
+      80% { text-shadow: 2px 2px #00bcd4; }
+      100% { text-shadow: -2px -2px #8a2be2; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="stars"></canvas>
+  <div class="content">
+    <h1>404</h1>
+    <h2>Страница не найдена</h2>
+    <p>
+      К сожалению, страница, которую вы ищете, отсутствует или была удалена.
+      Попробуйте вернуться на главную.
+    </p>
+    <a href="/">На главную</a>
+  </div>
+
+  <!-- three.js -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
+  <script>
+    const canvas = document.getElementById("stars");
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      2000
+    );
+    camera.position.z = 500;
+
+    const starGeometry = new THREE.BufferGeometry();
+    const starCount = 4000;
+    const starPositions = [];
+    for (let i = 0; i < starCount; i++) {
+      starPositions.push(
+        (Math.random() - 0.5) * 2000,
+        (Math.random() - 0.5) * 2000,
+        (Math.random() - 0.5) * 2000
+      );
+    }
+    starGeometry.setAttribute("position", new THREE.Float32BufferAttribute(starPositions, 3));
+    const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 1 });
+    const stars = new THREE.Points(starGeometry, starMaterial);
+    scene.add(stars);
+
+    function animate() {
+      requestAnimationFrame(animate);
+      stars.rotation.x += 0.0005;
+      stars.rotation.y += 0.0007;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener("resize", () => {
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+    });
+  </script>
+</body>
+</html>
