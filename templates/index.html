@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polyatop</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;600;800&display=swap');
+
+        :root {
+            --dark-bg: #0d1117;
+            --accent-color: #00bcd4;
+            --text-light: #f5f5f5;
+            --secondary-bg: #1a202c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: var(--dark-bg);
+            color: var(--text-light);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 3D-сцена */
+        #webgl-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        /* Навигация */
+        header {
+            position: fixed;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 50px;
+            backdrop-filter: blur(10px);
+            background: rgba(13, 17, 23, 0.4);
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent-color);
+        }
+        
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+        }
+        
+        nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 600;
+            position: relative;
+        }
+
+        /* Основной контент */
+        #page-container {
+            position: relative;
+            z-index: 1;
+        }
+
+        .content-block {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 100px 50px;
+            text-align: center;
+        }
+
+        .content-block h2 {
+            font-size: 6rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 20px;
+            color: var(--text-light);
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+        }
+        
+        .content-block p {
+            font-size: 1.5rem;
+            font-weight: 200;
+            max-width: 800px;
+            margin-top: 20px;
+            color: var(--text-light);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-top: 80px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .feature-item {
+            padding: 30px;
+            background: var(--secondary-bg);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="webgl-container"></div>
+
+    <header>
+        <div class="logo">Polyatop</div>
+        <nav>
+            <ul>
+                <li><a href="#about">О проекте</a></li>
+                <li><a href="#features">Возможности</a></li>
+                <li><a href="#contacts">Контакты</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div id="page-container">
+        <section id="hero" class="content-block">
+            <h2>Polyatop</h2>
+            <p>Платформа для онлайн-бронирования спортивных площадок</p>
+        </section>
+
+        <section id="about" class="content-block">
+            <h2>О проекте</h2>
+            <p>
+                Polyatop — это цифровая платформа, которая объединяет владельцев спортивных площадок и пользователей, предоставляя удобный способ поиска, бронирования и оплаты аренды. Проект создан для того, чтобы сделать аренду спортивных объектов прозрачной, простой и быстрой.
+            </p>
+        </section>
+
+        <section id="features" class="content-block">
+            <h2>Возможности</h2>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <i class="fas fa-search-plus"></i>
+                    <h3>Каталог площадок</h3>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-calendar-check"></i>
+                    <h3>Онлайн-бронирование</h3>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-cogs"></i>
+                    <h3>Управление</h3>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-credit-card"></i>
+                    <h3>Оплаты</h3>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-globe"></i>
+                    <h3>Локализация</h3>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-code"></i>
+                    <h3>API интеграция</h3>
+                </div>
+            </div>
+        </section>
+
+        <section id="contacts" class="content-block">
+            <h2>Контакты</h2>
+            <p>Telegram: <a href="https://t.me/ibr6xim" style="color: var(--accent-color); text-decoration: none;">@ibr6xim</a></p>
+        </section>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollToPlugin.min.js"></script>
+    <script>
+        gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+        // === 3D-сцена с объектами ===
+        const container = document.getElementById('webgl-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        container.appendChild(renderer.domElement);
+
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let currentHoveredObject = null;
+
+        const sectionsData = [
+            { id: 'hero', geometry: new THREE.IcosahedronGeometry(5, 0), color: 0x00bcd4 },
+            { id: 'about', geometry: new THREE.BoxGeometry(7, 7, 7), color: 0xffa500 },
+            { id: 'features', geometry: new THREE.TorusGeometry(5, 2, 16, 100), color: 0x8a2be2 },
+            { id: 'contacts', geometry: new THREE.OctahedronGeometry(6, 0), color: 0x32cd32 }
+        ];
+
+        const objects = [];
+        const sectionPositions = [
+            { x: -15, y: 0, z: -20 },
+            { x: 15, y: 0, z: -50 },
+            { x: -10, y: 0, z: -80 },
+            { x: 10, y: 0, z: -110 }
+        ];
+
+        sectionsData.forEach((data, index) => {
+            const material = new THREE.MeshPhongMaterial({
+                color: data.color,
+                flatShading: true,
+                transparent: true,
+                opacity: 0.8
+            });
+            const mesh = new THREE.Mesh(data.geometry, material);
+            mesh.position.set(sectionPositions[index].x, sectionPositions[index].y, sectionPositions[index].z);
+            mesh.userData = { id: data.id };
+            scene.add(mesh);
+            objects.push(mesh);
+        });
+
+        const ambientLight = new THREE.AmbientLight(0x404040, 5);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(1, 1, 1);
+        scene.add(directionalLight);
+
+        camera.position.z = 10;
+
+        let clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const time = clock.getElapsedTime();
+
+            objects.forEach((obj, index) => {
+                // Анимация вращения
+                obj.rotation.x += 0.005 + Math.sin(time * 0.1 + index) * 0.001;
+                obj.rotation.y += 0.005 + Math.cos(time * 0.2 + index) * 0.001;
+
+                // Перемещение по оси Z, чтобы имитировать движение
+                obj.position.z += 0.05;
+                if (obj.position.z > 20) {
+                    obj.position.z = -150;
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // === Взаимодействие с 3D-объектами ===
+        container.addEventListener('mousemove', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+            
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(objects, true);
+
+            if (intersects.length > 0) {
+                const hoveredObject = intersects[0].object;
+                if (currentHoveredObject !== hoveredObject) {
+                    if (currentHoveredObject) {
+                        gsap.to(currentHoveredObject.scale, { x: 1, y: 1, z: 1, duration: 0.3 });
+                        currentHoveredObject.material.emissive.setHex(0x000000);
+                        document.body.style.cursor = 'default';
+                    }
+                    currentHoveredObject = hoveredObject;
+                    gsap.to(currentHoveredObject.scale, { x: 1.2, y: 1.2, z: 1.2, duration: 0.3 });
+                    currentHoveredObject.material.emissive.setHex(0x0055ff);
+                    document.body.style.cursor = 'pointer';
+                }
+            } else {
+                if (currentHoveredObject) {
+                    gsap.to(currentHoveredObject.scale, { x: 1, y: 1, z: 1, duration: 0.3 });
+                    currentHoveredObject.material.emissive.setHex(0x000000);
+                    document.body.style.cursor = 'default';
+                }
+                currentHoveredObject = null;
+            }
+        });
+
+        container.addEventListener('click', () => {
+            if (currentHoveredObject) {
+                const targetId = `#${currentHoveredObject.userData.id}`;
+                gsap.to(window, {
+                    duration: 1.5,
+                    scrollTo: { y: targetId, offsetY: 70 },
+                    ease: "power3.inOut"
+                });
+            }
+        });
+
+        // === Анимация скролла GSAP ===
+        document.querySelectorAll(".content-block").forEach(block => {
+            const h2 = block.querySelector('h2');
+            const p = block.querySelector('p');
+            const features = block.querySelectorAll('.feature-item');
+
+            let tlBlock = gsap.timeline({
+                scrollTrigger: {
+                    trigger: block,
+                    start: "top 70%",
+                    end: "top 20%",
+                    toggleActions: "play none none reverse",
+                }
+            });
+
+            tlBlock.from(h2, {
+                opacity: 0,
+                y: 50,
+                duration: 1.5,
+                ease: "power3.out"
+            })
+            .from(p, {
+                opacity: 0,
+                y: 50,
+                duration: 1.5,
+                ease: "power3.out"
+            }, "<0.5");
+
+            if (features.length > 0) {
+                gsap.from(features, {
+                    opacity: 0,
+                    y: 50,
+                    scale: 0.8,
+                    stagger: 0.2,
+                    duration: 1.5,
+                    ease: "back.out(1.7)",
+                    scrollTrigger: {
+                        trigger: features[0],
+                        start: "top 80%",
+                        toggleActions: "play none none reverse",
+                    }
+                });
+            }
+        });
+
+        // Плавная прокрутка для навбара
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                gsap.to(window, {
+                    duration: 1.5,
+                    scrollTo: { y: targetId, offsetY: 70 },
+                    ease: "power3.inOut"
+                });
+            });
+        });
+    </script>
+</body>
+</html>

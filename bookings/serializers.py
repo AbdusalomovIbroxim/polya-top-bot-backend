@@ -1,12 +1,12 @@
 from rest_framework import serializers
 from .models import Booking
-from playgrounds.serializers import SportVenueSerializer
+from playgrounds.serializers import SportVenueReadSerializer
 from accounts.serializers import UserSerializer
 from django.utils import timezone
 from datetime import timedelta
 
 class BookingSerializer(serializers.ModelSerializer):
-    sport_venue_details = SportVenueSerializer(source='sport_venue', read_only=True)
+    sport_venue_details = SportVenueReadSerializer(source='sport_venue', read_only=True)
     user_details = UserSerializer(source='user', read_only=True)
 
     class Meta:

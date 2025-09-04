@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, time as dt_time
-
+from django.shortcuts import render
 from django.utils import timezone
 from django_filters import rest_framework as filters
 from drf_yasg import openapi
@@ -14,7 +14,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from accounts.models import Role
 from .models import SportVenue, SportVenueImage, FavoriteSportVenue, SportVenueType, Region
 from .serializers import (
-    SportVenueSerializer,
+    SportVenueReadSerializer,
     SportVenueImageSerializer,
     FavoriteSportVenueSerializer,
     SportVenueTypeSerializer,
@@ -42,7 +42,7 @@ class ClientSportVenueViewSet(
     queryset = SportVenue.objects.select_related(
         'sport_venue_type', 'region',
     ).prefetch_related('images').all()
-    serializer_class = SportVenueSerializer
+    serializer_class = SportVenueReadSerializer
     filterset_class = SportVenueFilter
     permission_classes = [permissions.AllowAny]
 
@@ -202,3 +202,7 @@ class RegionViewSet(ReadOnlyModelViewSet):
     queryset = Region.objects.all()
     serializer_class = RegionSerializer
     permission_classes = [AllowAny]
+    
+
+def welcome(request):
+    return render(request, 'index.html')
