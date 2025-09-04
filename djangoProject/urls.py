@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from playgrounds.views import welcome
 # from rest_framework_simplejwt.views import (
 #     TokenObtainPairView,
 #     TokenRefreshView,
@@ -17,8 +18,7 @@ schema_view = get_schema_view(
         default_version='v1',
         description="API для системы бронирования игровых полей",
         terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="contact@snippets.local"),
-        license=openapi.License(name="BSD License"),
+        contact=openapi.Contact(name="Telegram ->", url="https://t.me/ibr6xim")
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
@@ -29,6 +29,8 @@ urlpatterns = [
     path('api/', include('accounts.urls')),
     path('api/', include('playgrounds.urls')),
     path('api/', include('bookings.urls')),
+    path('api/', include('customers.urls')),
+    path('', welcome, name='welcome'),
 
     # Swagger URLs
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0),
