@@ -16,7 +16,7 @@ class User(AbstractUser):
         verbose_name='Роль'
     )
     
-    photo = ImageField(upload_to='user/profile/avatar', verbose_name='Фотография', null=True)
+    photo = ImageField(upload_to='user/profile/avatar', verbose_name='Фотография', null=True, blank=True)
     phone = CharField(max_length=15, blank=True, verbose_name='Телефон')
     telegram_id = BigIntegerField(null=True, blank=True, unique=True)
     # telegram_username = CharField(max_length=255, null=True, blank=True)
