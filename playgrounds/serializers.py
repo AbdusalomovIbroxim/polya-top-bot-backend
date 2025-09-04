@@ -52,7 +52,7 @@ class FavoriteSportVenueSerializer(serializers.ModelSerializer):
 class SportVenueTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = SportVenueType
-        fields = ("slug", "name")
+        fields = ("id", "name")
 
 
 class RegionSerializer(serializers.ModelSerializer):

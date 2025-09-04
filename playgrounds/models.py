@@ -8,9 +8,7 @@ User = get_user_model()
 
 
 class Region(models.Model):
-    name_ru = models.CharField(max_length=100, verbose_name='Название (русский)')
-    name_uz = models.CharField(max_length=100, verbose_name='Название (узбекский)')
-    name_en = models.CharField(max_length=100, verbose_name='Название (английский)')
+    name = models.CharField(max_length=100, verbose_name='Название')
 
     slug = models.SlugField(max_length=100, unique=True, verbose_name='Slug (для URL и фильтрации)', blank=True, null=True, help_text='Если оставить пустым, будет сгенерирован автоматически')
 
@@ -20,21 +18,14 @@ class Region(models.Model):
     class Meta:
         verbose_name = 'Регион'
         verbose_name_plural = 'Регионы'
-        ordering = ['name_ru']
+        ordering = ['name']
 
     def __str__(self):
-        return self.name_ru
-
-    def get_name_by_lang(self, lang_code):
-        if lang_code == 'uz':
-            return self.name_uz
-        elif lang_code == 'en':
-            return self.name_en
-        return self.name_ru
+        return self.name
 
     def save(self, *args, **kwargs):
-        if (not self.slug or self.slug.strip() == '') and self.name_ru:
-            base = slugify(unidecode(self.name_ru))
+        if (not self.slug or self.slug.strip() == '') and self.name:
+            base = slugify(unidecode(self.name))
             candidate = base or 'region'
             suffix = 1
             while Region.objects.exclude(pk=self.pk).filter(slug=candidate).exists():
@@ -47,9 +38,9 @@ class Region(models.Model):
     def ensure_test_regions(cls):
         if not cls.objects.exists():
             test_data = [
-                dict(name_ru='Ташкент', name_uz='Toshkent', name_en='Tashkent', slug='tashkent'),
-                dict(name_ru='Самарканд', name_uz='Samarqand', name_en='Samarkand', slug='samarkand'),
-                dict(name_ru='Бухара', name_uz='Buxoro', name_en='Bukhara', slug='bukhara'),
+                dict(name='Ташкент'),
+                dict(name='Самарканд'),
+                dict(name='Бухара'),
             ]
             for data in test_data:
                 cls.objects.create(**data)
