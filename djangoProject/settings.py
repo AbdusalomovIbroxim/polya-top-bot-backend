@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'playgrounds.apps.PlaygroundsConfig',
     'bookings.apps.BookingsConfig',
+    'customers.apps.CustomersConfig',
 ]
 
 MIDDLEWARE = [
