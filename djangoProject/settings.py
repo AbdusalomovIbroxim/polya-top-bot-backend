@@ -183,7 +183,7 @@ SWAGGER_SETTINGS = {
         'patch',
         'delete',
     ],
-    'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_yasg.openapi.AutoSchema',
+    'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_yasg.inspectors.SwaggerAutoSchema',
     'DEFAULT_SCHEMA_CLASS': 'drf_yasg.openapi.SwaggerSchema',
     'USE_SESSION_AUTH': False,
 }
