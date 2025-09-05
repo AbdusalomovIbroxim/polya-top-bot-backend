@@ -10,7 +10,7 @@ services:
     volumes:
       - .:/app
     expose:
-      - "8000"
+      - "80:8080"
       - "443:443"
 
   postgres:
