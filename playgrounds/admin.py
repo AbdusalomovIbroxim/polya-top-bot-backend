@@ -55,5 +55,5 @@ class SportVenueTypeAdmin(admin.ModelAdmin):
 @admin.register(Region)
 class RegionAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'slug')
-    search_fields = ('name')
+    search_fields = ('name',)
     ordering = ('id',)

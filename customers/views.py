@@ -2,7 +2,7 @@ from rest_framework import status, mixins, viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
-
+from rest_framework.exceptions import PermissionDenied
 from bookings.models import Booking
 from bookings.serializers import BookingSerializer
 from playgrounds.models import SportVenue, SportVenueImage
@@ -67,7 +67,7 @@ class OwnerSportVenueViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if self.request.user.role != Role.OWNER:
-            raise permissions.PermissionDenied("Только владельцы могут создавать площадки")
+            raise PermissionDenied("Только владельцы могут создавать площадки")
         
         sport_venue = serializer.save(owner=self.request.user)
         
@@ -79,12 +79,12 @@ class OwnerSportVenueViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         if self.request.user.role != Role.OWNER or serializer.instance.owner != self.request.user:
-            raise permissions.PermissionDenied("Вы можете обновлять только свои площадки")
+            raise PermissionDenied("Вы можете обновлять только свои площадки")
         serializer.save()
 
     def perform_destroy(self, instance):
         if self.request.user.role != Role.OWNER or instance.owner != self.request.user:
-            raise permissions.PermissionDenied("Вы можете удалять только свои площадки")
+            raise PermissionDenied("Вы можете удалять только свои площадки")
         instance.delete()
 
     # @action(detail=True, methods=['delete'])
