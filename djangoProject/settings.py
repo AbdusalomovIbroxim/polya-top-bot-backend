@@ -183,17 +183,25 @@ SWAGGER_SETTINGS = {
         'patch',
         'delete',
     ],
+    'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_yasg.openapi.AutoSchema',
+    'DEFAULT_SCHEMA_CLASS': 'drf_yasg.openapi.SwaggerSchema',
+    'USE_SESSION_AUTH': False,
 }
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_CREDENTIALS = True
-# CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = [
-    "https://polya-top-boy-frontend.onrender.com",
-    "https://polya-top-bot-backend.onrender.com",
-]
-# CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = [
+#     "https://polya-top-boy-frontend.onrender.com",
+#     "https://polya-top-bot-backend.onrender.com",
+# ]
+CORS_ALLOW_ALL_ORIGINS = True
 
 # CORS_ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',')
 
