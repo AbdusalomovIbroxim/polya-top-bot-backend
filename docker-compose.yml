@@ -24,7 +24,8 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   nginx:
-    image: ghcr.io/nginxinc/nginx-unprivileged:stable-alpine
+    # image: ghcr.io/nginxinc/nginx-unprivileged:stable-alpine
+    image: nginx:stable-alpine
     container_name: nginx
     restart: always
     ports:
