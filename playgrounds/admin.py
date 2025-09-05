@@ -46,7 +46,7 @@ class SportVenueAdmin(admin.ModelAdmin):
 
 @admin.register(SportVenueType)
 class SportVenueTypeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'created_at', 'updated_at')
+    list_display = ('id', 'name', 'created_at', 'updated_at')
     search_fields = ('name',)
     list_filter = ('created_at', 'updated_at')
     ordering = ('name',)
