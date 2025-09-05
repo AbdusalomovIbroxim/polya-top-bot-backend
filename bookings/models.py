@@ -37,12 +37,6 @@ class Booking(models.Model):
         related_name='bookings',
         verbose_name='Пользователь'
     )
-    session_key = models.CharField(
-        max_length=40,
-        null=True,
-        blank=True,
-        verbose_name='Ключ сессии'
-    )
     start_time = models.DateTimeField(verbose_name='Время начала')
     end_time = models.DateTimeField(verbose_name='Время окончания')
     status = models.CharField(
@@ -80,6 +74,14 @@ class Booking(models.Model):
         verbose_name='Сумма депозита',
         default=0
     )
+    telegram_payload = models.CharField(
+        max_length=255, 
+        unique=True, 
+        null=True, 
+        blank=True,
+        verbose_name='Telegram Payload'
+    )
+
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
 

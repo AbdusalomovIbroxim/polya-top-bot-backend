@@ -14,12 +14,11 @@ class BookingSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'sport_venue', 'sport_venue_details', 'user', 'user_details',
             'start_time', 'end_time', 'status', 'payment_status', 'payment_url',
-            'qr_code', 'total_price', 'deposit_amount', 'created_at', 'updated_at',
-            'session_key'
+            'qr_code', 'total_price', 'deposit_amount', 'created_at', 'updated_at'
         ]
         read_only_fields = [
             'total_price', 'deposit_amount', 'created_at', 'updated_at',
-            'payment_status', 'payment_url', 'qr_code', 'session_key'
+            'payment_status', 'payment_url', 'qr_code'
         ]
 
     def validate(self, data):
