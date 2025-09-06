@@ -1,9 +1,7 @@
 from django.db import models
-from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 from unidecode import unidecode
 
-User = get_user_model()
 
 
 class Region(models.Model):
@@ -103,7 +101,7 @@ class SportVenue(models.Model):
     )
 
     owner = models.ForeignKey(
-        User,
+        'accounts.User',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -159,7 +157,7 @@ class SportVenueImage(models.Model):
 
 
 class FavoriteSportVenue(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorite_sport_venues')
+    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='favorite_sport_venues')
     sport_venue = models.ForeignKey(SportVenue, on_delete=models.CASCADE, related_name='favorited_by')
     created_at = models.DateTimeField(auto_now_add=True)
 
