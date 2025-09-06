@@ -106,6 +106,8 @@ class FavoriteSportVenueViewSet(
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        if self.request.user.is_anonymous:
+            return FavoriteSportVenue.objects.none()
         return FavoriteSportVenue.objects.filter(user=self.request.user).select_related("sport_venue")
 
     def perform_create(self, serializer):
