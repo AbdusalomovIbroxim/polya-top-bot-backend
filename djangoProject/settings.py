@@ -15,6 +15,7 @@ ALLOWED_HOSTS = [
     "www.polya.top",
     "127.0.0.1",
     "localhost",
+    "176.98.177.140",
 ]
 
 INSTALLED_APPS = [
