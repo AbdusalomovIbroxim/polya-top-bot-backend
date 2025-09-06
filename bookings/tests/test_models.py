@@ -13,7 +13,7 @@ User = get_user_model()
 @pytest.mark.django_db
 def test_event_total_rent_and_participant_amount(settings, django_user_model):
     # подготовка: создаём поле с ценой 100000 за час
-    venue = SportVenue.objects.create(name="Test Field", price_per_hour=Decimal("100000.00"), deposit_amount=Decimal("0.00"), capacity=10)
+    venue = SportVenue.objects.create(name="Test Field", price_per_hour=Decimal("100000.00"), capacity=10)
     user = django_user_model.objects.create_user(username="u1", password="pass", telegram_username="t1", phone="998900000000")
     event = Event.objects.create(creator=user, field=venue, game_time=2, rounds=1, is_private=False)
     total_rent = event.get_total_rent()
@@ -28,7 +28,7 @@ def test_event_total_rent_and_participant_amount(settings, django_user_model):
 @pytest.mark.django_db
 def test_event_participant_unique_constraint(django_user_model):
     user = django_user_model.objects.create_user(username="u2", password="pass", telegram_username="t2", phone="998900000001")
-    venue = SportVenue.objects.create(name="Test Field 2", price_per_hour=Decimal("50000.00"), deposit_amount=Decimal("0.00"), capacity=6)
+    venue = SportVenue.objects.create(name="Test Field 2", price_per_hour=Decimal("50000.00"), capacity=6)
     event = Event.objects.create(creator=user, field=venue, game_time=1, rounds=1)
     # добавляем участника дважды
     EventParticipant.objects.create(event=event, user=user)

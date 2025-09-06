@@ -33,7 +33,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['sport_venue_type', 'region', 'city']
     search_fields = ['name', 'description', 'address']
-    ordering_fields = ['price_per_hour', 'name']
+    ordering_fields = ["id", 'price_per_hour']
 
     @swagger_auto_schema(
         operation_description="Проверить доступность площадки на определённую дату",

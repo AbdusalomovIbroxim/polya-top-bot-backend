@@ -17,7 +17,7 @@ def api_client():
 @pytest.mark.django_db
 def test_create_public_event_and_join(api_client, django_user_model):
     user = django_user_model.objects.create_user(username="creator", password="pass", telegram_username="t1", phone="998900000002")
-    venue = SportVenue.objects.create(name="FieldA", price_per_hour=Decimal("100000.00"), deposit_amount=Decimal("0.00"), capacity=6)
+    venue = SportVenue.objects.create(name="FieldA", price_per_hour=Decimal("100000.00"), capacity=6)
     api_client.force_authenticate(user=user)
 
     # create event
@@ -39,7 +39,7 @@ def test_create_public_event_and_join(api_client, django_user_model):
 @pytest.mark.django_db
 def test_duplicate_join_fails(api_client, django_user_model):
     creator = django_user_model.objects.create_user(username="c", password="pass", telegram_username="t3", phone="998900000004")
-    venue = SportVenue.objects.create(name="FieldB", price_per_hour=Decimal("50000.00"), deposit_amount=Decimal("0.00"), capacity=2)
+    venue = SportVenue.objects.create(name="FieldB", price_per_hour=Decimal("50000.00"), capacity=2)
     api_client.force_authenticate(user=creator)
     resp = api_client.post(reverse("events-list"), {"field": venue.id, "game_time": 1, "rounds": 1, "is_private": False}, format="json")
     assert resp.status_code == 201

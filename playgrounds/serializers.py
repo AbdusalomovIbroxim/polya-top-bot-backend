@@ -24,7 +24,7 @@ class SportVenueSerializer(serializers.ModelSerializer):
     class Meta:
         model = SportVenue
         fields = [
-            'id', 'name', 'description', 'price_per_hour', 'deposit_amount',
+            'id', 'name', 'description', 'price_per_hour',
             'city', 'address', 'latitude', 'longitude', 'yandex_map_url',
             'sport_venue_type', 'region', 'owner', 'images'
         ]

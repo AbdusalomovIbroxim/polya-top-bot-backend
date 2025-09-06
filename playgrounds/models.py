@@ -80,7 +80,7 @@ class SportVenue(models.Model):
     description = models.TextField(verbose_name='Описание')
 
     price_per_hour = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена за час')
-    deposit_amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Залоговая сумма', null=True, blank=True)
+    # deposit_amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Залоговая сумма', null=True, blank=True)
 
     city = models.CharField(max_length=100, verbose_name='Город', default='Ташкент')
     address = models.CharField(max_length=200, verbose_name='Адрес', default='Адрес не указан')
@@ -141,8 +141,8 @@ class SportVenue(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        if not self.deposit_amount:
-            self.deposit_amount = self.price_per_hour
+        # if not self.deposit_amount:
+        #     self.deposit_amount = self.price_per_hour
         super().save(*args, **kwargs)
 
 
