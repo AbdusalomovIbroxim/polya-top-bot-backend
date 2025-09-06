@@ -321,14 +321,18 @@
             <div class="contact-row"><i class="fa-solid fa-globe"></i> <span>polyatop.com</span></div>
           </div>
           <div class="contact-card">
-            <form method="post" action="#" onsubmit="event.preventDefault(); alert('Заявка отправлена!');">
+            <form method="post" action="#" onsubmit="sendContact(event);">
               <div class="field">
                 <label for="name">Ваше имя</label>
                 <input class="input" id="name" name="name" placeholder="Иван" required />
               </div>
               <div class="field">
-                <label for="email">Email</label>
-                <input class="input" id="email" type="email" name="email" placeholder="you@example.com" required />
+                <label for="phone">Номер телефона</label>
+                <input class="input" id="phone" name="phone" placeholder="+998 90 123 45 67" required />
+              </div>
+              <div class="field">
+                <label for="telegram">Telegram</label>
+                <input class="input" id="telegram" name="telegram" placeholder="@username" required />
               </div>
               <div class="field">
                 <label for="message">Сообщение</label>
@@ -376,6 +380,36 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
   <script>
+    
+    async function sendContact(event) {
+      event.preventDefault();
+  
+      const data = {
+        name: document.getElementById("name").value,
+        phone: document.getElementById("phone").value,
+        telegram: document.getElementById("telegram").value,
+        message: document.getElementById("message").value,
+      };
+  
+      try {
+        const res = await fetch("/api/send-contact/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+  
+        if (res.ok) {
+          alert("✅ Заявка отправлена!");
+          document.getElementById("contactForm").reset();
+        } else {
+          alert("❌ Ошибка при отправке!");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("⚠️ Проблема с соединением.");
+      }
+    }
+  
     // === Mobile nav ===
     const burger = document.querySelector('.burger');
     const menu = document.getElementById('menu');

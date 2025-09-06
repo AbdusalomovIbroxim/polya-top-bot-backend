@@ -244,6 +244,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Telegram Bot Settings
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 WEBAPP_URL = os.getenv('WEBAPP_URL')
 
 

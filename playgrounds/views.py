@@ -1,4 +1,7 @@
+import json
+from django.http import JsonResponse
 from django.shortcuts import render
+import requests
 from rest_framework import viewsets, permissions, filters
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -8,6 +11,8 @@ from drf_yasg import openapi
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
+
+from djangoProject import settings
 from .models import SportVenue, SportVenueType, Region, FavoriteSportVenue
 from .serializers import (
     SportVenueSerializer,
@@ -120,3 +125,31 @@ def welcome(request):
 
 def custom_page_not_found_view(request, exception):
     return render(request, "404.html", status=404)
+
+
+def send_contact(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+
+        name = data.get("name")
+        phone = data.get("phone")
+        telegram_user = data.get("telegram")
+        message = data.get("message")
+
+        text = f"""
+📩 Новая заявка с сайта Polyatop:
+👤 Имя: {name}
+📞 Телефон: {phone}
+💬 Telegram: {telegram_user}
+📝 Сообщение: {message}"""
+
+        url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/sendMessage"
+        payload = {"chat_id": settings.TELEGRAM_CHAT_ID, "text": text}
+
+        r = requests.post(url, json=payload)
+
+        if r.status_code == 200:
+            return JsonResponse({"ok": True})
+        return JsonResponse({"ok": False, "error": r.text}, status=400)
+
+    return JsonResponse({"error": "Invalid request"}, status=405)
