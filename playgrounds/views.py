@@ -11,7 +11,7 @@ from drf_yasg import openapi
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
-from django.views.decorators.csrf import csrf_exempt
+from rest_framework.views import APIView
 
 from djangoProject import settings
 from .models import SportVenue, SportVenueType, Region, FavoriteSportVenue
