@@ -72,17 +72,17 @@ class CreateEventSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("rounds должно быть >= 1")
         return value
 
-    def validate(self, data):
-        """
-        Проверяем профиль пользователя перед созданием: telegram_username и phone должны быть заполнены.
-        Также убедимся, что поле существует.
-        """
-        user = self.context["request"].user
+    # def validate(self, data):
+        # """
+        # Проверяем профиль пользователя перед созданием: telegram_username и phone должны быть заполнены.
+        # Также убедимся, что поле существует.
+        # """
+        # user = self.context["request"].user
         # Проверка профиля — ожидаем атрибуты telegram_username и phone на user
-        if not getattr(user, "telegram_username", None) and not getattr(user, "telegram_id", None):
-            raise serializers.ValidationError("Заполните telegram username в профиле")
-        if not getattr(user, "phone", None):
-            raise serializers.ValidationError("Заполните телефон в профиле")
+        # if not getattr(user, "telegram_username", None) and not getattr(user, "telegram_id", None):
+        #     raise serializers.ValidationError("Заполните telegram username в профиле")
+        # if not getattr(user, "phone", None):
+        #     raise serializers.ValidationError("Заполните телефон в профиле")
 
         # Доп. проверки по полю можно добавить при необходимости
         return data
