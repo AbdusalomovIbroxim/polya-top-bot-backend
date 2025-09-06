@@ -1,409 +1,513 @@
-{% load static  %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- SEO Meta -->
-  <meta name="title" content="Polyatop — Онлайн-бронирование спортивных площадок">
-  <meta name="description" content="Polyatop — это цифровая платформа для онлайн-бронирования спортивных площадок. Ищи, бронируй и управляй арендами легко.">
-  <meta name="keywords" content="Polyatop, Полятоп, бронирование спорт площадок, аренда футбольного поля, аренда баскетбольного зала, спортивные площадки онлайн">
-  <meta name="author" content="Polyatop Team">
-  <meta name="robots" content="index, follow">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- SEO Meta -->
+  <meta name="title" content="Polyatop — Онлайн-бронирование спортивных площадок" />
+  <meta name="description" content="Polyatop — это цифровая платформа для онлайн-бронирования спортивных площадок. Ищи, бронируй и управляй арендами легко." />
+  <meta name="keywords" content="Polyatop, Полятоп, бронирование спорт площадок, аренда футбольного поля, аренда баскетбольного зала, спортивные площадки онлайн" />
+  <meta name="author" content="Polyatop Team" />
+  <meta name="robots" content="index, follow" />
 
-  <!-- Open Graph (для соцсетей и мессенджеров) -->
-  <meta property="og:title" content="Polyatop — Онлайн-бронирование спортивных площадок">
-  <meta property="og:description" content="Удобный сервис для поиска и бронирования спортивных площадок.">
-  <meta property="og:image" content="https://polyatop.com/preview.png"> <!-- ссылка на картинку -->
-  <meta property="og:url" content="https://polyatop.com/">
-  <meta property="og:type" content="website">
+  <!-- Open Graph -->
+  <meta property="og:title" content="Polyatop — Онлайн-бронирование спортивных площадок" />
+  <meta property="og:description" content="Удобный сервис для поиска и бронирования спортивных площадок." />
+  <meta property="og:image" content="https://polyatop.com/preview.png" />
+  <meta property="og:url" content="https://polyatop.com/" />
+  <meta property="og:type" content="website" />
 
   <!-- Favicon -->
-  <link rel="icon" href="{% static  "logo.png" %}" type="image/x-icon">
-  <title>Polya top</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" href="{% static 'logo.png' %}" type="image/png" />
+  <title>Polyatop — Бронирование спортивных площадок</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;600;800&display=swap');
+    /* === Fonts & Theme === */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;400;600;800&display=swap');
 
     :root {
-      --dark-bg: #0d1117;
-      --accent-color: #00bcd4;
-      --text-light: #f5f5f5;
-      --secondary-bg: #1a202c;
+      --bg: #0d1117;
+      --bg-soft: #121826;
+      --surface: #1a2234;
+      --surface-2: #0f1625;
+      --text: #f5f7fb;
+      --muted: #c7cede;
+      --accent: #00bcd4;
+      --accent-2: #7c3aed;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --radius: 14px;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --glass: rgba(255,255,255,.04);
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Poppins', sans-serif;
-    }
-
+    * { box-sizing: border-box; }
+    html, body { height: 100%; scroll-behavior: smooth; }
     body {
-      background: var(--dark-bg);
-      color: var(--text-light);
+      margin: 0;
+      font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+      color: var(--text);
+      background: radial-gradient(1200px 600px at 10% -10%, rgba(0,188,212,.15), transparent 60%),
+                  radial-gradient(1000px 600px at 110% -30%, rgba(124,58,237,.18), transparent 60%),
+                  var(--bg);
       overflow-x: hidden;
-      position: relative;
     }
 
-    /* === 3D-сцена === */
-    #webgl-container {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    .container { width: min(1200px, 92vw); margin-inline: auto; }
 
-    /* === Навигация === */
+    /* === Header === */
     header {
-      position: fixed;
-      width: 100%;
-      z-index: 1000;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 30px;
-      backdrop-filter: blur(10px);
-      background: rgba(13, 17, 23, 0.5);
+      position: fixed; inset-inline: 0; top: 0; z-index: 1000;
+      backdrop-filter: saturate(1.2) blur(10px);
+      background: linear-gradient(180deg, rgba(13,17,23,.75), rgba(13,17,23,.35));
+      border-bottom: 1px solid rgba(255,255,255,.06);
     }
-    
-    .logo {
-      font-size: clamp(1.5rem, 4vw, 2.5rem);
-      font-weight: 800;
-      color: var(--accent-color);
+    .nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: .5px; }
+    .logo i { color: var(--accent); }
+
+    .nav-links { display: flex; align-items: center; gap: 20px; }
+    .nav-links a { padding: 10px 14px; border-radius: 999px; color: var(--muted); font-weight: 600; font-size: .95rem; }
+    .nav-links a.active, .nav-links a:hover { color: var(--text); background: var(--glass); }
+
+    .burger { display: none; border: 0; background: transparent; color: var(--text); font-size: 1.4rem; }
+
+    /* CTA button */
+    .btn { display: inline-flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 999px; border: 1px solid transparent; font-weight: 700; cursor: pointer; transition: .25s ease; }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), #18e0f8); color: #001219; box-shadow: var(--shadow); }
+    .btn-primary:hover { transform: translateY(-1px); filter: brightness(1.03); }
+    .btn-ghost { background: var(--glass); border-color: rgba(255,255,255,.08); color: var(--text); }
+    .btn-ghost:hover { background: rgba(255,255,255,.08); }
+
+    /* === Hero === */
+    .section { position: relative; padding: clamp(72px, 8vw, 120px) 0; }
+    .hero { min-height: 100vh; display: grid; place-items: center; }
+    .hero-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: clamp(24px, 4vw, 48px); align-items: center; }
+    .hero h1 { font-size: clamp(2.2rem, 6vw, 4.2rem); line-height: 1.05; margin: 0 0 14px; }
+    .hero p { font-size: clamp(1.05rem, 2.2vw, 1.25rem); color: var(--muted); margin: 0 0 26px; }
+    .hero .badges { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+    .badge { padding: 8px 12px; border-radius: 999px; background: var(--glass); color: var(--muted); font-weight: 600; font-size: .9rem; border: 1px solid rgba(255,255,255,.06); }
+    .cta { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    .hero-card { background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)); border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); display: grid; grid-template-columns: 48px 1fr; gap: 14px; align-items: center; }
+    .hero-card i { font-size: 1.4rem; color: var(--accent); }
+
+    /* === About === */
+    .about { background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.00)); }
+    .section-title { font-size: clamp(1.8rem, 4vw, 2.6rem); margin: 0 0 8px; }
+    .section-sub { color: var(--muted); margin: 0 0 30px; }
+
+    .audiences { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .card { background: var(--surface); border: 1px solid rgba(255,255,255,.06); border-radius: var(--radius); padding: 22px; transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
+    .card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,.16); box-shadow: var(--shadow); }
+    .card h3 { margin: 6px 0 10px; font-size: 1.15rem; }
+    .card p { margin: 0; color: var(--muted); font-size: .98rem; }
+
+    /* === Features === */
+    .features .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .feature { background: linear-gradient(180deg, var(--surface), var(--surface-2)); border: 1px solid rgba(255,255,255,.06); border-radius: var(--radius); padding: 22px; position: relative; overflow: hidden; }
+    .feature i { font-size: 1.4rem; }
+    .feature .icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(135deg, rgba(0,188,212,.18), rgba(124,58,237,.18)); border: 1px solid rgba(255,255,255,.08); margin-bottom: 12px; }
+    .feature h4 { margin: 6px 0 8px; font-size: 1.06rem; }
+    .feature p { margin: 0; color: var(--muted); font-size: .96rem; }
+    .feature:hover { outline: 1px solid rgba(255,255,255,.14); transform: translateY(-2px); box-shadow: var(--shadow); }
+
+    /* === CTA strip === */
+    .cta-strip { background: linear-gradient(90deg, rgba(0,188,212,.15), rgba(124,58,237,.15)); border-top: 1px solid rgba(255,255,255,.06); border-bottom: 1px solid rgba(255,255,255,.06); }
+    .cta-wrap { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; }
+    .cta-wrap p { margin: 0; color: var(--muted); }
+
+    /* === Contacts === */
+    .contacts .grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 24px; }
+    .contact-card { background: var(--surface); border: 1px solid rgba(255,255,255,.06); border-radius: var(--radius); padding: 22px; }
+    .contact-row { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background: var(--glass); margin-bottom: 10px; }
+    .contact-row a { color: var(--text); font-weight: 700; }
+
+    form { display: grid; gap: 12px; }
+    .field { display: grid; gap: 6px; }
+    .field label { color: var(--muted); font-size: .92rem; }
+    .input { width: 100%; padding: 12px 14px; border-radius: 12px; background: var(--surface-2); color: var(--text); border: 1px solid rgba(255,255,255,.08); outline: none; }
+    .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,188,212,.12); }
+    textarea.input { min-height: 120px; resize: vertical; }
+
+    /* === Footer === */
+    footer { background: #0a0f19; border-top: 1px solid rgba(255,255,255,.06); }
+    .footer-grid { display: grid; grid-template-columns: 1.2fr .8fr .8fr; gap: 18px; padding: 36px 0; }
+    .footer-col h5 { margin: 0 0 12px; font-size: 1rem; }
+    .footer-col a { color: var(--muted); display: inline-block; padding: 6px 0; }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,.06); padding: 16px 0; color: var(--muted); font-size: .92rem; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+
+    /* === WebGL layer === */
+    #webgl-container { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    #page { position: relative; z-index: 1; }
+
+    /* === Utilities === */
+    .divider { height: 1px; background: linear-gradient(90deg, rgba(255,255,255,.06), rgba(255,255,255,0)); margin: 30px 0; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+    /* === Adaptive === */
+    @media (max-width: 1024px) {
+      .hero-grid { grid-template-columns: 1fr; text-align: center; }
+      .cta { justify-content: center; }
+      .audiences { grid-template-columns: repeat(2, 1fr); }
+      .features .grid { grid-template-columns: repeat(2, 1fr); }
+      .contacts .grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
     }
-    
-    nav ul {
-      list-style: none;
-      display: flex;
-      gap: 20px;
-    }
-    
-    nav a {
-      color: var(--text-light);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: clamp(0.9rem, 2vw, 1rem);
+    @media (max-width: 680px) {
+      .nav-links { position: fixed; top: 60px; right: 16px; left: 16px; background: rgba(10,15,25,.96); border: 1px solid rgba(255,255,255,.06); border-radius: 14px; padding: 12px; flex-direction: column; gap: 4px; display: none; }
+      .nav-links.show { display: flex; }
+      .burger { display: inline-flex; }
+      .audiences { grid-template-columns: 1fr; }
+      .features .grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
     }
 
-    /* === Контент === */
-    #page-container {
-      position: relative;
-      z-index: 1;
-    }
-
-    .content-block {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: clamp(60px, 8vw, 100px) clamp(20px, 6vw, 50px);
-      text-align: center;
-    }
-
-    .content-block h2 {
-      font-size: clamp(2rem, 8vw, 6rem);
-      font-weight: 800;
-      margin-bottom: 20px;
-      color: var(--text-light);
-      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
-    }
-    
-    .content-block p {
-      font-size: clamp(1rem, 3vw, 1.5rem);
-      font-weight: 200;
-      max-width: 800px;
-      margin-top: 20px;
-      color: var(--text-light);
-    }
-
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 25px;
-      margin-top: 60px;
-      width: 100%;
-      max-width: 1200px;
-    }
-
-    .feature-item {
-      padding: 25px;
-      background: var(--secondary-bg);
-      border-radius: 12px;
-      backdrop-filter: blur(10px);
-      font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-    }
-
-    /* === Мобильная адаптация === */
-    @media (max-width: 768px) {
-      nav ul {
-        display: none;
-        flex-direction: column;
-        gap: 15px;
-        background: rgba(13, 17, 23, 0.95);
-        position: absolute;
-        top: 70px;
-        right: 20px;
-        padding: 20px;
-        border-radius: 8px;
-      }
-      nav ul.active {
-        display: flex;
-      }
-      .burger {
-        display: block;
-        font-size: 1.5rem;
-        cursor: pointer;
-        color: var(--text-light);
-      }
-    }
-
-    @media (min-width: 769px) {
-      .burger {
-        display: none;
-      }
-    }
+    /* Back-to-top */
+    .to-top { position: fixed; right: 18px; bottom: 18px; z-index: 1001; opacity: 0; visibility: hidden; transform: translateY(8px); transition: .25s ease; }
+    .to-top.show { opacity: 1; visibility: visible; transform: translateY(0); }
   </style>
 </head>
 <body>
-  <div id="webgl-container"></div>
+  <div id="webgl-container" aria-hidden="true"></div>
 
-  <header>
-    <div class="logo">Polyatop</div>
-    <nav>
-      <i class="fas fa-bars burger"></i>
-      <ul>
-        <li><a href="#about">О проекте</a></li>
-        <li><a href="#features">Возможности</a></li>
-        <li><a href="#contacts">Контакты</a></li>
-      </ul>
-    </nav>
+  <header aria-label="Главная навигация">
+    <div class="container nav">
+      <a class="logo" href="#hero" aria-label="На главную">
+        <i class="fa-solid fa-futbol"></i>
+        <span>Polyatop</span>
+      </a>
+      <nav>
+        <button class="burger" aria-controls="menu" aria-expanded="false" aria-label="Открыть меню">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <div id="menu" class="nav-links" role="menu">
+          <a href="#about" role="menuitem">О проекте</a>
+          <a href="#features" role="menuitem">Возможности</a>
+          <a href="#contacts" role="menuitem">Контакты</a>
+          <a href="#cta" class="btn btn-ghost" role="menuitem"><i class="fa-regular fa-calendar-check"></i> Забронировать</a>
+        </div>
+      </nav>
+    </div>
   </header>
 
-  <div id="page-container">
-    <section id="hero" class="content-block">
-      <h2>Polyatop</h2>
-      <p>Платформа для онлайн-бронирования спортивных площадок</p>
-    </section>
-
-    <section id="about" class="content-block">
-      <h2>О проекте</h2>
-      <p>
-        Polyatop — это цифровая платформа, которая объединяет владельцев спортивных площадок и пользователей, предоставляя удобный способ поиска, бронирования и оплаты аренды.
-      </p>
-    </section>
-
-    <section id="features" class="content-block">
-      <h2>Возможности</h2>
-      <div class="feature-grid">
-        <div class="feature-item"><i class="fas fa-search-plus"></i> Каталог площадок</div>
-        <div class="feature-item"><i class="fas fa-calendar-check"></i> Онлайн-бронирование</div>
-        <div class="feature-item"><i class="fas fa-cogs"></i> Управление</div>
-        <div class="feature-item"><i class="fas fa-credit-card"></i> Оплаты</div>
-        <div class="feature-item"><i class="fas fa-globe"></i> Локализация</div>
-        <div class="feature-item"><i class="fas fa-code"></i> API интеграция</div>
+  <main id="page">
+    <!-- Hero -->
+    <section id="hero" class="section hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="badges">
+            <span class="badge"><i class="fa-solid fa-shield-check"></i> Безопасные оплаты</span>
+            <span class="badge"><i class="fa-regular fa-clock"></i> Бронирование за 30 сек</span>
+          </div>
+          <h1>Ищи, бронируй и играй
+            <br /><span style="background: linear-gradient(90deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent;">на лучших площадках</span></h1>
+          <p>Polyatop объединяет игроков и владельцев площадок: прозрачное расписание, мгновенная бронь, удобные оплаты и управление арендами — всё в одном месте.</p>
+          <div class="cta">
+            <a href="#features" class="btn btn-primary"><i class="fa-regular fa-calendar-check"></i> Начать бронирование</a>
+            <a href="#about" class="btn btn-ghost"><i class="fa-regular fa-circle-question"></i> Как это работает</a>
+          </div>
+          <div class="divider"></div>
+          <div class="hero-card">
+            <i class="fa-solid fa-chart-line"></i>
+            <div>
+              <strong>Для владельцев:</strong>
+              <div style="color: var(--muted)">Онлайн-календарь, депозиты, частичная/групповая оплата, оповещения и API.</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <!-- Placeholder иллюстрация / скрин / 3D объект поверх WebGL -->
+          <div class="card" style="aspect-ratio: 4/3; display:grid; place-items:center; background: linear-gradient(135deg, rgba(0,188,212,.08), rgba(124,58,237,.08)); border: 1px dashed rgba(255,255,255,.14);">
+            <div style="text-align:center; color: var(--muted)">
+              <i class="fa-regular fa-image" style="font-size: 2rem; display:block; margin-bottom:8px"></i>
+              Загрузим сюда скриншот веб‑приложения / 3D
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section id="contacts" class="content-block">
-      <h2>Контакты</h2>
-      <p>Telegram: <a href="https://t.me/ibr6xim" style="color: var(--accent-color); text-decoration: none;">@ibr6xim</a></p>
+    <!-- About -->
+    <section id="about" class="section about">
+      <div class="container">
+        <h2 class="section-title">О проекте</h2>
+        <p class="section-sub">Polyatop — цифровая платформа, которая соединяет игроков и владельцев площадок. В основе — простота и скорость: от поиска до оплаты.</p>
+        <div class="audiences">
+          <div class="card">
+            <div class="icon"><i class="fa-solid fa-users"></i></div>
+            <h3>Игрокам</h3>
+            <p>Находи площадку рядом, смотри свободные слоты и моментально бронируй без звонков.</p>
+          </div>
+          <div class="card">
+            <div class="icon"><i class="fa-solid fa-store"></i></div>
+            <h3>Владельцам</h3>
+            <p>Онлайн‑расписание, депозиты, гибкие тарифы, уведомления и аналитика загрузки.</p>
+          </div>
+          <div class="card">
+            <div class="icon"><i class="fa-solid fa-people-group"></i></div>
+            <h3>Командам</h3>
+            <p>Групповые оплаты, приглашения друзей и общий календарь тренировок.</p>
+          </div>
+        </div>
+      </div>
     </section>
-  </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollToPlugin.min.js"></script>
-    <script>
+    <!-- Features -->
+    <section id="features" class="section features">
+      <div class="container">
+        <h2 class="section-title">Возможности</h2>
+        <p class="section-sub">Набор инструментов для быстрого старта и удобного управления.</p>
+        <div class="grid">
+          <div class="feature">
+            <div class="icon"><i class="fa-solid fa-magnifying-glass-plus"></i></div>
+            <h4>Каталог площадок</h4>
+            <p>Фильтры по виду спорта, цене, покрытию, доступности и расположению.</p>
+          </div>
+          <div class="feature">
+            <div class="icon"><i class="fa-regular fa-calendar-check"></i></div>
+            <h4>Онлайн‑бронирование</h4>
+            <p>Реальное расписание, моментальная бронь, напоминания и отмена по правилам.</p>
+          </div>
+          <div class="feature">
+            <div class="icon"><i class="fa-solid fa-wrench"></i></div>
+            <h4>Управление</h4>
+            <p>Гибкие тарифы, блокировка слотов, акционные предложения и промокоды.</p>
+          </div>
+          <div class="feature">
+            <div class="icon"><i class="fa-regular fa-credit-card"></i></div>
+            <h4>Оплаты</h4>
+            <p>Поддержка частичной/групповой оплаты, депозитов и возвратов.</p>
+          </div>
+          <div class="feature">
+            <div class="icon"><i class="fa-solid fa-globe"></i></div>
+            <h4>Локализация</h4>
+            <p>Русский, узбекский и английский языки. Часовые пояса и валюты.</p>
+          </div>
+          <div class="feature">
+            <div class="icon"><i class="fa-solid fa-code"></i></div>
+            <h4>API интеграция</h4>
+            <p>Подключение к сайту/боту, webhooks и экспорт данных.</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        const burger = document.querySelector('.burger');
-        const navMenu = document.querySelector('nav ul');
-        burger.addEventListener('click', () => {
-        navMenu.classList.toggle('active');
-        });
+    <!-- CTA strip -->
+    <section id="cta" class="section cta-strip">
+      <div class="container cta-wrap">
+        <p><strong>Готовы попробовать?</strong> Забронируйте площадку онлайн — быстро и без звонков.</p>
+        <div class="cta">
+          <a href="https://t.me/ibr6xim" class="btn btn-primary"><i class="fa-brands fa-telegram"></i> Открыть в Telegram</a>
+          <a href="#contacts" class="btn btn-ghost"><i class="fa-regular fa-envelope"></i> Связаться</a>
+        </div>
+      </div>
+    </section>
 
-        gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+    <!-- Contacts -->
+    <section id="contacts" class="section contacts">
+      <div class="container">
+        <h2 class="section-title">Контакты</h2>
+        <p class="section-sub">Оставьте заявку — мы свяжемся в ближайшее время.</p>
+        <div class="grid">
+          <div class="contact-card">
+            <div class="contact-row"><i class="fa-brands fa-telegram"></i> <a href="https://t.me/ibr6xim" target="_blank" rel="noopener">@ibr6xim</a></div>
+            <div class="contact-row"><i class="fa-regular fa-envelope"></i> <a href="mailto:hello@polyatop.com">hello@polyatop.com</a></div>
+            <div class="contact-row"><i class="fa-solid fa-globe"></i> <span>polyatop.com</span></div>
+          </div>
+          <div class="contact-card">
+            <form method="post" action="#" onsubmit="event.preventDefault(); alert('Заявка отправлена!');">
+              <div class="field">
+                <label for="name">Ваше имя</label>
+                <input class="input" id="name" name="name" placeholder="Иван" required />
+              </div>
+              <div class="field">
+                <label for="email">Email</label>
+                <input class="input" id="email" type="email" name="email" placeholder="you@example.com" required />
+              </div>
+              <div class="field">
+                <label for="message">Сообщение</label>
+                <textarea class="input" id="message" name="message" placeholder="Коротко опишите задачу"></textarea>
+              </div>
+              <button class="btn btn-primary" type="submit"><i class="fa-regular fa-paper-plane"></i> Отправить</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 
-        // === 3D-сцена с объектами ===
-        const container = document.getElementById('webgl-container');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        container.appendChild(renderer.domElement);
+  <!-- Footer -->
+  <footer>
+    <div class="container footer-grid">
+      <div class="footer-col">
+        <h5>Polyatop</h5>
+        <p style="color:var(--muted); margin:0">Платформа для поиска и бронирования спортивных площадок.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Навигация</h5>
+        <a href="#about">О проекте</a><br />
+        <a href="#features">Возможности</a><br />
+        <a href="#contacts">Контакты</a>
+      </div>
+      <div class="footer-col">
+        <h5>Поддержка</h5>
+        <a href="#">Политика конфиденциальности</a><br />
+        <a href="#">Пользовательское соглашение</a>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <span>© {{ now|date:'Y' }} Polyatop. Все права защищены.</span>
+      <span>Сделано с любовью к спорту ⚽</span>
+    </div>
+  </footer>
 
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        let currentHoveredObject = null;
+  <!-- Back to top -->
+  <a href="#hero" class="to-top btn btn-ghost" aria-label="Наверх"><i class="fa-solid fa-arrow-up"></i></a>
 
-        const sectionsData = [
-            { id: 'hero', geometry: new THREE.IcosahedronGeometry(5, 0), color: 0x00bcd4 },
-            { id: 'about', geometry: new THREE.BoxGeometry(7, 7, 7), color: 0xffa500 },
-            { id: 'features', geometry: new THREE.TorusGeometry(5, 2, 16, 100), color: 0x8a2be2 },
-            { id: 'contacts', geometry: new THREE.OctahedronGeometry(6, 0), color: 0x32cd32 }
-        ];
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+  <script>
+    // === Mobile nav ===
+    const burger = document.querySelector('.burger');
+    const menu = document.getElementById('menu');
+    burger?.addEventListener('click', () => {
+      const expanded = burger.getAttribute('aria-expanded') === 'true';
+      burger.setAttribute('aria-expanded', String(!expanded));
+      menu.classList.toggle('show');
+    });
 
-        const objects = [];
-        const sectionPositions = [
-            { x: -15, y: 0, z: -20 },
-            { x: 15, y: 0, z: -50 },
-            { x: -10, y: 0, z: -80 },
-            { x: 10, y: 0, z: -110 }
-        ];
+    // === Active link on scroll ===
+    const links = Array.from(document.querySelectorAll('.nav-links a')).filter(a => a.hash);
+    const sections = links.map(a => document.querySelector(a.hash)).filter(Boolean);
+    const setActive = () => {
+      const y = window.scrollY + 120; // header offset
+      let current = links[0];
+      sections.forEach((sec, i) => {
+        if (sec.offsetTop <= y) current = links[i];
+      });
+      links.forEach(a => a.classList.remove('active'));
+      current?.classList.add('active');
+    };
+    window.addEventListener('scroll', setActive, { passive: true });
+    window.addEventListener('load', setActive);
 
-        sectionsData.forEach((data, index) => {
-            const material = new THREE.MeshPhongMaterial({
-                color: data.color,
-                flatShading: true,
-                transparent: true,
-                opacity: 0.8
-            });
-            const mesh = new THREE.Mesh(data.geometry, material);
-            mesh.position.set(sectionPositions[index].x, sectionPositions[index].y, sectionPositions[index].z);
-            mesh.userData = { id: data.id };
-            scene.add(mesh);
-            objects.push(mesh);
-        });
+    // === Smooth scroll for internal links ===
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const href = a.getAttribute('href');
+        if (!href || href === '#') return;
+        const target = document.querySelector(href);
+        if (!target) return;
+        e.preventDefault();
+        gsap.to(window, { duration: 1.1, scrollTo: { y: target, offsetY: 70 }, ease: 'power3.inOut' });
+        menu?.classList.remove('show');
+      });
+    });
 
-        const ambientLight = new THREE.AmbientLight(0x404040, 5);
-        scene.add(ambientLight);
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(1, 1, 1);
-        scene.add(directionalLight);
+    // === Back-to-top visibility ===
+    const toTop = document.querySelector('.to-top');
+    const toggleToTop = () => {
+      if (window.scrollY > 400) toTop.classList.add('show'); else toTop.classList.remove('show');
+    };
+    window.addEventListener('scroll', toggleToTop, { passive: true });
 
-        camera.position.z = 10;
+    // === WebGL scene (lighter & optimized) ===
+    const container = document.getElementById('webgl-container');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    container.appendChild(renderer.domElement);
 
-        let clock = new THREE.Clock();
+    const ambient = new THREE.AmbientLight(0xffffff, .8);
+    scene.add(ambient);
+    const dir = new THREE.DirectionalLight(0xffffff, .8);
+    dir.position.set(1,1,1);
+    scene.add(dir);
 
-        function animate() {
-            requestAnimationFrame(animate);
+    const objects = [];
+    const geoms = [
+      new THREE.IcosahedronGeometry(5, 0),
+      new THREE.BoxGeometry(6, 6, 6),
+      new THREE.TorusGeometry(5, 1.8, 16, 100),
+      new THREE.OctahedronGeometry(5, 0)
+    ];
+    const colors = [0x00bcd4, 0xffa500, 0x8a2be2, 0x32cd32];
+    const positions = [
+      { x: -15, y: 0, z: -30 },
+      { x: 15,  y: 6, z: -60 },
+      { x: -8,  y: -4, z: -90 },
+      { x: 10,  y: 3, z: -120 }
+    ];
 
-            const time = clock.getElapsedTime();
+    for (let i = 0; i < geoms.length; i++) {
+      const m = new THREE.MeshPhongMaterial({ color: colors[i], flatShading: true, transparent: true, opacity: .8 });
+      const mesh = new THREE.Mesh(geoms[i], m);
+      mesh.position.set(positions[i].x, positions[i].y, positions[i].z);
+      scene.add(mesh);
+      objects.push(mesh);
+    }
 
-            objects.forEach((obj, index) => {
-                // Анимация вращения
-                obj.rotation.x += 0.005 + Math.sin(time * 0.1 + index) * 0.001;
-                obj.rotation.y += 0.005 + Math.cos(time * 0.2 + index) * 0.001;
+    camera.position.z = 10;
+    const clock = new THREE.Clock();
+    let running = true;
 
-                // Перемещение по оси Z, чтобы имитировать движение
-                obj.position.z += 0.05;
-                if (obj.position.z > 20) {
-                    obj.position.z = -150;
-                }
-            });
+    function animate() {
+      if (!running) return;
+      requestAnimationFrame(animate);
+      const t = clock.getElapsedTime();
+      objects.forEach((o, i) => {
+        o.rotation.x += 0.004 + Math.sin(t * 0.1 + i) * 0.001;
+        o.rotation.y += 0.006 + Math.cos(t * 0.2 + i) * 0.001;
+        o.position.z += 0.04;
+        if (o.position.z > 15) o.position.z = -140;
+      });
+      renderer.render(scene, camera);
+    }
+    animate();
 
-            renderer.render(scene, camera);
-        }
-        animate();
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
 
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+    // Pause when tab hidden to save CPU
+    document.addEventListener('visibilitychange', () => {
+      running = document.hidden ? false : true;
+      if (running) animate();
+    });
 
-        // === Взаимодействие с 3D-объектами ===
-        container.addEventListener('mousemove', (event) => {
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-            
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(objects, true);
+    // === GSAP reveal animations ===
+    gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
-            if (intersects.length > 0) {
-                const hoveredObject = intersects[0].object;
-                if (currentHoveredObject !== hoveredObject) {
-                    if (currentHoveredObject) {
-                        gsap.to(currentHoveredObject.scale, { x: 1, y: 1, z: 1, duration: 0.3 });
-                        currentHoveredObject.material.emissive.setHex(0x000000);
-                        document.body.style.cursor = 'default';
-                    }
-                    currentHoveredObject = hoveredObject;
-                    gsap.to(currentHoveredObject.scale, { x: 1.2, y: 1.2, z: 1.2, duration: 0.3 });
-                    currentHoveredObject.material.emissive.setHex(0x0055ff);
-                    document.body.style.cursor = 'pointer';
-                }
-            } else {
-                if (currentHoveredObject) {
-                    gsap.to(currentHoveredObject.scale, { x: 1, y: 1, z: 1, duration: 0.3 });
-                    currentHoveredObject.material.emissive.setHex(0x000000);
-                    document.body.style.cursor = 'default';
-                }
-                currentHoveredObject = null;
-            }
-        });
+    const reveal = (el, opts = {}) => {
+      gsap.from(el, { opacity: 0, y: 30, duration: .9, ease: 'power3.out', stagger: .08, scrollTrigger: { trigger: el, start: 'top 80%' }, ...opts });
+    };
 
-        container.addEventListener('click', () => {
-            if (currentHoveredObject) {
-                const targetId = `#${currentHoveredObject.userData.id}`;
-                gsap.to(window, {
-                    duration: 1.5,
-                    scrollTo: { y: targetId, offsetY: 70 },
-                    ease: "power3.inOut"
-                });
-            }
-        });
+    reveal('.hero .badges');
+    reveal('.hero h1', { y: 18 });
+    reveal('.hero p', { y: 18 });
+    reveal('.hero .cta');
+    reveal('#about .card');
+    reveal('#features .feature');
+    reveal('#contacts .contact-card');
 
-        // === Анимация скролла GSAP ===
-        document.querySelectorAll(".content-block").forEach(block => {
-            const h2 = block.querySelector('h2');
-            const p = block.querySelector('p');
-            const features = block.querySelectorAll('.feature-item');
-
-            let tlBlock = gsap.timeline({
-                scrollTrigger: {
-                    trigger: block,
-                    start: "top 70%",
-                    end: "top 20%",
-                    toggleActions: "play none none reverse",
-                }
-            });
-
-            tlBlock.from(h2, {
-                opacity: 0,
-                y: 50,
-                duration: 1.5,
-                ease: "power3.out"
-            })
-            .from(p, {
-                opacity: 0,
-                y: 50,
-                duration: 1.5,
-                ease: "power3.out"
-            }, "<0.5");
-
-            if (features.length > 0) {
-                gsap.from(features, {
-                    opacity: 0,
-                    y: 50,
-                    scale: 0.8,
-                    stagger: 0.2,
-                    duration: 1.5,
-                    ease: "back.out(1.7)",
-                    scrollTrigger: {
-                        trigger: features[0],
-                        start: "top 80%",
-                        toggleActions: "play none none reverse",
-                    }
-                });
-            }
-        });
-
-        // Плавная прокрутка для навбара
-        document.querySelectorAll('nav a').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                gsap.to(window, {
-                    duration: 1.5,
-                    scrollTo: { y: targetId, offsetY: 70 },
-                    ease: "power3.inOut"
-                });
-            });
-        });
-    </script>
+    // Respect reduced motion
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) {
+      gsap.globalTimeline.timeScale(0.8);
+    }
+  </script>
 </body>
 </html>
