@@ -128,15 +128,20 @@ def custom_page_not_found_view(request, exception):
     return render(request, "404.html", status=404)
 
 
-@csrf_exempt
-def send_contact(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
+class ContactFormAPIView(APIView):
+    """
+    Принимает POST-запрос с контактными данными и отправляет их в Telegram.
+    """
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return Response({"ok": False, "error": "Неверный формат JSON"}, status=status.HTTP_400_BAD_REQUEST)
 
-        name = data.get("name")
-        phone = data.get("phone")
-        telegram_user = data.get("telegram")
-        message = data.get("message")
+        name = data.get("name", "Не указано")
+        phone = data.get("phone", "Не указан")
+        telegram_user = data.get("telegram", "Не указан")
+        message = data.get("message", "Нет сообщения")
 
         text = f"""
 📩 Новая заявка с сайта Polyatop:
@@ -148,10 +153,9 @@ def send_contact(request):
         url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/sendMessage"
         payload = {"chat_id": settings.TELEGRAM_CHAT_ID, "text": text}
 
-        r = requests.post(url, json=payload)
-
-        if r.status_code == 200:
-            return JsonResponse({"ok": True})
-        return JsonResponse({"ok": False, "error": r.text}, status=400)
-
-    return JsonResponse({"error": "Invalid request"}, status=405)
+        try:
+            r = requests.post(url, json=payload, timeout=5)
+            r.raise_for_status() # Вызывает ошибку для плохих HTTP-статусов
+            return Response({"ok": True}, status=status.HTTP_200_OK)
+        except requests.RequestException as e:
+            return Response({"ok": False, "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
