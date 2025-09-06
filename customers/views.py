@@ -26,6 +26,9 @@ class OwnerEventViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        user = self.request.user
+        if user.is_anonymous or not user.is_authenticated:
+            return Event.objects.none()
         return Event.objects.filter(sport_venue__owner=self.request.user).select_related("sport_venue")
 
 
@@ -35,6 +38,9 @@ class OwnerPaymentViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        user = self.request.user
+        if user.is_anonymous or not user.is_authenticated:
+            return Payment.objects.none()
         return Payment.objects.filter(event__sport_venue__owner=self.request.user)
 
 
