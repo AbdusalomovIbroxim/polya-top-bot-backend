@@ -144,7 +144,6 @@ class EventParticipant(models.Model):
 
 
 
-
 class Payment(models.Model):
     """
     Отдельная модель платежа, привязанная к участнику события.

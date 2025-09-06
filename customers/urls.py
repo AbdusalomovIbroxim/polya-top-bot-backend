@@ -1,12 +1,12 @@
-# from django.urls import path, include
-# from rest_framework.routers import DefaultRouter
-# from .views import OwnerSportVenueViewSet, OwnerBookingViewSet
+from rest_framework.routers import DefaultRouter
+from .views import OwnerVenueViewSet, OwnerEventViewSet, OwnerPaymentViewSet, OwnerStatisticsView
 
-# router = DefaultRouter()
-# router.register(r'owner/sport-venues', OwnerSportVenueViewSet, basename='owner-sport-venues')
-# router.register(r'owner/bookings', OwnerBookingViewSet, basename='owner-bookings')
+router = DefaultRouter()
+router.register(r'owner/venues', OwnerVenueViewSet, basename='owner-venues')
+router.register(r'owner/events', OwnerEventViewSet, basename='owner-events')
+router.register(r'owner/payments', OwnerPaymentViewSet, basename='owner-payments')
 
-
-# urlpatterns = [
-#     path('', include(router.urls)),
-# ]
+urlpatterns = [
+    *router.urls,
+    path('owner/statistics/', OwnerStatisticsView.as_view(), name='owner-statistics'),
+]

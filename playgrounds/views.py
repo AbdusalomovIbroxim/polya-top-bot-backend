@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import viewsets, permissions, filters
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework import status
+from rest_framework import status, mixins
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from datetime import datetime, timedelta
@@ -96,21 +96,21 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
             'time_points': slots
         })
         
-class FavoriteSportVenueViewSet(viewsets.ModelViewSet):
+class FavoriteSportVenueViewSet(
+    mixins.ListModelMixin,       # GET /favorites/
+    mixins.CreateModelMixin,     # POST /favorites/
+    mixins.DestroyModelMixin,    # DELETE /favorites/{id}/
+    viewsets.GenericViewSet
+):
     serializer_class = FavoriteSportVenueSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return FavoriteSportVenue.objects.filter(user=self.request.user).select_related('sport_venue')
+        return FavoriteSportVenue.objects.filter(user=self.request.user).select_related("sport_venue")
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-    @action(detail=True, methods=['delete'], url_path='remove')
-    def remove(self, request, pk=None):
-        favorite = self.get_object()
-        favorite.delete()
-        return Response({"detail": "Удалено из избранного"}, status=204)
 
 
 def welcome(request):
