@@ -12,6 +12,8 @@ class OwnerVenueViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        if self.request.user.is_anonymous:
+            return SportVenue.objects.none()
         return SportVenue.objects.filter(owner=self.request.user)
 
     def perform_create(self, serializer):
