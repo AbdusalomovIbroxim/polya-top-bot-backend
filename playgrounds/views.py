@@ -11,6 +11,7 @@ from drf_yasg import openapi
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
+from django.views.decorators.csrf import csrf_exempt
 
 from djangoProject import settings
 from .models import SportVenue, SportVenueType, Region, FavoriteSportVenue
@@ -127,6 +128,7 @@ def custom_page_not_found_view(request, exception):
     return render(request, "404.html", status=404)
 
 
+@csrf_exempt
 def send_contact(request):
     if request.method == "POST":
         data = json.loads(request.body)
