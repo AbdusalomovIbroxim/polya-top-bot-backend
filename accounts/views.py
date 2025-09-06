@@ -1,30 +1,12 @@
-from rest_framework import serializers, viewsets, status
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
+from .serializers import UserSerializer, UpdateUserSerializer, RegisterSerializer, LoginSerializer
 
-from .models import User
-from .serializers import UserSerializer, UpdateUserSerializer
-
-
-class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-
-    class Meta:
-        model = User
-        fields = ("username", "email", "phone", "first_name", "last_name", "password")
-
-    def create(self, validated_data):
-        user = User.objects.create_user(**validated_data)
-        return user
-
-
-class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
 
 
 class UserViewSet(viewsets.ViewSet):

@@ -20,6 +20,7 @@ def test_create_sport_venue():
         region=region,
         owner=user
     )
+    
     assert venue.name == 'Центральный стадион'
     assert venue.region.name == 'Ташкент'
     assert venue.owner.username == 'owner'

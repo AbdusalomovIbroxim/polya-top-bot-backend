@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from playgrounds.models import Region
 
 
 # --- Choices (справочники) ---
@@ -68,12 +69,8 @@ class User(AbstractUser):
         default="ru",
         verbose_name="Язык"
     )
-    city = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
-        verbose_name="Город"
-    )
+    city = models.ForeignKey("playgrounds.Region", verbose_name="Город", on_delete=models.CASCADE)
+    
     football_experience = models.CharField(
         max_length=20,
         choices=FootballExperience.choices,
@@ -106,6 +103,8 @@ class User(AbstractUser):
         null=True, blank=True,
         # default=FootballPosition.MID
     )
+    
+    telegram_id = models.CharField(max_length=100, blank=True, null=True, verbose_name="Telegram ID")
 
     class Meta:
         verbose_name = 'Пользователь'

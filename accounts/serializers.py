@@ -52,3 +52,20 @@ class UpdateUserSerializer(serializers.ModelSerializer):
             'football_formats',
             'football_position',
         )
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ("language", "city", "username", "football_experience", "football_frequency", "football_competitions", "football_formats", "football_position", "telegram_id")
+
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        return user
+
+
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
