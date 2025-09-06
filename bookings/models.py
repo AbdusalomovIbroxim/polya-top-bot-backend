@@ -29,8 +29,8 @@ class Event(models.Model):
     field = models.ForeignKey(
         SportVenue, on_delete=models.CASCADE, related_name="events", verbose_name="Поле"
     )
-    future_time = timezone.now() + timedelta(days=5)
-    start_game_time = models.DateTimeField(verbose_name="Время начала игры", default=future_time)
+    # future_time = timezone.now() + timedelta(days=5)
+    start_game_time = models.DateTimeField(verbose_name="Время начала игры", null=True, blank=True)
     game_time = models.PositiveSmallIntegerField(choices=GAME_TIME_CHOICES, verbose_name="Время игры (часы)")
     # game_format — связываем через строковую ссылку, чтобы избежать жёсткой зависимости
     game_format = models.CharField(
