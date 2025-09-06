@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import User, FootballFormat
-
+import uuid
 
 class UserSerializer(serializers.ModelSerializer):
     football_formats = serializers.MultipleChoiceField(
@@ -55,13 +55,14 @@ class UpdateUserSerializer(serializers.ModelSerializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-
+    password = serializers.CharField(required=False)
+    
     class Meta:
         model = User
         fields = ("language", "city", "username", "football_experience", "football_frequency", "football_competitions", "football_formats", "football_position", "telegram_id")
 
     def create(self, validated_data):
+        validated_data['password'] = uuid.uuid4().hex
         user = User.objects.create_user(**validated_data)
         return user
 

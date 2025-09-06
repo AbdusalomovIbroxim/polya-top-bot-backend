@@ -10,5 +10,5 @@ router.register(r'regions', RegionViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('send-contant/', send_contact),
+    path('send-contant/', send_contact, name="send-contact"),
 ]
