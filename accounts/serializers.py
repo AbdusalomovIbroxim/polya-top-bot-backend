@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from .models import User, FootballFormat
 import uuid
+from .models import FootballExperience, FootballFrequency, FootballPosition, FootballFormat, User
 
 class UserSerializer(serializers.ModelSerializer):
     football_formats = serializers.MultipleChoiceField(
@@ -70,3 +70,21 @@ class RegisterSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
+    
+    
+    
+
+class ChoiceSerializer(serializers.Serializer):
+    """
+    Сериализатор общего назначения для преобразования
+    классов TextChoices в список объектов.
+    """
+    value = serializers.CharField(source='0')
+    display_name = serializers.CharField(source='1')
+
+def get_choices_from_enum(enum_class):
+    """
+    Вспомогательная функция для получения списка словарей
+    из класса TextChoices.
+    """
+    return [{'value': choice[0], 'display_name': choice[1]} for choice in enum_class.choices]

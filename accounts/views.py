@@ -1,11 +1,14 @@
+from rest_framework.views import APIView
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from django.contrib.auth import authenticate
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import authenticate
-from .serializers import UserSerializer, UpdateUserSerializer, RegisterSerializer, LoginSerializer
+from rest_framework.permissions import IsAuthenticated, AllowAny
+
+from accounts.models import FootballExperience, FootballFormat, FootballFrequency, FootballPosition
+from .serializers import UserSerializer, UpdateUserSerializer, RegisterSerializer, LoginSerializer, get_choices_from_enum
 
 
 
@@ -82,3 +85,35 @@ class AuthViewSet(viewsets.ViewSet):
             "access": str(refresh.access_token),
             "user": UserSerializer(user).data
         })
+
+
+
+class FootballExperienceView(APIView):
+    def get(self, request):
+        choices = get_choices_from_enum(FootballExperience)
+        return Response(choices)
+
+class FootballFrequencyView(APIView):
+    def get(self, request):
+        choices = get_choices_from_enum(FootballFrequency)
+        return Response(choices)
+
+class FootballPositionView(APIView):
+    def get(self, request):
+        choices = get_choices_from_enum(FootballPosition)
+        return Response(choices)
+
+class FootballFormatView(APIView):
+    def get(self, request):
+        choices = get_choices_from_enum(FootballFormat)
+        return Response(choices)
+
+class FootballChoicesView(APIView):
+    def get(self, request):
+        data = {
+            'experience': get_choices_from_enum(FootballExperience),
+            'frequency': get_choices_from_enum(FootballFrequency),
+            'position': get_choices_from_enum(FootballPosition),
+            'format': get_choices_from_enum(FootballFormat),
+        }
+        return Response(data)
