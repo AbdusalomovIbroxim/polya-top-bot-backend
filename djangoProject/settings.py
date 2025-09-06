@@ -13,6 +13,8 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = [
     "polya.top",
     "www.polya.top",
+    'api.polya.top',
+    'www.api.polya.top',
     "127.0.0.1",
     "localhost",
     "176.98.177.140",
