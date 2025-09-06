@@ -1,60 +1,99 @@
-from rest_framework import serializers
-from .models import Booking
-from playgrounds.serializers import SportVenueReadSerializer
-from accounts.serializers import UserSerializer
-from django.utils import timezone
-from datetime import timedelta
+from decimal import Decimal
+import logging
 
-class BookingSerializer(serializers.ModelSerializer):
-    sport_venue_details = SportVenueReadSerializer(source='sport_venue', read_only=True)
-    user_details = UserSerializer(source='user', read_only=True)
+from rest_framework import serializers
+from django.utils import timezone
+
+from .models import Event, EventParticipant, Payment
+from playgrounds.serializers import SportVenueSerializer
+from django.conf import settings
+
+logger = logging.getLogger(__name__)
+
+
+class EventParticipantSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source="user.id", read_only=True)
+    username = serializers.CharField(source="user.username", read_only=True)
+    payment_method = serializers.ChoiceField(choices=EventParticipant.PAYMENT_METHOD_CHOICES, required=False)
+    payment_status = serializers.ChoiceField(choices=EventParticipant.PAYMENT_STATUS_CHOICES, read_only=True)
 
     class Meta:
-        model = Booking
-        fields = [
-            'id', 'sport_venue', 'sport_venue_details', 'user', 'user_details',
-            'start_time', 'end_time', 'status', 'payment_status', 'payment_url',
-            'qr_code', 'total_price', 'deposit_amount', 'created_at', 'updated_at'
-        ]
-        read_only_fields = [
-            'total_price', 'deposit_amount', 'created_at', 'updated_at',
-            'payment_status', 'payment_url', 'qr_code'
-        ]
+        model = EventParticipant
+        fields = ("id", "user_id", "username", "payment_method", "payment_status", "joined_at")
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    event_participant = serializers.PrimaryKeyRelatedField(queryset=EventParticipant.objects.all())
+
+    class Meta:
+        model = Payment
+        fields = ("id", "event_participant", "amount", "status", "method", "provider_transaction_id", "payload", "created_at")
+        read_only_fields = ("id", "created_at")
+
+
+class EventReadSerializer(serializers.ModelSerializer):
+    field_details = SportVenueSerializer(source="field", read_only=True)
+    creator_id = serializers.IntegerField(source="creator.id", read_only=True)
+    participants = serializers.SerializerMethodField()
+    total_rent = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Event
+        fields = ("id", "creator_id", "is_private", "field", "field_details",
+                  "game_time", "game_format", "rounds", "location", "participants", "total_rent", "created_at")
+        read_only_fields = ("id", "created_at", "location", "creator_id")
+
+    def get_participants(self, obj):
+        qs = obj.event_participants.select_related("user")
+        return EventParticipantSerializer(qs, many=True).data
+
+    def get_total_rent(self, obj):
+        return str(obj.get_total_rent())
+
+
+class CreateEventSerializer(serializers.ModelSerializer):
+    # При создании передаём id поля, game_time (1-5), game_format id (опционально), rounds и is_private
+    class Meta:
+        model = Event
+        fields = ("field", "game_time", "game_format", "rounds", "is_private")
+        extra_kwargs = {
+            "rounds": {"required": True},
+            "game_time": {"required": True},
+            "field": {"required": True},
+        }
+
+    def validate_game_time(self, value):
+        if value < 1 or value > 5:
+            raise serializers.ValidationError("game_time должно быть от 1 до 5 часов")
+        return value
+
+    def validate_rounds(self, value):
+        if value < 1:
+            raise serializers.ValidationError("rounds должно быть >= 1")
+        return value
 
     def validate(self, data):
-        # Проверяем, что время окончания больше времени начала
-        if data['end_time'] <= data['start_time']:
-            raise serializers.ValidationError("Время окончания должно быть позже времени начала")
+        """
+        Проверяем профиль пользователя перед созданием: telegram_username и phone должны быть заполнены.
+        Также убедимся, что поле существует.
+        """
+        user = self.context["request"].user
+        # Проверка профиля — ожидаем атрибуты telegram_username и phone на user
+        if not getattr(user, "telegram_username", None) and not getattr(user, "telegram_id", None):
+            raise serializers.ValidationError("Заполните telegram username в профиле")
+        if not getattr(user, "phone", None):
+            raise serializers.ValidationError("Заполните телефон в профиле")
 
-        # Проверяем, что бронирование не в прошлом
-        if data['start_time'] < timezone.now():
-            raise serializers.ValidationError("Нельзя бронировать время в прошлом")
+        # Доп. проверки по полю можно добавить при необходимости
+        return data
 
-        # Проверяем, что длительность бронирования не превышает 24 часа
-        duration = data['end_time'] - data['start_time']
-        if duration > timedelta(hours=24):
-            raise serializers.ValidationError("Максимальная длительность бронирования - 24 часа")
+    def create(self, validated_data):
+        request = self.context["request"]
+        user = request.user
 
-        # Проверяем, что время соответствует 30-минутным интервалам
-        start_minutes = data['start_time'].minute
-        end_minutes = data['end_time'].minute
-        if start_minutes not in [0, 30] or end_minutes not in [0, 30]:
-            raise serializers.ValidationError("Время должно быть кратно 30 минутам")
-
-        # Проверяем, что время в пределах рабочего дня (8:00 - 22:30)
-        start_hour = data['start_time'].hour
-        end_hour = data['end_time'].hour
-        if start_hour < 8 or (end_hour > 22 or (end_hour == 22 and end_minutes > 30)):
-            raise serializers.ValidationError("Бронирование возможно только с 8:00 до 22:30")
-
-        # Проверяем, нет ли пересечений с другими бронированиями
-        overlapping_bookings = Booking.objects.filter(
-            sport_venue=data['sport_venue'],
-            status__in=['PENDING', 'CONFIRMED'],
-            start_time__lt=data['end_time'],
-            end_time__gt=data['start_time']
-        )
-        if overlapping_bookings.exists():
-            raise serializers.ValidationError("Выбранное время уже забронировано")
-
-        return data 
+        # создаём Event и автоматически добавляем создателя как участника
+        event = Event.objects.create(creator=user, **validated_data)
+        # Добавляем создателя в EventParticipant
+        event.add_creator_as_participant()
+        logger.info("Event created %s by %s", event.id, user.username)
+        return event

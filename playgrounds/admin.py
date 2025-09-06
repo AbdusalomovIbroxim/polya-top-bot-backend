@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import SportVenue, SportVenueImage, SportVenueType, Region
+from .models import SportVenue, SportVenueImage, SportVenueType, Region, FavoriteSportVenue
 
-
+# Inline для изображений
 class SportVenueImageInline(admin.TabularInline):
     model = SportVenueImage
     extra = 1
@@ -11,49 +11,54 @@ class SportVenueImageInline(admin.TabularInline):
 
     def preview_image(self, obj):
         if obj.image:
-            return f'<img src="{obj.image.url}" style="max-height: 100px;"/>'
+            return format_html('<img src="{}" style="max-height:100px;"/>', obj.image.url)
         return 'Нет изображения'
-    preview_image.short_description = 'Предпросмотр'
-    preview_image.allow_tags = True
+    preview_image.short_description = 'Превью'
 
-
+# Админ для площадок
 @admin.register(SportVenue)
 class SportVenueAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price_per_hour', 'image_preview', 'created_at', 'updated_at')
-    list_filter = ('created_at', 'updated_at', 'price_per_hour')
-    search_fields = ('name', 'description')
+    list_display = (
+        'name', 'price_per_hour', 'deposit_amount', 'city', 'region', 'owner', 'image_preview', 'created_at'
+    )
+    list_filter = ('city', 'region', 'sport_venue_type', 'created_at', 'updated_at')
+    search_fields = ('name', 'description', 'address')
     readonly_fields = ('created_at', 'updated_at')
     inlines = [SportVenueImageInline]
     
     fieldsets = (
         ('Основная информация', {
-            'fields': ('name', 'description', 'price_per_hour','sport_venue_type', 'deposit_amount')
+            'fields': ('name', 'description', 'price_per_hour', 'deposit_amount', 'sport_venue_type', 'owner')
         }),
         ('Локация', {
-            'fields': ('city', 'address', 'latitude', 'longitude', 'yandex_map_url')
+            'fields': ('city', 'region', 'address', 'latitude', 'longitude', 'yandex_map_url')
         }),
     )
 
     @admin.display(description='Превью')
     def image_preview(self, obj):
         if obj.images.exists():
-            return format_html(
-                '<img src="{}" style="max-height: 100px;"/>',
-                obj.images.first().image.url
-            )
+            return format_html('<img src="{}" style="max-height:100px;"/>', obj.images.first().image.url)
         return 'Нет изображений'
 
-
+# Админ для типов площадок
 @admin.register(SportVenueType)
 class SportVenueTypeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'created_at', 'updated_at')
+    list_display = ('id', 'name', 'slug', 'created_at', 'updated_at')
     search_fields = ('name',)
     list_filter = ('created_at', 'updated_at')
     ordering = ('name',)
 
-
+# Админ для регионов
 @admin.register(Region)
 class RegionAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'slug')
+    list_display = ('id', 'name', 'slug', 'created_at', 'updated_at')
     search_fields = ('name',)
     ordering = ('id',)
+
+# Админ для избранного
+@admin.register(FavoriteSportVenue)
+class FavoriteSportVenueAdmin(admin.ModelAdmin):
+    list_display = ('user', 'sport_venue', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('user__username', 'sport_venue__name')

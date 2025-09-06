@@ -11,5 +11,4 @@ class PlaygroundsConfig(AppConfig):
         def fill_test_data(sender, **kwargs):
             Region.ensure_test_regions()
             SportVenueType.ensure_test_types()
-            SportVenue.ensure_test_venues()
         post_migrate.connect(fill_test_data, sender=self)

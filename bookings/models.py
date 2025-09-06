@@ -1,139 +1,188 @@
-from django.db import models
-from django.contrib.auth import get_user_model
-from django.utils import timezone
-from playgrounds.models import SportVenue
+import uuid
 from decimal import Decimal
 
-User = get_user_model()
+from django.db import models
+from django.conf import settings
+from django.conf import settings
+from django.db import models, transaction
+from django.utils import timezone
+from decimal import Decimal
 
-class Booking(models.Model):
-    STATUS_CHOICES = [
-        ('PENDING', 'Ожидает подтверждения'),
-        ('CONFIRMED', 'Подтверждено'),
-        ('CANCELLED', 'Отменено'),
-        ('COMPLETED', 'Завершено'),
-        ('EXPIRED', 'Истекло'),
+from accounts.models import FootballFormat
+from playgrounds.models import SportVenue  # adjust import if your model name differs
+
+
+User = settings.AUTH_USER_MODEL
+
+
+class Event(models.Model):
+    """
+    Событие (ивент) — организованный матч/серия раундов на поле.
+    """
+    GAME_TIME_CHOICES = [
+        (1, "1 час"),
+        (2, "2 часа"),
+        (3, "3 часа"),
+        (4, "4 часа"),
+        (5, "5 часов"),
     ]
 
-    PAYMENT_STATUS_CHOICES = [
-        ('PENDING', 'Ожидает оплаты'),
-        ('PAID', 'Оплачено'),
-        ('REFUNDED', 'Возвращено'),
-    ]
-
-    sport_venue = models.ForeignKey(
-        SportVenue,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name='bookings',
-        verbose_name='Игровое поле'
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="created_events")
+    is_private = models.BooleanField(default=True, verbose_name="Приватный")
+    field = models.ForeignKey(
+        SportVenue, on_delete=models.CASCADE, related_name="events", verbose_name="Поле"
     )
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name='bookings',
-        verbose_name='Пользователь'
+    game_time = models.PositiveSmallIntegerField(choices=GAME_TIME_CHOICES, verbose_name="Время игры (часы)")
+    # game_format — связываем через строковую ссылку, чтобы избежать жёсткой зависимости
+    game_format = models.CharField(
+        max_length=5,
+        choices=FootballFormat.choices,
+        default=FootballFormat.FIVE,
+        verbose_name="Формат игры"
     )
-    start_time = models.DateTimeField(verbose_name='Время начала')
-    end_time = models.DateTimeField(verbose_name='Время окончания')
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default='PENDING',
-        verbose_name='Статус'
-    )
-    payment_status = models.CharField(
-        max_length=20,
-        choices=PAYMENT_STATUS_CHOICES,
-        default='PENDING',
-        verbose_name='Статус оплаты'
-    )
-    payment_url = models.URLField(
-        max_length=500,
-        blank=True,
-        null=True,
-        verbose_name='Ссылка на оплату'
-    )
-    qr_code = models.ImageField(
-        upload_to='qr_codes/',
-        blank=True,
-        null=True,
-        verbose_name='QR-код'
-    )
-    total_price = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        verbose_name='Общая стоимость'
-    )
-    deposit_amount = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        verbose_name='Сумма депозита',
-        default=0
-    )
-    telegram_payload = models.CharField(
-        max_length=255, 
-        unique=True, 
-        null=True, 
-        blank=True,
-        verbose_name='Telegram Payload'
-    )
-
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+    rounds = models.PositiveSmallIntegerField(default=1, verbose_name="Раундов")
+    # Локация всегда Ташкент, по умолчанию и не показываем на фронте
+    location = models.CharField(max_length=128, default="Ташкент", editable=False)
+    participants = models.ManyToManyField(User, through="EventParticipant", related_name="events")
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Бронирование'
-        verbose_name_plural = 'Бронирования'
-        ordering = ['-created_at']
+        verbose_name = "Событие"
+        verbose_name_plural = "События"
+        ordering = ["-created_at"]
 
     def __str__(self):
-        return f'Бронирование {self.sport_venue.name} - {self.user.username} ({self.start_time.date()})'
+        return f"Event {self.id} by {self.creator} at {self.field.name} ({self.game_time}h)"
 
-    def save(self, *args, **kwargs):
-        if self.start_time and self.end_time:
-            # Вычисляем длительность в часах как Decimal
-            duration = self.end_time - self.start_time
-            duration_hours = Decimal(str(duration.total_seconds() / 3600))
-            
-            # Вычисляем общую стоимость
-            self.total_price = self.sport_venue.price_per_hour * duration_hours
-            
-            # Устанавливаем сумму депозита
-            self.deposit_amount = self.sport_venue.deposit_amount
-        super().save(*args, **kwargs)
+    # ---- Helpers / Business logic ----
+    def get_total_rent(self) -> Decimal:
+        """
+        Общая стоимость аренды поля за весь период (price_per_hour * game_time).
+        """
+        if not self.field or self.field.price_per_hour is None:
+            return Decimal("0.00")
+        return (self.field.price_per_hour * Decimal(self.game_time)).quantize(Decimal("0.01"))
 
-    def update_status_if_expired(self):
+    def get_participants_count(self) -> int:
+        return self.participants.count()
+
+    def get_free_slots(self, capacity: int) -> int:
         """
-        Автоматически обновляет статус брони, если время уже прошло
+        Возвращает количество свободных слотов, если поле имеет capacity (максимум игроков).
+        capacity нужно получать от модели поля (например, field.capacity) — передаётся извне.
         """
-        now = timezone.now()
-        
-        # Если время окончания уже прошло и статус не COMPLETED/CANCELLED/EXPIRED
-        if (self.end_time < now and 
-            self.status not in ['COMPLETED', 'CANCELLED', 'EXPIRED']):
-            self.status = 'EXPIRED'
-            self.save(update_fields=['status', 'updated_at'])
-            return True
+        return max(0, capacity - self.get_participants_count())
+
+    def is_full(self, capacity: int) -> bool:
+        return self.get_participants_count() >= capacity
+
+    @transaction.atomic
+    def add_creator_as_participant(self, payment_method="system_money"):
+        """
+        Добавляет создателя в таблицу участников, если его там нет.
+        """
+        from django.db import IntegrityError
+
+        try:
+            EventParticipant.objects.create(
+                event=self,
+                user=self.creator,
+                payment_method=payment_method,
+                payment_status=EventParticipant.PAYMENT_STATUS_PENDING,
+            )
+        except IntegrityError:
+            # Уже есть — игнорируем
+            pass
+
+    def update_status_if_expired(self, end_time):
+        """
+        Если время события прошло (полный конец), можно ставить какой-то флаг/логирование.
+        Тут событие не хранит start_time/end_time — ожидалось, что Booking workflow
+        распределяет эти значения. Если понадобится, можно добавить start/end.
+        """
+        # Заглушка: ничего не делает сейчас.
         return False
 
-    @classmethod
-    def update_expired_bookings(cls):
-        """
-        Обновляет статус всех истекших броней
-        """
-        now = timezone.now()
-        expired_bookings = cls.objects.filter(
-            end_time__lt=now,
-            status__in=['PENDING', 'CONFIRMED']
-        )
-        
-        updated_count = expired_bookings.update(
-            status='EXPIRED',
-            updated_at=now
-        )
-        
-        return updated_count
+
+
+class EventParticipant(models.Model):
+    """
+    Участник события — связывает Event и User, хранит способ оплаты и статус.
+    """
+    PAYMENT_METHOD_SYSTEM = "system_money"
+    PAYMENT_METHOD_CLICK = "click"
+    PAYMENT_METHOD_CASH = "cash"
+
+    PAYMENT_METHOD_CHOICES = [
+        (PAYMENT_METHOD_SYSTEM, "Система (баланс)"),
+        (PAYMENT_METHOD_CLICK, "Click"),
+        (PAYMENT_METHOD_CASH, "Наличные / Перевод"),
+    ]
+
+    PAYMENT_STATUS_PENDING = "pending"
+    PAYMENT_STATUS_PAID = "paid"
+    PAYMENT_STATUS_FAILED = "failed"
+
+    PAYMENT_STATUS_CHOICES = [
+        (PAYMENT_STATUS_PENDING, "Ожидает оплаты"),
+        (PAYMENT_STATUS_PAID, "Оплачено"),
+        (PAYMENT_STATUS_FAILED, "Ошибка оплаты"),
+    ]
+
+    event = models.ForeignKey("Event", on_delete=models.CASCADE, related_name="event_participants")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="event_participations")
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default=PAYMENT_METHOD_SYSTEM)
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING)
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("event", "user")
+        verbose_name = "Участник события"
+        verbose_name_plural = "Участники события"
+
+    def __str__(self):
+        return f"{self.user.username} in {self.event.id} ({self.payment_status})"
+
+
+
+
+class Payment(models.Model):
+    """
+    Отдельная модель платежа, привязанная к участнику события.
+    """
+    STATUS_PENDING = "pending"
+    STATUS_CONFIRMED = "confirmed"
+    STATUS_FAILED = "failed"
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, "Ожидание"),
+        (STATUS_CONFIRMED, "Подтвержено"),
+        (STATUS_FAILED, "Ошибка"),
+    ]
+
+    METHOD_SYSTEM = "system_money"
+    METHOD_CLICK = "click"
+    METHOD_CASH = "cash"
+
+    METHOD_CHOICES = [
+        (METHOD_SYSTEM, "Система баллов/денег"),
+        (METHOD_CLICK, "Click"),
+        (METHOD_CASH, "Наличные/Перевод"),
+    ]
+
+    event_participant = models.ForeignKey(EventParticipant, on_delete=models.CASCADE, related_name="payments")
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"))
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    method = models.CharField(max_length=20, choices=METHOD_CHOICES, default=METHOD_SYSTEM)
+    provider_transaction_id = models.CharField(max_length=255, null=True, blank=True)
+    payload = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Платеж"
+        verbose_name_plural = "Платежи"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Payment {self.id} {self.method} {self.amount} ({self.status})"

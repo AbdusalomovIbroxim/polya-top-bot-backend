@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ClientSportVenueViewSet, FavoriteSportVenueViewSet, SportVenueTypeViewSet, RegionViewSet, welcome
+from .views import ClientSportVenueViewSet, FavoriteSportVenueViewSet, SportVenueTypeViewSet, RegionViewSet
+
 router = DefaultRouter()
 router.register(r'types', SportVenueTypeViewSet)
 router.register(r'sport-venues', ClientSportVenueViewSet)
@@ -9,4 +10,4 @@ router.register(r'regions', RegionViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-] 
+]

@@ -8,9 +8,8 @@ User = get_user_model()
 
 
 class Region(models.Model):
-    name = models.CharField(max_length=100, verbose_name='Название')
-
-    slug = models.SlugField(max_length=100, unique=True, verbose_name='Slug (для URL и фильтрации)', blank=True, null=True, help_text='Если оставить пустым, будет сгенерирован автоматически')
+    name = models.CharField(max_length=100, verbose_name='Название', null=True, blank=True, unique=True, default=None)
+    slug = models.SlugField(max_length=100, unique=True, blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
@@ -22,6 +21,17 @@ class Region(models.Model):
 
     def __str__(self):
         return self.name
+    
+    @classmethod
+    def ensure_test_regions(cls):
+        if not cls.objects.exists():
+            test_data = [
+                dict(name='Ташкент'),
+                dict(name='Самарканд'),
+                dict(name='Бухара'),
+            ]
+            for data in test_data:
+                cls.objects.create(**data)
 
     def save(self, *args, **kwargs):
         if (not self.slug or self.slug.strip() == '') and self.name:
@@ -34,27 +44,13 @@ class Region(models.Model):
             self.slug = candidate
         super().save(*args, **kwargs)
 
-    @classmethod
-    def ensure_test_regions(cls):
-        if not cls.objects.exists():
-            test_data = [
-                dict(name='Ташкент'),
-                dict(name='Самарканд'),
-                dict(name='Бухара'),
-            ]
-            for data in test_data:
-                cls.objects.create(**data)
-
 
 class SportVenueType(models.Model):
-    slug = models.SlugField(
-        max_length=255,
-        unique=True,
-        blank=True,
-        null=True,
-        verbose_name='Slug (URL-идентификатор)'
-    )
     name = models.CharField(max_length=100, verbose_name='Название типа')
+    slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
+
+    is_indoor = models.BooleanField(default=False, verbose_name="Закрытое помещение")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -64,19 +60,8 @@ class SportVenueType(models.Model):
         ordering = ['name']
 
     def __str__(self):
-        return self.name
-
-    def save(self, *args, **kwargs):
-        if (not self.slug or self.slug.strip() == '') and self.name:
-            base = slugify(unidecode(self.name))
-            candidate = base or 'type'
-            suffix = 1
-            while SportVenueType.objects.exclude(pk=self.pk).filter(slug=candidate).exists():
-                suffix += 1
-                candidate = f"{base}-{suffix}"
-            self.slug = candidate
-        super().save(*args, **kwargs)
-
+        return f"{self.name} ({'Закрытое' if self.is_indoor else 'Открытое'})"
+    
     @classmethod
     def ensure_test_types(cls):
         if not cls.objects.exists():
@@ -89,44 +74,17 @@ class SportVenueType(models.Model):
                 cls.objects.create(**data)
 
 
+
 class SportVenue(models.Model):
     name = models.CharField(max_length=200, verbose_name='Название')
     description = models.TextField(verbose_name='Описание')
+
     price_per_hour = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена за час')
     deposit_amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Залоговая сумма', null=True, blank=True)
+
     city = models.CharField(max_length=100, verbose_name='Город', default='Ташкент')
     address = models.CharField(max_length=200, verbose_name='Адрес', default='Адрес не указан')
-    latitude = models.DecimalField(
-        max_digits=9,
-        decimal_places=6,
-        verbose_name='Широта',
-        help_text='Географическая широта',
-        null=True,
-        blank=True
-    )
-    longitude = models.DecimalField(
-        max_digits=9,
-        decimal_places=6,
-        verbose_name='Долгота',
-        help_text='Географическая долгота',
-        null=True,
-        blank=True
-    )
-    yandex_map_url = models.URLField(
-        max_length=500,
-        verbose_name='Ссылка на Яндекс Карты',
-        help_text='Ссылка на место в Яндекс Картах',
-        null=True,
-        blank=True
-    )
-    sport_venue_type = models.ForeignKey(
-        SportVenueType,
-        on_delete=models.SET_NULL,
-        verbose_name='Тип площадки',
-        null=True,
-        blank=True,
-        related_name='sport_venues'
-    )
+
     region = models.ForeignKey(
         Region,
         on_delete=models.SET_NULL,
@@ -135,6 +93,16 @@ class SportVenue(models.Model):
         blank=True,
         related_name='sport_venues'
     )
+
+    sport_venue_type = models.ForeignKey(
+        SportVenueType,
+        on_delete=models.SET_NULL,
+        verbose_name='Тип площадки',
+        null=True,
+        blank=True,
+        related_name='sport_venues'
+    )
+
     owner = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -143,6 +111,24 @@ class SportVenue(models.Model):
         verbose_name='Владелец',
         related_name='sport_venues'
     )
+
+    # Время работы
+    open_time = models.TimeField(verbose_name="Время открытия", default="08:00")
+    close_time = models.TimeField(verbose_name="Время закрытия", default="23:00")
+
+    # Удобства
+    has_lights = models.BooleanField(default=False, verbose_name="Освещение")
+    has_lockers = models.BooleanField(default=False, verbose_name="Раздевалки")
+    has_showers = models.BooleanField(default=False, verbose_name="Душевые")
+    has_restrooms = models.BooleanField(default=False, verbose_name="Туалеты")
+    has_walls = models.BooleanField(default=False, verbose_name="Ограждение/стены")
+    has_parking = models.BooleanField(default=False, verbose_name="Парковка")
+
+    # Гео
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, verbose_name='Широта')
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, verbose_name='Долгота')
+    yandex_map_url = models.URLField(max_length=500, null=True, blank=True, verbose_name='Ссылка на Яндекс Карты')
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -159,35 +145,6 @@ class SportVenue(models.Model):
             self.deposit_amount = self.price_per_hour
         super().save(*args, **kwargs)
 
-    @classmethod
-    def ensure_test_venues(cls):
-        if not cls.objects.exists():
-            from django.contrib.auth import get_user_model
-            from .models import SportVenueType, Region
-            User = get_user_model()
-            owner = User.objects.filter(role=Role.OWNER).first()
-            venue_type = SportVenueType.objects.first()
-            region = Region.objects.first()
-            if not (owner and venue_type and region):
-                return
-            test_data = [
-                dict(
-                    name='Центральный стадион',
-                    description='Главный стадион города',
-                    price_per_hour=1000,
-                    city='Ташкент',
-                    address='ул. Центральная, 1',
-                    latitude=41.2995,
-                    longitude=69.2401,
-                    sport_venue_type=venue_type,
-                    region=region,
-                    deposit_amount=500,
-                    owner=owner
-                ),
-            ]
-            for data in test_data:
-                cls.objects.create(**data)
-
 
 class SportVenueImage(models.Model):
     sport_venue = models.ForeignKey(SportVenue, related_name='images', on_delete=models.CASCADE)
@@ -197,6 +154,9 @@ class SportVenueImage(models.Model):
     class Meta:
         verbose_name = 'Фотография площадки'
         verbose_name_plural = 'Фотографии площадок'
+
+    def __str__(self):
+        return f"Фото {self.sport_venue.name}"
 
 
 class FavoriteSportVenue(models.Model):
@@ -209,4 +169,4 @@ class FavoriteSportVenue(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.user.username} - {self.sport_venue.name}"
+        return f"{self.user.username} → {self.sport_venue.name}"
