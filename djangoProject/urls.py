@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.static import serve   
+from djangoProject.settings import BASE_DIR
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -11,6 +13,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
 )
+import os
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -45,5 +48,18 @@ urlpatterns = [
     # path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+urlpatterns += [
+    re_path(r'^robots\.txt$', serve, {
+        'path': "robots.txt", 
+        'document_root': os.path.join(BASE_DIR, "static")
+    }),
+    re_path(r'^sitemap\.xml$', serve, {
+        'path': "sitemap.xml", 
+        'document_root': os.path.join(BASE_DIR, "static")
+    }),
+
+]
+
 
 handler404 = custom_page_not_found_view
+
