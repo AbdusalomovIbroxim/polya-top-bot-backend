@@ -1,18 +1,14 @@
 import uuid
 from decimal import Decimal
-
-from django.db import models
-from django.conf import settings
-from django.conf import settings
 from django.db import models, transaction
 from django.utils import timezone
+from datetime import timedelta
 from decimal import Decimal
-
+from django.contrib.auth import get_user_model
 from accounts.models import FootballFormat
 from playgrounds.models import SportVenue  # adjust import if your model name differs
 
-
-User = settings.AUTH_USER_MODEL
+User = get_user_model()
 
 
 class Event(models.Model):
@@ -33,6 +29,8 @@ class Event(models.Model):
     field = models.ForeignKey(
         SportVenue, on_delete=models.CASCADE, related_name="events", verbose_name="Поле"
     )
+    future_time = timezone.now() + timedelta(days=5)
+    start_game_time = models.DateTimeField(verbose_name="Время начала игры", default=future_time)
     game_time = models.PositiveSmallIntegerField(choices=GAME_TIME_CHOICES, verbose_name="Время игры (часы)")
     # game_format — связываем через строковую ссылку, чтобы избежать жёсткой зависимости
     game_format = models.CharField(
@@ -131,7 +129,7 @@ class EventParticipant(models.Model):
     ]
 
     event = models.ForeignKey("Event", on_delete=models.CASCADE, related_name="event_participants")
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="event_participations")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="event_participations")
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default=PAYMENT_METHOD_SYSTEM)
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING)
     joined_at = models.DateTimeField(auto_now_add=True)
