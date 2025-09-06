@@ -7,9 +7,10 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from accounts.models import FootballExperience, FootballFormat, FootballFrequency, FootballPosition
+from accounts.models import FootballExperience, FootballFormat, FootballFrequency, FootballPosition, User
+from djangoProject import settings
 from .serializers import UserSerializer, UpdateUserSerializer, RegisterSerializer, LoginSerializer, get_choices_from_enum
-
+from .utils import check_telegram_auth
 
 
 class UserViewSet(viewsets.ViewSet):
@@ -62,29 +63,37 @@ class AuthViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @swagger_auto_schema(
-        operation_description="Логин по username и password",
-        request_body=LoginSerializer,
-        responses={200: "JWT токены + данные пользователя"}
-    )
     @action(detail=False, methods=['post'])
     def login(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        init_data = serializer.validated_data["initData"]
 
-        username = serializer.validated_data["username"]
-        password = serializer.validated_data["password"]
+        parsed = check_telegram_auth(init_data, settings.TELEGRAM_BOT_TOKEN)
+        if not parsed:
+            return Response({"error": "Invalid initData"}, status=status.HTTP_403_FORBIDDEN)
 
-        user = authenticate(username=username, password=password)
-        if user is None:
-            return Response({"error": "Неверный логин или пароль"}, status=status.HTTP_401_UNAUTHORIZED)
+        telegram_id = parsed.get("user[id]")
+        username = parsed.get("user[username]")
+
+        if not telegram_id:
+            return Response({"error": "Нет user[id] в initData"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # ищем пользователя по telegram_id
+        user, created = User.objects.get(
+            telegram_id=telegram_id,
+            defaults={
+                "username": username or f"user_{telegram_id}",
+                "password": User.objects.make_random_password(),
+            }
+        )
 
         refresh = RefreshToken.for_user(user)
         return Response({
             "refresh": str(refresh),
             "access": str(refresh.access_token),
             "user": UserSerializer(user).data
-        })
+        }, status=status.HTTP_200_OK)
 
 
 

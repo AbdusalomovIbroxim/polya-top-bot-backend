@@ -59,17 +59,39 @@ class RegisterSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ("language", "city", "username", "football_experience", "football_frequency", "football_competitions", "football_formats", "football_position", "telegram_id", "password")
+        fields = ("language", "city", "username", "football_experience", "football_frequency", "football_competitions", "football_formats", "football_position", "telegram_id", "password", "initData")
 
     def create(self, validated_data):
-        validated_data['password'] = uuid.uuid4().hex
+        import uuid
+        from django.conf import settings
+        from .utils import check_telegram_auth
+
+        init_data = validated_data.pop("initData", None)
+        telegram_id = validated_data.get("telegram_id")
+
+        # Если прилетел initData — проверяем и заполняем телеграм-поля
+        if init_data:
+            parsed = check_telegram_auth(init_data, settings.TELEGRAM_BOT_TOKEN)
+            if not parsed:
+                raise serializers.ValidationError({"initData": "Некорректная подпись Telegram"})
+            
+            if "user[id]" in parsed:
+                validated_data["telegram_id"] = parsed["user[id]"]
+            if "user[username]" in parsed:
+                validated_data.setdefault("username", parsed["user[username]"])
+
+        # генерируем пароль (если не пришёл)
+        if "password" not in validated_data or not validated_data["password"]:
+            validated_data["password"] = uuid.uuid4().hex
+
         user = User.objects.create_user(**validated_data)
         return user
 
 
+
 class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
+    initData = serializers.CharField()
+
     
     
     

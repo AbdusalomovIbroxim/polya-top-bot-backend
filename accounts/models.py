@@ -83,19 +83,21 @@ class User(AbstractUser):
         choices=FootballFrequency.choices,
         verbose_name="Частота игры",
         null=True, blank=True,
-        # default=FootballFrequency.NEVER
-        
+        # default=FootballFrequency.NEVER    
     )
+    
     football_competitions = models.BooleanField(
         default=False,
         verbose_name="Участвовали ли в соревнованиях?"
     )
+    
     football_formats = models.CharField(
         choices=FootballFormat.choices,
         verbose_name="Формат игры (5Х5, 7Х7 и т.д.)",
         blank=True,
         max_length=10
     )
+    
     football_position = models.CharField(
         max_length=10,
         choices=FootballPosition.choices,
