@@ -14,6 +14,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 
 from djangoProject import settings
+from bookings.models import Event
 from .models import SportVenue, SportVenueType, Region, FavoriteSportVenue
 from .serializers import (
     SportVenueSerializer,
