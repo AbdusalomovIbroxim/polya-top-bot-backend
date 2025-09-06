@@ -25,7 +25,7 @@ class Event(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="created_events")
-    is_private = models.BooleanField(default=True, verbose_name="Приватный")
+    is_private = models.BooleanField(default=False, verbose_name="Приватный")
     field = models.ForeignKey(
         SportVenue, on_delete=models.CASCADE, related_name="events", verbose_name="Поле"
     )

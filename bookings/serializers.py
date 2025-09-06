@@ -55,7 +55,7 @@ class CreateEventSerializer(serializers.ModelSerializer):
     # При создании передаём id поля, game_time (1-5), game_format id (опционально), rounds и is_private
     class Meta:
         model = Event
-        fields = ("field", "game_time", "game_format", "rounds", "is_private")
+        fields = ("field", "game_time", "game_format", "rounds")
         extra_kwargs = {
             "rounds": {"required": True},
             "game_time": {"required": True},
@@ -63,7 +63,7 @@ class CreateEventSerializer(serializers.ModelSerializer):
         }
 
     def validate_game_time(self, value):
-        if value < 1 or value > 5:
+        if value < 1 or value > 7:
             raise serializers.ValidationError("game_time должно быть от 1 до 5 часов")
         return value
 
