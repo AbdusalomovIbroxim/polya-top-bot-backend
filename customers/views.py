@@ -1,4 +1,5 @@
-from rest_framework import viewsets, permissions, generics
+from rest_framework import viewsets, permissions
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.models import Sum, Count
 from bookings.models import SportVenue, Event, Payment
@@ -36,10 +37,13 @@ class OwnerPaymentViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 # 🔹 Статистика для владельца
-class OwnerStatisticsView(generics.GenericAPIView):
+class OwnerStatisticsView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
+        if getattr(self, 'swagger_fake_view', False):  
+            return Response({})
+
         events = Event.objects.filter(sport_venue__owner=request.user)
         payments = Payment.objects.filter(event__sport_venue__owner=request.user)
 
