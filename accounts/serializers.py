@@ -56,6 +56,7 @@ class UpdateUserSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(required=False)
+    initData = serializers.CharField(write_only=True, required=False)
     
     class Meta:
         model = User

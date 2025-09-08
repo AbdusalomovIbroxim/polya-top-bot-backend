@@ -69,6 +69,7 @@ class User(AbstractUser):
         default="ru",
         verbose_name="Язык"
     )
+    
     city = models.ForeignKey("playgrounds.Region", verbose_name="Город", on_delete=models.CASCADE, null=True, blank=True)
     
     football_experience = models.CharField(
