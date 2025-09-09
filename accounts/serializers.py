@@ -55,39 +55,41 @@ class UpdateUserSerializer(serializers.ModelSerializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(required=False)
-    initData = serializers.CharField(write_only=True, required=False)
-    
+    initData = serializers.CharField(write_only=True)
+
     class Meta:
         model = User
-        fields = ("language", "city", "username", "football_experience", "football_frequency", "football_competitions", "football_formats", "football_position", "telegram_id", "password", "initData")
+        fields = (
+            "language", "city", "username",
+            "football_experience", "football_frequency",
+            "football_competitions", "football_formats", "football_position",
+            "telegram_id", "password", "initData"
+        )
+        extra_kwargs = {
+            "password": {"write_only": True, "required": False},
+            "telegram_id": {"read_only": True},  # чтобы клиент не подменял
+        }
 
     def create(self, validated_data):
-        import uuid
-        from django.conf import settings
-        from .utils import check_telegram_auth
+        init_data = validated_data.pop("initData")
+        parsed = check_telegram_auth(init_data, settings.TELEGRAM_BOT_TOKEN)
+        if not parsed:
+            raise serializers.ValidationError({"initData": "Некорректная подпись Telegram"})
 
-        init_data = validated_data.pop("initData", None)
-        telegram_id = validated_data.get("telegram_id")
+        telegram_id = parsed.get("user[id]")
+        if not telegram_id:
+            raise serializers.ValidationError({"initData": "Нет user[id] в initData"})
 
-        # Если прилетел initData — проверяем и заполняем телеграм-поля
-        if init_data:
-            parsed = check_telegram_auth(init_data, settings.TELEGRAM_BOT_TOKEN)
-            if not parsed:
-                raise serializers.ValidationError({"initData": "Некорректная подпись Telegram"})
-            
-            if "user[id]" in parsed:
-                validated_data["telegram_id"] = parsed["user[id]"]
-            if "user[username]" in parsed:
-                validated_data.setdefault("username", parsed["user[username]"])
+        validated_data["telegram_id"] = telegram_id
 
-        # генерируем пароль (если не пришёл)
-        if "password" not in validated_data or not validated_data["password"]:
+        if "user[username]" in parsed and not validated_data.get("username"):
+            validated_data["username"] = parsed["user[username]"]
+
+        if not validated_data.get("password"):
             validated_data["password"] = uuid.uuid4().hex
 
         user = User.objects.create_user(**validated_data)
         return user
-
 
 
 class LoginSerializer(serializers.Serializer):

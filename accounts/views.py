@@ -50,7 +50,7 @@ class AuthViewSet(viewsets.ViewSet):
         request_body=RegisterSerializer,
         responses={201: UserSerializer()}
     )
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=["post"])
     def register(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
@@ -63,30 +63,29 @@ class AuthViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['post'])
+    @swagger_auto_schema(
+        operation_description="Логин пользователя по initData",
+        request_body=LoginSerializer,
+        responses={200: UserSerializer()}
+    )
+    @action(detail=False, methods=["post"])
     def login(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        init_data = serializer.validated_data["initData"]
 
+        init_data = serializer.validated_data["initData"]
         parsed = check_telegram_auth(init_data, settings.TELEGRAM_BOT_TOKEN)
         if not parsed:
-            return Response({"error": "Invalid initData"}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"error": "Некорректная подпись Telegram"}, status=status.HTTP_403_FORBIDDEN)
 
         telegram_id = parsed.get("user[id]")
-        username = parsed.get("user[username]")
-
         if not telegram_id:
             return Response({"error": "Нет user[id] в initData"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # ищем пользователя по telegram_id
-        user, created = User.objects.get(
-            telegram_id=telegram_id,
-            defaults={
-                "username": username or f"user_{telegram_id}",
-                "password": User.objects.make_random_password(),
-            }
-        )
+        try:
+            user = User.objects.get(telegram_id=telegram_id)
+        except User.DoesNotExist:
+            return Response({"error": "Пользователь не зарегистрирован"}, status=status.HTTP_404_NOT_FOUND)
 
         refresh = RefreshToken.for_user(user)
         return Response({
@@ -94,6 +93,7 @@ class AuthViewSet(viewsets.ViewSet):
             "access": str(refresh.access_token),
             "user": UserSerializer(user).data
         }, status=status.HTTP_200_OK)
+
 
 
 
