@@ -12,6 +12,10 @@ from djangoProject import settings
 from .serializers import UserSerializer, UpdateUserSerializer, RegisterSerializer, LoginSerializer, get_choices_from_enum
 from .utils import check_telegram_auth
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class UserViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
@@ -71,6 +75,7 @@ class AuthViewSet(viewsets.ViewSet):
     )
     @action(detail=False, methods=["post"])
     def login(self, request):
+        logger.info("Login request data: %s", request.data)
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
