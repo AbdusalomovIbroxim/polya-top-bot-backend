@@ -78,7 +78,7 @@ class AuthViewSet(viewsets.ViewSet):
         logger.info("Login request data: %s", request.data)
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
+        
         init_data = serializer.validated_data["initData"]
         parsed = check_telegram_auth(init_data, settings.TELEGRAM_BOT_TOKEN)
         if not parsed:
