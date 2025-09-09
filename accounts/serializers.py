@@ -1,6 +1,8 @@
 from rest_framework import serializers
 import uuid
 from .models import FootballExperience, FootballFrequency, FootballPosition, FootballFormat, User
+from django.conf import settings
+from .utils import check_telegram_auth
 
 class UserSerializer(serializers.ModelSerializer):
     football_formats = serializers.MultipleChoiceField(

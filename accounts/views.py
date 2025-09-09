@@ -63,6 +63,7 @@ class AuthViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
     @swagger_auto_schema(
         operation_description="Логин пользователя по initData",
         request_body=LoginSerializer,
