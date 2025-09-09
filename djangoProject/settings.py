@@ -206,15 +206,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_CREDENTIALS = True
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://polya.top",
-    "https://www.polya.top",
-]
+# CSRF_TRUSTED_ORIGINS = [
+#     "https://polya.top",
+#     "https://www.polya.top",
+    
+# ]
 
 
-# CORS_ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',')
+CORS_ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',')
 
-# CSRF_TRUSTED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',')
+CSRF_TRUSTED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',')
 
 # CORS_ALLOW_METHODS = [
 #     'DELETE',
