@@ -82,25 +82,39 @@ class AuthViewSet(viewsets.ViewSet):
         init_data = serializer.validated_data["initData"]
         parsed = check_telegram_auth(init_data, settings.TELEGRAM_BOT_TOKEN)
         if not parsed:
-            return Response({"error": "Некорректная подпись Telegram"}, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"error": "Некорректная подпись Telegram"},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
-        user_json = parsed.get("user")
-        telegram_id = user_json.get("id") if user_json else None
+        user_data = parsed.get("user")
+        if not user_data:
+            return Response(
+                {"error": "Нет user в initData"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
+        telegram_id = user_data.get("id")
         if not telegram_id:
-            return Response({"error": "Нет user[id] в initData"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Нет user.id в initData"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
             user = User.objects.get(telegram_id=telegram_id)
         except User.DoesNotExist:
-            return Response({"error": "Пользователь не зарегистрирован"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Пользователь не зарегистрирован"},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         refresh = RefreshToken.for_user(user)
         return Response({
             "refresh": str(refresh),
             "access": str(refresh.access_token),
             "user": UserSerializer(user).data
-        }, status=status.HTTP_200_OK)
+        })
 
 
 
