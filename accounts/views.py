@@ -84,7 +84,8 @@ class AuthViewSet(viewsets.ViewSet):
         if not parsed:
             return Response({"error": "Некорректная подпись Telegram"}, status=status.HTTP_403_FORBIDDEN)
 
-        telegram_id = parsed.get("user[id]")
+        user_json = parsed.get("user")
+        telegram_id = user_json.get("id") if user_json else None
         if not telegram_id:
             return Response({"error": "Нет user[id] в initData"}, status=status.HTTP_400_BAD_REQUEST)
 
