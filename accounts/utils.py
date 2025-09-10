@@ -8,30 +8,17 @@ from urllib.parse import parse_qs
 logger = logging.getLogger(__name__)
 
 def check_telegram_auth(init_data: str, bot_token: str):
-    """
-    Проверяет подлинность данных инициализации (initData), полученных от Telegram Web App.
-
-    Args:
-        init_data: Строка initData, полученная из window.Telegram.WebApp.initData.
-        bot_token: Токен вашего Telegram-бота.
-
-    Returns:
-        Словарь с данными пользователя и другой информацией в случае успеха,
-        иначе None.
-    """
     try:
         if not bot_token:
             logger.error("Токен бота (TELEGRAM_BOT_TOKEN) не предоставлен.")
             return None
 
-        # initData представляет собой строку запроса (query string)
         parsed_data = parse_qs(init_data)
         
         if "hash" not in parsed_data:
             logger.warning("В initData отсутствует поле 'hash'.")
             return None
 
-        # Извлекаем хэш для проверки. parse_qs возвращает список значений для каждого ключа.
         hash_from_telegram = parsed_data.pop("hash")[0]
 
         # Проверяем, что данные не устарели. Срок жизни - 1 час (3600 секунд).

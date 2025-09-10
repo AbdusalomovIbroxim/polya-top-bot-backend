@@ -76,10 +76,6 @@ class AuthViewSet(viewsets.ViewSet):
     )
     @action(detail=False, methods=["post"])
     def login(self, request):
-        """
-        Авторизация существующего пользователя по initData из Telegram.
-        Этот метод не создает новых пользователей.
-        """
         logger.info("Получен запрос на /auth/login/")
         
         init_data = request.data.get("initData")
@@ -96,7 +92,7 @@ class AuthViewSet(viewsets.ViewSet):
             logger.warning("Авторизация не пройдена. Возвращаем 403 Forbidden.")
             return Response(
                 {"error": "Некорректные данные авторизации Telegram."},
-                status=status.HTTP_403_FORBIDDEN
+                status=status.HTTP_401_UNAUTHORIZED
             )
 
         user_data = auth_result.get("user")
@@ -104,7 +100,7 @@ class AuthViewSet(viewsets.ViewSet):
             logger.error("В данных авторизации отсутствует информация о пользователе (user.id).")
             return Response(
                 {"error": "Неполные данные пользователя от Telegram."},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY
             )
 
         telegram_id = user_data["id"]
