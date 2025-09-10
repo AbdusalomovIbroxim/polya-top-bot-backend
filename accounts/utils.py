@@ -4,14 +4,21 @@ import json
 from urllib.parse import parse_qs
 
 def check_telegram_auth(init_data: str, bot_token: str):
+    """
+    Проверка корректности initData от Telegram WebApp.
+    """
     try:
         parsed = parse_qs(init_data)
         data_dict = {k: v[0] for k, v in parsed.items()}
 
+        # В initData приходят и hash, и signature. Нам нужен только hash.
         hash_value = data_dict.pop("hash", None)
+        data_dict.pop("signature", None)
+
         if not hash_value:
             return None
 
+        # Формируем data_check_string
         data_check_string = "\n".join(
             [f"{k}={v}" for k, v in sorted(data_dict.items())]
         )
@@ -24,7 +31,7 @@ def check_telegram_auth(init_data: str, bot_token: str):
         if hmac_string != hash_value:
             return None
 
-        # только теперь парсим user
+        # Только после успешной проверки парсим user
         if "user" in data_dict:
             data_dict["user"] = json.loads(data_dict["user"])
 

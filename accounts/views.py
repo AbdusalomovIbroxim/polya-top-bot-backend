@@ -86,6 +86,7 @@ class AuthViewSet(viewsets.ViewSet):
 
         user_json = parsed.get("user")
         telegram_id = user_json.get("id") if user_json else None
+
         if not telegram_id:
             return Response({"error": "Нет user[id] в initData"}, status=status.HTTP_400_BAD_REQUEST)
 
