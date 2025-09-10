@@ -78,23 +78,21 @@ class AuthViewSet(viewsets.ViewSet):
     def login(self, request):
         init_data_raw = request.data.get("initData", "")
         logger.error("Login request raw: %s", init_data_raw)
-        logger.error("Login request decoded: %s", unquote(init_data_raw))
 
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         init_data = serializer.validated_data["initData"]
         parsed = check_telegram_auth(init_data, settings.TELEGRAM_BOT_TOKEN)
-        if not parsed:
-            logger.error("❌ Ошибка проверки Telegram initData")
 
+        if not parsed:
             return Response(
                 {"error": "Некорректная подпись Telegram"},
                 status=status.HTTP_403_FORBIDDEN
             )
-        logger.error("✅ Успешно разобран initData: %s", parsed)
 
         user_data = parsed.get("user")
+
         if not user_data:
             return Response(
                 {"error": "Нет user в initData"},
