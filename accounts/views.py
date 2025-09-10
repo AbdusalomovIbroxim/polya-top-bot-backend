@@ -75,7 +75,7 @@ class AuthViewSet(viewsets.ViewSet):
     )
     @action(detail=False, methods=["post"])
     def login(self, request):
-        logger.info("Login request data: %s", request.data)
+        logger.error("Login request data: %s", request.data)
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
@@ -88,7 +88,7 @@ class AuthViewSet(viewsets.ViewSet):
                 {"error": "Некорректная подпись Telegram"},
                 status=status.HTTP_403_FORBIDDEN
             )
-        logger.info("✅ Успешно разобран initData: %s", parsed)
+        logger.error("✅ Успешно разобран initData: %s", parsed)
 
         user_data = parsed.get("user")
         if not user_data:
