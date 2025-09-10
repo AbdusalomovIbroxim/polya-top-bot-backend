@@ -2,7 +2,10 @@ import hmac
 import hashlib
 import json
 from urllib.parse import parse_qs
-from .views import logger
+
+import logging
+logger = logging.getLogger(__name__)
+
 
 def check_telegram_auth(init_data: str, bot_token: str):
     """
