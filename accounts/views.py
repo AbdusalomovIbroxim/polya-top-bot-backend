@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from urllib.parse import unquote
 
 from accounts.models import FootballExperience, FootballFormat, FootballFrequency, FootballPosition, User
 from djangoProject import settings
@@ -75,7 +76,7 @@ class AuthViewSet(viewsets.ViewSet):
     )
     @action(detail=False, methods=["post"])
     def login(self, request):
-        logger.error("Login request data: %s", request.data)
+        logger.error("Login request data: %s", unquote(request.data))
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
@@ -88,7 +89,7 @@ class AuthViewSet(viewsets.ViewSet):
                 {"error": "Некорректная подпись Telegram"},
                 status=status.HTTP_403_FORBIDDEN
             )
-        logger.error("✅ Успешно разобран initData: %s", parsed)
+        logger.error("✅ Успешно разобран initData: %s", unquote(parsed))
 
         user_data = parsed.get("user")
         if not user_data:
