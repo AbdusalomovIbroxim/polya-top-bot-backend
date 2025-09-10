@@ -76,55 +76,67 @@ class AuthViewSet(viewsets.ViewSet):
     )
     @action(detail=False, methods=["post"])
     def login(self, request):
-        init_data_raw = request.data.get("initData", "")
-        logger.info("Login request received")
-        logger.info("Raw initData: %s", init_data_raw)
-
-        serializer = LoginSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        init_data = serializer.validated_data["initData"]
-        logger.info("Validated initData: %s", init_data)
+        """
+        Авторизация существующего пользователя по initData из Telegram.
+        Этот метод не создает новых пользователей.
+        """
+        logger.info("Получен запрос на /auth/login/")
         
-        parsed = check_telegram_auth(init_data, settings.TELEGRAM_BOT_TOKEN)
-        logger.info("Auth check result: %s", bool(parsed))
+        init_data = request.data.get("initData")
+        if not init_data:
+             return Response(
+                {"error": "initData не предоставлены"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        if not parsed:
-            logger.error("Authentication failed - returning 403")
+        logger.info("Проверка initData...")
+        auth_result = check_telegram_auth(init_data, settings.TELEGRAM_BOT_TOKEN)
+
+        if not auth_result:
+            logger.warning("Авторизация не пройдена. Возвращаем 403 Forbidden.")
             return Response(
-                {"error": "Некорректная подпись Telegram"},
+                {"error": "Некорректные данные авторизации Telegram."},
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        user_data = parsed.get("user")
-
-        if not user_data:
+        user_data = auth_result.get("user")
+        if not user_data or "id" not in user_data:
+            logger.error("В данных авторизации отсутствует информация о пользователе (user.id).")
             return Response(
-                {"error": "Нет user в initData"},
+                {"error": "Неполные данные пользователя от Telegram."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        telegram_id = user_data.get("id")
-        if not telegram_id:
-            return Response(
-                {"error": "Нет user.id в initData"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        telegram_id = user_data["id"]
 
         try:
+            # ИЗМЕНЕНИЕ: Ищем пользователя, но не создаем его.
             user = User.objects.get(telegram_id=telegram_id)
+            logger.info("Пользователь с telegram_id: %s найден.", telegram_id)
+        
         except User.DoesNotExist:
+            # Если пользователь не найден, возвращаем ошибку.
+            logger.warning("Попытка входа для незарегистрированного telegram_id: %s", telegram_id)
             return Response(
                 {"error": "Пользователь не зарегистрирован"},
                 status=status.HTTP_404_NOT_FOUND
             )
+        
+        except Exception as e:
+            logger.exception("Ошибка при поиске пользователя: %s", e)
+            return Response(
+                {"error": "Ошибка на стороне сервера при работе с базой данных."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
+        # Если пользователь найден, генерируем для него JWT токены.
         refresh = RefreshToken.for_user(user)
         return Response({
             "refresh": str(refresh),
             "access": str(refresh.access_token),
             "user": UserSerializer(user).data
         })
+
 
 
 
