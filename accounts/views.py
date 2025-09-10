@@ -82,10 +82,13 @@ class AuthViewSet(viewsets.ViewSet):
         init_data = serializer.validated_data["initData"]
         parsed = check_telegram_auth(init_data, settings.TELEGRAM_BOT_TOKEN)
         if not parsed:
+            logger.error("❌ Ошибка проверки Telegram initData")
+
             return Response(
                 {"error": "Некорректная подпись Telegram"},
                 status=status.HTTP_403_FORBIDDEN
             )
+        logger.info("✅ Успешно разобран initData: %s", parsed)
 
         user_data = parsed.get("user")
         if not user_data:
