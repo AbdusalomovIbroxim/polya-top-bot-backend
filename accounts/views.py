@@ -77,15 +77,20 @@ class AuthViewSet(viewsets.ViewSet):
     @action(detail=False, methods=["post"])
     def login(self, request):
         init_data_raw = request.data.get("initData", "")
-        logger.error("Login request raw: %s", init_data_raw)
+        logger.info("Login request received")
+        logger.info("Raw initData: %s", init_data_raw)
 
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         init_data = serializer.validated_data["initData"]
+        logger.info("Validated initData: %s", init_data)
+        
         parsed = check_telegram_auth(init_data, settings.TELEGRAM_BOT_TOKEN)
+        logger.info("Auth check result: %s", bool(parsed))
 
         if not parsed:
+            logger.error("Authentication failed - returning 403")
             return Response(
                 {"error": "Некорректная подпись Telegram"},
                 status=status.HTTP_403_FORBIDDEN

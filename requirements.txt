@@ -14,3 +14,4 @@ unidecode==1.4.0
 requests==2.32.3
 pytest
 pytest-django
+telegram-webapp-auth==3.0.6
