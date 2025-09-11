@@ -75,23 +75,28 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         init_data = validated_data.pop("initData")
         parsed = check_telegram_auth(init_data, settings.TELEGRAM_BOT_TOKEN)
+
         if not parsed:
             raise serializers.ValidationError({"initData": "Некорректная подпись Telegram"})
 
-        telegram_id = parsed.get("user[id]")
-        if not telegram_id:
-            raise serializers.ValidationError({"initData": "Нет user[id] в initData"})
+        user_data = parsed.get("user")
+        if not user_data or "id" not in user_data:
+            raise serializers.ValidationError({"initData": "Нет user.id в initData"})
 
+        telegram_id = user_data["id"]
         validated_data["telegram_id"] = telegram_id
 
-        if "user[username]" in parsed and not validated_data.get("username"):
-            validated_data["username"] = parsed["user[username]"]
+        # username — приоритет от клиента, если не передан → берём из Telegram
+        if not validated_data.get("username"):
+            validated_data["username"] = user_data.get("username") or f"user_{telegram_id}"
 
+        # если пароль не передали → создаём случайный
         if not validated_data.get("password"):
             validated_data["password"] = uuid.uuid4().hex
 
         user = User.objects.create_user(**validated_data)
         return user
+
 
 
 class LoginSerializer(serializers.Serializer):
