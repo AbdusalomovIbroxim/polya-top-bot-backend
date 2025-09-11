@@ -60,8 +60,9 @@ class User(AbstractUser):
     )
     phone = models.CharField(
         max_length=15,
+        null=True,
         blank=True,
-        unique=True,
+        # unique=True,
         verbose_name='Телефон'
     )
     language = models.CharField(
