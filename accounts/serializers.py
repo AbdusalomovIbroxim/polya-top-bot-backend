@@ -86,10 +86,9 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            "language", "city", "username",
-            "football_experience", "football_frequency",
-            "football_competitions", "football_formats", "football_position",
-            "initData"
+            "language", "city", "football_experience",
+            "football_frequency", "football_competitions",
+            "football_formats", "football_position", "initData"
         )
         extra_kwargs = {
             "password": {"write_only": True, "required": False}, 
