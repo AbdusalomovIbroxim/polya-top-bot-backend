@@ -4,7 +4,7 @@ import logging
 from rest_framework import serializers
 from django.utils import timezone
 
-from .models import Event, EventParticipant, Payment
+from .models import Event, EventParticipant, Payment, Booking
 from playgrounds.serializers import SportVenueSerializer
 from django.conf import settings
 
@@ -97,3 +97,14 @@ class CreateEventSerializer(serializers.ModelSerializer):
         event.add_creator_as_participant()
         logger.info("Event created %s by %s", event.id, user.username)
         return event
+
+
+class BookingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Booking
+        fields = ["id", "user", "field", "start_time", "end_time", "status", "created_at"]
+        read_only_fields = ["id", "status", "created_at", "user"]
+
+    def create(self, validated_data):
+        validated_data["user"] = self.context["request"].user
+        return super().create(validated_data)

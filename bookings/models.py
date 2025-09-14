@@ -183,3 +183,38 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment {self.id} {self.method} {self.amount} ({self.status})"
+
+
+class Booking(models.Model):
+    STATUS_PENDING = "pending"
+    STATUS_CONFIRMED = "confirmed"
+    STATUS_CANCELLED = "cancelled"
+    STATUS_EXPIRED = "expired"
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, "В ожидании"),
+        (STATUS_CONFIRMED, "Подтверждено"),
+        (STATUS_CANCELLED, "Отменено"),
+        (STATUS_EXPIRED, "Просрочено"),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookings")
+    field = models.ForeignKey(SportVenue, on_delete=models.CASCADE, related_name="bookings")
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Бронь"
+        verbose_name_plural = "Брони"
+        ordering = ["-created_at"]
+        unique_together = ("field", "start_time", "end_time")
+
+    def __str__(self):
+        return f"Booking {self.id} by {self.user} at {self.field}"
+
+    def mark_expired(self):
+        if self.end_time < timezone.now() and self.status not in [self.STATUS_CANCELLED, self.STATUS_EXPIRED]:
+            self.status = self.STATUS_EXPIRED
+            self.save()

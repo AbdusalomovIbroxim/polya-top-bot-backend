@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django_filters import rest_framework as filters
 
-from .models import Event, EventParticipant, Payment
+from .models import Event, EventParticipant, Payment, Booking
 from .serializers import (
     EventReadSerializer, CreateEventSerializer,
     EventParticipantSerializer, PaymentSerializer
@@ -216,3 +216,37 @@ def telegram_webhook(request):
         return JsonResponse(result, status=status_code)
 
     return JsonResponse({"ok": True})
+
+class BookingViewSet(viewsets.ModelViewSet):
+    serializer_class = BookingSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Booking.objects.filter(user=self.request.user).order_by("-created_at")
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    @action(detail=True, methods=["post"])
+    def cancel(self, request, pk=None):
+        booking = self.get_object()
+        if booking.status not in [Booking.STATUS_CANCELLED, Booking.STATUS_EXPIRED]:
+            booking.status = Booking.STATUS_CANCELLED
+            booking.save()
+        return Response({"status": booking.status})
+
+    @action(detail=False, methods=["get"])
+    def expired(self, request):
+        qs = Booking.objects.filter(user=request.user, end_time__lt=timezone.now())
+        for b in qs:
+            b.mark_expired()
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"])
+    def confirmed(self, request):
+        qs = Booking.objects.filter(user=request.user, status=Booking.STATUS_CONFIRMED)
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data)
+
+
