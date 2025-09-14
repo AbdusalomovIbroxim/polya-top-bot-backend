@@ -22,7 +22,6 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name',
             'phone',
             'photo',
-            'role',
             'language',
             'city',
             'football_experience',

@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from playgrounds.models import Region
-
+from django.contrib.postgres.fields import ArrayField
 
 # --- Choices (справочники) ---
 class Role(models.TextChoices):
@@ -93,7 +93,7 @@ class User(AbstractUser):
         verbose_name="Участвовали ли в соревнованиях?"
     )
     
-    football_formats = models.CharField(
+    football_formats = ArrayField(
         choices=FootballFormat.choices,
         verbose_name="Формат игры (5Х5, 7Х7 и т.д.)",
         blank=True,
