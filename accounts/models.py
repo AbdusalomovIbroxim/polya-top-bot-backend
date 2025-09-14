@@ -96,6 +96,7 @@ class User(AbstractUser):
     football_formats = ArrayField(
         models.CharField(max_length=10, choices=FootballFormat.choices),
         blank=True,
+        null=True,
         default=list,
         verbose_name="Форматы игры"
     )
