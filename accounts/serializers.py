@@ -37,9 +37,10 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UpdateUserSerializer(serializers.ModelSerializer):
     football_formats = serializers.MultipleChoiceField(
-        choices=User._meta.get_field("football_formats").choices,
+        choices=FootballFormat.choices,
         required=False
     )
+
 
     class Meta:
         model = User
