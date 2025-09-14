@@ -1,20 +1,22 @@
 import json
 import logging
 
+
 from django.db import transaction
+from django.utils import timezone
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from rest_framework.response import Response
+from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, mixins
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
 from django_filters import rest_framework as filters
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
 from .models import Event, EventParticipant, Payment, Booking
 from .serializers import (
     EventReadSerializer, CreateEventSerializer,
-    EventParticipantSerializer, PaymentSerializer
+    EventParticipantSerializer, PaymentSerializer, BookingSerializer
 )
 from . import services
 
@@ -219,7 +221,7 @@ def telegram_webhook(request):
 
 class BookingViewSet(viewsets.ModelViewSet):
     serializer_class = BookingSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return Booking.objects.filter(user=self.request.user).order_by("-created_at")
