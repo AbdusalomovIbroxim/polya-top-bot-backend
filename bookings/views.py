@@ -219,11 +219,13 @@ def telegram_webhook(request):
 
     return JsonResponse({"ok": True})
 
+
 class BookingViewSet(viewsets.ModelViewSet):
     serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        # DRF гарантирует, что здесь user всегда аутентифицирован
         return Booking.objects.filter(user=self.request.user).order_by("-created_at")
 
     def perform_create(self, serializer):
@@ -250,5 +252,3 @@ class BookingViewSet(viewsets.ModelViewSet):
         qs = Booking.objects.filter(user=request.user, status=Booking.STATUS_CONFIRMED)
         serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data)
-
-

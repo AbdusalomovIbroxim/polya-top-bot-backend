@@ -90,12 +90,25 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
         slots = []
         current = datetime.combine(date, open_time)
         end = datetime.combine(date, close_time)
+        now = timezone.localtime(timezone.now())
+
         while current < end:
             aware_time = timezone.make_aware(current)
-            time_str = timezone.localtime(aware_time).strftime('%H:%M')
-            is_available = aware_time > timezone.now() if date == timezone.now().date() else True
-            slots.append({'time': time_str, 'is_available': is_available and time_str not in booked})
+            time_str = aware_time.strftime('%H:%M')
+
+            # по умолчанию слот доступен, если он не в booked
+            is_available = time_str not in booked
+
+            # если дата сегодня — проверяем прошло ли время
+            if date == now.date() and aware_time <= now:
+                is_available = False
+
+            slots.append({
+                'time': time_str,
+                'is_available': is_available
+            })
             current += timedelta(hours=1)
+
 
         return Response({
             'date': date_str,
