@@ -1,58 +1,129 @@
+import json
 import pytest
 from decimal import Decimal
 from django.urls import reverse
-from rest_framework.test import APIClient
-from playgrounds.models import SportVenue
+from django.utils import timezone
+from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
-from bookings.models import Event, EventParticipant, Payment
+from bookings.models import Booking, Transaction
+from stadiums.models import Stadium
+
+# Импортируем фабрики, чтобы избежать дублирования кода для создания тестовых данных
+from .factories import UserFactory, StadiumFactory, BookingFactory, TransactionFactory
 
 User = get_user_model()
 
 
-@pytest.fixture
-def api_client():
-    return APIClient()
+@pytest.mark.django_db
+class BookingViewSetTests(APITestCase):
+    """Тестирование ViewSet для модели Booking."""
+    
+    def setUp(self):
+        self.user = UserFactory()
+        self.client.force_authenticate(user=self.user)
+        self.stadium = StadiumFactory()
+        self.list_url = reverse('booking-list')
+        
+    def test_create_booking_authenticated(self):
+        """Проверка, что аутентифицированный пользователь может создать бронь."""
+        data = {
+            'stadium': self.stadium.id,
+            'start_time': (timezone.now() + timezone.timedelta(days=2)).isoformat(),
+            'end_time': (timezone.now() + timezone.timedelta(days=2, hours=2)).isoformat(),
+            'amount': Decimal('100000.00'),
+        }
+        response = self.client.post(self.list_url, data, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Booking.objects.count(), 1)
+        self.assertEqual(Booking.objects.first().user, self.user)
+        self.assertEqual(Booking.objects.first().status, Booking.STATUS_PENDING)
+    
+    def test_list_bookings_only_user_data(self):
+        """Проверка, что пользователь видит только свои брони."""
+        BookingFactory(user=self.user)
+        BookingFactory(user=UserFactory())
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['stadium'], self.stadium.id)
+
+    def test_pay_cash_action_creates_pending_transaction(self):
+        """Тестирование оплаты наличными."""
+        booking = BookingFactory(user=self.user)
+        pay_url = reverse('booking-pay', kwargs={'pk': booking.id})
+        data = {'payment_method': Booking.PAYMENT_CASH}
+        
+        response = self.client.post(pay_url, data, format='json')
+        booking.refresh_from_db()
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(booking.payment_method, Booking.PAYMENT_CASH)
+        self.assertTrue(Transaction.objects.filter(booking=booking, provider="cash", status="pending").exists())
+        self.assertIn("Вы выбрали оплату наличными", response.data['detail'])
+        
+    def test_pay_card_action_returns_payment_url(self):
+        """Тестирование оплаты картой (Click) возвращает URL."""
+        booking = BookingFactory(user=self.user)
+        pay_url = reverse('booking-pay', kwargs={'pk': booking.id})
+        data = {'payment_method': Booking.PAYMENT_CARD}
+        
+        response = self.client.post(pay_url, data, format='json')
+        booking.refresh_from_db()
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(booking.payment_method, Booking.PAYMENT_CARD)
+        self.assertTrue(Transaction.objects.filter(booking=booking, provider="click", status="pending").exists())
+        self.assertIn('payment_url', response.data)
+        
+    def test_pay_on_processed_booking_fails(self):
+        """Проверка, что нельзя оплатить уже обработанную бронь."""
+        booking = BookingFactory(user=self.user, status=Booking.STATUS_CONFIRMED)
+        pay_url = reverse('booking-pay', kwargs={'pk': booking.id})
+        data = {'payment_method': Booking.PAYMENT_CASH}
+        
+        response = self.client.post(pay_url, data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Бронь уже обработана", response.data['detail'])
+        
+    def test_expired_action_marks_expired_bookings(self):
+        """Тестирование обновления статуса на "просрочено"."""
+        expired_booking = BookingFactory(user=self.user, end_time=timezone.now() - timezone.timedelta(hours=1))
+        active_booking = BookingFactory(user=self.user)
+        
+        expired_url = reverse('booking-expired')
+        response = self.client.get(expired_url)
+        
+        self.assertEqual(response.status_code, 200)
+        expired_booking.refresh_from_db()
+        active_booking.refresh_from_db()
+        
+        self.assertEqual(expired_booking.status, Booking.STATUS_EXPIRED)
+        self.assertEqual(active_booking.status, Booking.STATUS_PENDING)
 
 
 @pytest.mark.django_db
-def test_create_public_event_and_join(api_client, django_user_model):
-    user = django_user_model.objects.create_user(username="creator", password="pass", telegram_username="t1", phone="998900000002")
-    venue = SportVenue.objects.create(name="FieldA", price_per_hour=Decimal("100000.00"), capacity=6)
-    api_client.force_authenticate(user=user)
-
-    # create event
-    url = reverse("events-list")
-    resp = api_client.post(url, {"field": venue.id, "game_time": 2, "rounds": 1, "is_private": False}, format="json")
-    assert resp.status_code == 201
-    data = resp.json()
-    event_id = data["id"]
-
-    # create second user and join
-    user2 = django_user_model.objects.create_user(username="joiner", password="pass", telegram_username="t2", phone="998900000003")
-    api_client.force_authenticate(user=user2)
-    join_url = reverse("events-join", args=[event_id])
-    r = api_client.post(join_url, {}, format="json")
-    assert r.status_code == 201
-    assert "user_id" in r.json()
-
-
-@pytest.mark.django_db
-def test_duplicate_join_fails(api_client, django_user_model):
-    creator = django_user_model.objects.create_user(username="c", password="pass", telegram_username="t3", phone="998900000004")
-    venue = SportVenue.objects.create(name="FieldB", price_per_hour=Decimal("50000.00"), capacity=2)
-    api_client.force_authenticate(user=creator)
-    resp = api_client.post(reverse("events-list"), {"field": venue.id, "game_time": 1, "rounds": 1, "is_private": False}, format="json")
-    assert resp.status_code == 201
-    event_id = resp.json()["id"]
-
-    # same user tries to join again
-    r = api_client.post(reverse("events-join", args=[event_id]), {}, format="json")
-    assert r.status_code in (201, 400)  # either created by creator automatically or rejected due unique
-
-    # try duplicate join by another user twice
-    user2 = django_user_model.objects.create_user(username="u", password="pass", telegram_username="t4", phone="998900000005")
-    api_client.force_authenticate(user=user2)
-    r1 = api_client.post(reverse("events-join", args=[event_id]), {}, format="json")
-    r2 = api_client.post(reverse("events-join", args=[event_id]), {}, format="json")
-    assert r1.status_code == 201
-    assert r2.status_code == 400
+class TransactionViewSetTests(APITestCase):
+    """Тестирование ViewSet для модели Transaction."""
+    
+    def setUp(self):
+        self.user = UserFactory()
+        self.client.force_authenticate(user=self.user)
+        self.list_url = reverse('transaction-list')
+        
+    def test_list_transactions(self):
+        """Проверка, что пользователь видит только свои транзакции."""
+        TransactionFactory(user=self.user)
+        TransactionFactory(user=UserFactory())
+        
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['user'], self.user.id)
+        
+    def test_retrieve_transaction(self):
+        """Проверка, что пользователь может получить свою транзакцию."""
+        transaction_obj = TransactionFactory(user=self.user)
+        detail_url = reverse('transaction-detail', kwargs={'pk': transaction_obj.id})
+        response = self.client.get(detail_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['id'], transaction_obj.id)

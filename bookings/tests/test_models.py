@@ -1,36 +1,116 @@
 import pytest
 from decimal import Decimal
 from django.utils import timezone
-from datetime import timedelta
-
-from playgrounds.models import SportVenue
 from django.contrib.auth import get_user_model
-from bookings.models import Event, EventParticipant, Payment
+from django.db import IntegrityError
 
+from stadiums.models import Stadium
+from bookings.models import Booking, Transaction
+
+# Получаем модель пользователя, чтобы она работала с любой кастомной моделью
 User = get_user_model()
 
 
-@pytest.mark.django_db
-def test_event_total_rent_and_participant_amount(settings, django_user_model):
-    # подготовка: создаём поле с ценой 100000 за час
-    venue = SportVenue.objects.create(name="Test Field", price_per_hour=Decimal("100000.00"), capacity=10)
-    user = django_user_model.objects.create_user(username="u1", password="pass", telegram_username="t1", phone="998900000000")
-    event = Event.objects.create(creator=user, field=venue, game_time=2, rounds=1, is_private=False)
-    total_rent = event.get_total_rent()
-    assert total_rent == Decimal("200000.00")  # 100k * 2
+# Создаем фиктивные модели для тестирования
+@pytest.fixture
+def test_user(django_user_model):
+    """Фикстура для создания тестового пользователя."""
+    return django_user_model.objects.create(username="testuser", password="password")
 
-    # calculate_participant_amount через service
-    from bookings.services import calculate_participant_amount
-    amount = calculate_participant_amount(event, venue.capacity)
-    assert amount == Decimal("20000.00")  # 200k / 10
+
+@pytest.fixture
+def test_stadium(db):
+    """Фикстура для создания тестового стадиона."""
+    return Stadium.objects.create(name="Test Stadium", price_per_hour=Decimal("50000.00"), capacity=11)
 
 
 @pytest.mark.django_db
-def test_event_participant_unique_constraint(django_user_model):
-    user = django_user_model.objects.create_user(username="u2", password="pass", telegram_username="t2", phone="998900000001")
-    venue = SportVenue.objects.create(name="Test Field 2", price_per_hour=Decimal("50000.00"), capacity=6)
-    event = Event.objects.create(creator=user, field=venue, game_time=1, rounds=1)
-    # добавляем участника дважды
-    EventParticipant.objects.create(event=event, user=user)
-    with pytest.raises(Exception):
-        EventParticipant.objects.create(event=event, user=user)
+def test_booking_creation(test_user, test_stadium):
+    """Проверка, что объект Booking создается корректно."""
+    start_time = timezone.now() + timezone.timedelta(hours=1)
+    end_time = start_time + timezone.timedelta(hours=2)
+    booking = Booking.objects.create(
+        user=test_user,
+        stadium=test_stadium,
+        start_time=start_time,
+        end_time=end_time,
+        amount=Decimal("100000.00"),
+    )
+    
+    assert booking.user == test_user
+    assert booking.stadium == test_stadium
+    assert booking.amount == Decimal("100000.00")
+    assert booking.status == Booking.STATUS_PENDING
+    assert booking.payment_method is None
+    assert isinstance(booking.created_at, timezone.datetime)
+
+
+@pytest.mark.django_db
+def test_booking_mark_expired_pending_status(test_user, test_stadium):
+    """Проверка, что метод mark_expired правильно меняет статус на 'expired'."""
+    # Создаем бронь, которая должна быть просрочена
+    start_time = timezone.now() - timezone.timedelta(hours=2)
+    end_time = timezone.now() - timezone.timedelta(hours=1)
+    booking = Booking.objects.create(
+        user=test_user,
+        stadium=test_stadium,
+        start_time=start_time,
+        end_time=end_time,
+        amount=Decimal("100.00"),
+        status=Booking.STATUS_PENDING,
+    )
+    
+    booking.mark_expired()
+    booking.refresh_from_db()
+    
+    assert booking.status == Booking.STATUS_EXPIRED
+
+
+@pytest.mark.django_db
+def test_booking_mark_expired_confirmed_status(test_user, test_stadium):
+    """Проверка, что метод mark_expired не меняет статус 'confirmed'."""
+    # Создаем бронь, которая уже подтверждена, даже если время прошло
+    start_time = timezone.now() - timezone.timedelta(hours=2)
+    end_time = timezone.now() - timezone.timedelta(hours=1)
+    booking = Booking.objects.create(
+        user=test_user,
+        stadium=test_stadium,
+        start_time=start_time,
+        end_time=end_time,
+        amount=Decimal("100.00"),
+        status=Booking.STATUS_CONFIRMED,
+    )
+    
+    booking.mark_expired()
+    booking.refresh_from_db()
+    
+    assert booking.status == Booking.STATUS_CONFIRMED
+
+
+@pytest.mark.django_db
+def test_transaction_creation(test_user, test_stadium):
+    """Проверка, что объект Transaction создается корректно."""
+    booking = Booking.objects.create(
+        user=test_user,
+        stadium=test_stadium,
+        start_time=timezone.now(),
+        end_time=timezone.now(),
+        amount=Decimal("150.00"),
+    )
+    
+    transaction = Transaction.objects.create(
+        booking=booking,
+        user=test_user,
+        provider="cash",
+        amount=booking.amount,
+        status="success",
+    )
+    
+    assert transaction.booking == booking
+    assert transaction.user == test_user
+    assert transaction.provider == "cash"
+    assert transaction.amount == Decimal("150.00")
+    assert transaction.status == "success"
+    assert isinstance(transaction.created_at, timezone.datetime)
+    assert isinstance(transaction.updated_at, timezone.datetime)
+    assert transaction.created_at != transaction.updated_at # Проверяем, что updated_at обновился при создании
