@@ -2,10 +2,13 @@ from rest_framework import viewsets, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.models import Sum, Count
-from bookings.models import Event, Payment
+from django.utils import timezone
+
+from bookings.models import Booking, Transaction
 from playgrounds.models import SportVenue
 from playgrounds.serializers import SportVenueSerializer
-from bookings.serializers import EventReadSerializer, PaymentSerializer
+from bookings.serializers import BookingSerializer, TransactionSerializer
+
 
 # 🔹 Владелец может управлять только своими площадками
 class OwnerVenueViewSet(viewsets.ModelViewSet):
@@ -21,28 +24,33 @@ class OwnerVenueViewSet(viewsets.ModelViewSet):
         serializer.save(owner=self.request.user)
 
 
-# 🔹 Владелец может видеть ивенты только по своим площадкам
-class OwnerEventViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = EventReadSerializer
+# 🔹 Владелец может видеть бронирования только по своим площадкам
+class OwnerBookingViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = BookingSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
         if user.is_anonymous or not user.is_authenticated:
-            return Event.objects.none()
-        return Event.objects.filter(sport_venue__owner=self.request.user).select_related("sport_venue")
+            return Booking.objects.none()
+        return (
+            Booking.objects.filter(stadium__venue__owner=self.request.user)
+            .select_related("stadium", "user")
+        )
 
 
-# 🔹 Владелец видит только платежи по своим площадкам
-class OwnerPaymentViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = PaymentSerializer
+# 🔹 Владелец видит только транзакции по своим площадкам
+class OwnerTransactionViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = TransactionSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
         if user.is_anonymous or not user.is_authenticated:
-            return Payment.objects.none()
-        return Payment.objects.filter(event__sport_venue__owner=self.request.user)
+            return Transaction.objects.none()
+        return Transaction.objects.filter(
+            booking__stadium__venue__owner=self.request.user
+        ).select_related("booking", "user")
 
 
 # 🔹 Статистика для владельца
@@ -50,16 +58,23 @@ class OwnerStatisticsView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        if getattr(self, 'swagger_fake_view', False):  
+        if getattr(self, "swagger_fake_view", False):
             return Response({})
 
-        events = Event.objects.filter(sport_venue__owner=request.user)
-        payments = Payment.objects.filter(event__sport_venue__owner=request.user)
+        bookings = Booking.objects.filter(stadium__venue__owner=request.user)
+        transactions = Transaction.objects.filter(booking__stadium__venue__owner=request.user)
+
+        # Подсчет бронирований и участников (у каждого booking есть user → считаем брони)
+        stats = bookings.aggregate(
+            total_bookings=Count("id"),
+            upcoming_bookings=Count("id", filter=models.Q(start_time__gte=timezone.now())),
+            total_income=Sum("amount"),
+        )
 
         data = {
-            "total_events": events.count(),
-            "total_participants": sum(e.participants.count() for e in events),
-            "total_income": payments.aggregate(total=Sum("amount"))["total"] or 0,
-            "upcoming_events": events.filter(start_game_time__gte="now").count(),
+            "total_bookings": stats["total_bookings"] or 0,
+            "total_income": stats["total_income"] or 0,
+            "upcoming_bookings": stats["upcoming_bookings"] or 0,
+            "total_transactions": transactions.count(),
         }
         return Response(data)
