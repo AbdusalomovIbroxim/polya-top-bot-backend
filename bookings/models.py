@@ -223,6 +223,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from playgrounds.models import SportVenue
 
 
 class Booking(models.Model):
@@ -247,7 +248,7 @@ class Booking(models.Model):
     ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    stadium = models.ForeignKey("stadiums.Stadium", on_delete=models.CASCADE)
+    stadium = models.ForeignKey(SportVenue, on_delete=models.CASCADE)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     amount = models.DecimalField(max_digits=12, decimal_places=2)
