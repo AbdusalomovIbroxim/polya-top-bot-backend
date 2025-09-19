@@ -243,6 +243,14 @@ class BookingViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        # Если запрос поднимается Swagger'ом → отдаем пустой queryset
+        if getattr(self, 'swagger_fake_view', False):
+            return Booking.objects.none()
+
+        # Если пользователь аноним → отдаем пустой queryset
+        if self.request.user.is_anonymous:
+            return Booking.objects.none()
+
         return Booking.objects.filter(user=self.request.user).order_by("-created_at")
 
     def perform_create(self, serializer):
