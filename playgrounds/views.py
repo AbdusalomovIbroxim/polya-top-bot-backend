@@ -71,20 +71,20 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
         end_day = timezone.make_aware(datetime.combine(date, close_time))
 
         # Берём все события на это поле, которые пересекаются с рабочими часами
-        events = Event.objects.filter(
+        bookings = Booking.objects.filter(
             field=sport_venue,
-            start_game_time__lt=end_day,
-            start_game_time__gte=start_day
+            start_time__lt=end_day,
+            end_time__gte=start_day,
+            status__in=[Booking.STATUS_PENDING, Booking.STATUS_CONFIRMED]  # только активные
         )
 
         booked = set()
-        for event in events:
-            event_start = event.start_game_time
-            event_end = event_start + timedelta(hours=event.game_time)
-            current = event_start
-            while current < event_end:
+        for booking in bookings:
+            current = booking.start_time
+            while current < booking.end_time:
                 booked.add(timezone.localtime(current).strftime('%H:%M'))
                 current += timedelta(hours=1)
+
 
         # Формируем слоты по часам
         slots = []
