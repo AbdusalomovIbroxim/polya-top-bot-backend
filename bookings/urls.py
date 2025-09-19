@@ -23,5 +23,5 @@ router.register(r'transactions', TransactionViewSet, basename='transaction')
 urlpatterns = router.urls
 
 urlpatterns += [
-    path("webhooks/telegram/", telegram_webhook, name="bookings_telegram_webhook"),
+    path("webhooks/telegram/", telegram_webhook, name="telegram_webhook"),
 ]
