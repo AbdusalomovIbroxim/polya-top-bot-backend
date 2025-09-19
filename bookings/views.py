@@ -238,6 +238,9 @@ from .serializers import BookingSerializer, TransactionSerializer
 from . import services
 
 
+logger = logging.getLogger(__name__)
+
+
 class BookingViewSet(viewsets.ModelViewSet):
     serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated]
@@ -254,7 +257,23 @@ class BookingViewSet(viewsets.ModelViewSet):
         return Booking.objects.filter(user=self.request.user).order_by("-created_at")
 
     def perform_create(self, serializer):
-        booking = serializer.save(user=self.request.user, status=Booking.STATUS_PENDING)
+        payment_method = self.request.data.get("payment_method", Booking.PAYMENT_CASH)
+
+        booking = services.create_booking(
+            user=self.request.user,
+            stadium=serializer.validated_data["stadium"],
+            start_time=serializer.validated_data["start_time"],
+            end_time=serializer.validated_data["end_time"],
+            amount=serializer.validated_data["amount"],
+            payment_method=payment_method,
+        )
+
+        if payment_method == Booking.PAYMENT_CARD:
+            try:
+                services.send_telegram_invoice(booking)
+            except Exception as exc:
+                logger.error("Не удалось отправить invoice в Telegram: %s", exc)
+
         return booking
 
     @action(detail=True, methods=["post"])
@@ -361,5 +380,3 @@ def telegram_webhook(request):
         return JsonResponse(result, status=status_code)
 
     return JsonResponse({"ok": True})
-
-
