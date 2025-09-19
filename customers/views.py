@@ -2,7 +2,8 @@ from rest_framework import viewsets, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.models import Sum, Count
-from bookings.models import SportVenue, Event, Payment
+from bookings.models import Event, Payment
+from playgrounds.models import SportVenue
 from playgrounds.serializers import SportVenueSerializer
 from bookings.serializers import EventReadSerializer, PaymentSerializer
 
