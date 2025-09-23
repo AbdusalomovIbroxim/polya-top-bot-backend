@@ -5,6 +5,7 @@ from decimal import Decimal
 import requests
 from django.db import transaction
 from django.utils import timezone
+from playgrounds.models import SportVenue
 
 from .models import Booking, Transaction
 
@@ -15,10 +16,14 @@ def create_booking(user, stadium, start_time, end_time, amount: Decimal, payment
     """
     Создаёт бронь и транзакцию в статусе pending.
     """
+    sport_venue = SportVenue.object.get(id=stadium)
+    duration_hours = Decimal((end_time - start_time).total_seconds()) / Decimal(3600)
+    amount = duration_hours * sport_venue.price_per_hour
+    
     with transaction.atomic():
         booking = Booking.objects.create(
             user=user,
-            stadium=stadium,
+            stadium=sport_venue,
             start_time=start_time,
             end_time=end_time,
             amount=amount,

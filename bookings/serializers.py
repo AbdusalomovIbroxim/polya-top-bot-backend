@@ -127,7 +127,7 @@ class BookingSerializer(serializers.ModelSerializer):
             "payment_method",
             "created_at",
         ]
-        read_only_fields = ["status", "created_at"]
+        read_only_fields = ["id", "status", "created_at", "amount"]
 
 
 class TransactionSerializer(serializers.ModelSerializer):
