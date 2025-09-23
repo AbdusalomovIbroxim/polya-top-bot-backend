@@ -12,7 +12,7 @@ from .models import Booking, Transaction
 logger = logging.getLogger(__name__)
 
 
-def create_booking(user, stadium, start_time, end_time, amount: Decimal, payment_method: str) -> Booking:
+def create_booking(user, stadium, start_time, end_time, payment_method: str) -> Booking:
     """
     Создаёт бронь и транзакцию в статусе pending.
     """
