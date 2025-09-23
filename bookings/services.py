@@ -16,14 +16,14 @@ def create_booking(user, stadium, start_time, end_time, payment_method: str) -> 
     """
     Создаёт бронь и транзакцию в статусе pending.
     """
-    sport_venue = SportVenue.objects.get(id=stadium)
+
     duration_hours = Decimal((end_time - start_time).total_seconds()) / Decimal(3600)
-    amount = duration_hours * sport_venue.price_per_hour
+    amount = duration_hours * stadium.price_per_hour
     
     with transaction.atomic():
         booking = Booking.objects.create(
             user=user,
-            stadium=sport_venue,
+            stadium=stadium,
             start_time=start_time,
             end_time=end_time,
             amount=amount,
