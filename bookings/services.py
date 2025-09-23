@@ -29,14 +29,14 @@ def create_booking(user, stadium, start_time, end_time, payment_method: str) -> 
             amount=amount,
             payment_method=payment_method,
         )
-        transaction = Transaction.objects.create(
+        tx  = Transaction.objects.create(
             booking=booking,
             user=user,
             provider="click" if payment_method == Booking.PAYMENT_CARD else "cash",
             amount=amount,
             status="pending",
         )
-    return booking, transaction
+    return booking, tx
 
 
 def send_telegram_invoice(booking: Booking) -> dict:
