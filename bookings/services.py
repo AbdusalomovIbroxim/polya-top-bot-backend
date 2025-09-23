@@ -36,7 +36,7 @@ def create_booking(user, stadium, start_time, end_time, payment_method: str) -> 
             amount=amount,
             status="pending",
         )
-    return booking, tx
+    return booking
 
 
 def send_telegram_invoice(booking: Booking) -> dict:
