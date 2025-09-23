@@ -264,7 +264,6 @@ class BookingViewSet(viewsets.ModelViewSet):
             stadium=serializer.validated_data["stadium"],
             start_time=serializer.validated_data["start_time"],
             end_time=serializer.validated_data["end_time"],
-            amount=serializer.validated_data["amount"],
             payment_method=payment_method,
         )
 
