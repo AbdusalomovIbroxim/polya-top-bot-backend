@@ -72,7 +72,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
 
         # Берём все события на это поле, которые пересекаются с рабочими часами
         bookings = Booking.objects.filter(
-            field=sport_venue,
+            stadium=sport_venue,
             start_time__lt=end_day,
             end_time__gte=start_day,
             status__in=[Booking.STATUS_PENDING, Booking.STATUS_CONFIRMED]  # только активные
