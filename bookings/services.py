@@ -49,9 +49,9 @@ def send_telegram_invoice(booking: Booking) -> dict:
         logger.error("Telegram or provider token not configured")
         raise RuntimeError("Telegram or provider token not configured")
 
-    if not getattr(booking.user, "telegram_chat_id", None):
-        logger.error("User %s has no telegram_chat_id", booking.user)
-        raise RuntimeError("User has no telegram_chat_id")
+    if not getattr(booking.user, "telegram_id", None):
+        logger.error("User %s has no telegram_id", booking.user)
+        raise RuntimeError("User has no telegram_id")
 
     url = f"https://api.telegram.org/bot{bot_token}/sendInvoice"
 
@@ -59,7 +59,7 @@ def send_telegram_invoice(booking: Booking) -> dict:
     prices = [{"label": f"Бронирование {booking.stadium.name}", "amount": int(booking.amount * Decimal(100))}]
 
     body = {
-        "chat_id": booking.user.telegram_chat_id,
+        "chat_id": booking.user.telegram_id,
         "title": f"Оплата брони #{booking.id}",
         "description": f"Оплата бронирования стадиона {booking.stadium.name}",
         "payload": payload_str,
