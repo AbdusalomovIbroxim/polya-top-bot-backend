@@ -15,6 +15,7 @@ from rest_framework_simplejwt.views import (
 )
 import os
 
+
 schema_view = get_schema_view(
     openapi.Info(
         title="Playground Booking API",
@@ -33,7 +34,7 @@ urlpatterns = [
     path('api/', include('accounts.urls')),
     path('api/', include('playgrounds.urls')),
     path('api/', include('bookings.urls')),
-    path('api/', include('customers.urls')),
+    # path('api/', include('customers.urls')),
     path('', welcome, name='welcome'),
 
     # Swagger URLs
@@ -57,7 +58,6 @@ urlpatterns += [
         'path': "sitemap.xml", 
         'document_root': os.path.join(BASE_DIR, "static")
     }),
-
 ]
 
 

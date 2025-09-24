@@ -219,41 +219,39 @@
 
 import json
 import logging
-from django.utils import timezone
-from django.http import JsonResponse
-from rest_framework.response import Response
-from rest_framework.decorators import action
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
-from django.views.decorators.csrf import csrf_exempt
 import requests
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 from django.utils import timezone
 
-from .models import Booking, Transaction
+
 from .serializers import BookingSerializer, TransactionSerializer
+from .models import Booking, Transaction
 from . import services
+
 
 
 logger = logging.getLogger(__name__)
 
 
-class BookingViewSet(viewsets.ModelViewSet):
+class BookingViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet
+):
     serializer_class = BookingSerializer
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Если запрос поднимается Swagger'ом → отдаем пустой queryset
-        if getattr(self, 'swagger_fake_view', False):
+        if getattr(self, "swagger_fake_view", False):
             return Booking.objects.none()
-
-        # Если пользователь аноним → отдаем пустой queryset
         if self.request.user.is_anonymous:
             return Booking.objects.none()
-
         return Booking.objects.filter(user=self.request.user).order_by("-created_at")
 
     def perform_create(self, serializer):
@@ -276,57 +274,14 @@ class BookingViewSet(viewsets.ModelViewSet):
         return booking
 
     @action(detail=True, methods=["post"])
-    def pay(self, request, pk=None):
+    def cancel(self, request, pk=None):
         booking = self.get_object()
-        payment_method = request.data.get("payment_method")
-
         if booking.status != Booking.STATUS_PENDING:
-            return Response({"detail": "Бронь уже обработана"}, status=400)
+            return Response({"detail": "Бронь нельзя отменить"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if payment_method not in [Booking.PAYMENT_CARD, Booking.PAYMENT_CASH]:
-            return Response({"detail": "Некорректный метод оплаты"}, status=400)
-
-        booking.payment_method = payment_method
-
-        if payment_method == Booking.PAYMENT_CASH:
-            booking.save()
-            tx = Transaction.objects.create(
-                booking=booking,
-                user=request.user,
-                provider="cash",
-                amount=booking.amount,
-                status="pending",
-            )
-            return Response({"detail": "Вы выбрали оплату наличными. Подтвердит администратор."})
-
-        if payment_method == Booking.PAYMENT_CARD:
-            # TODO: заменить на реальный API Click
-            click_payload = {
-                "service_id": "TEST",  # твой service_id
-                "transaction_param": str(booking.id),
-                "amount": str(booking.amount),
-                "return_url": "https://your-domain.com/api/click/callback/",
-            }
-            # в реале -> запрос в Click API, а сейчас фейк URL
-            payment_url = f"https://my.click.uz/pay/{booking.id}?amount={booking.amount}"
-
-            booking.save()
-            tx = Transaction.objects.create(
-                booking=booking,
-                user=request.user,
-                provider="click",
-                amount=booking.amount,
-                status="pending",
-            )
-            return Response({"payment_url": payment_url})
-
-    @action(detail=False, methods=["get"])
-    def expired(self, request):
-        qs = Booking.objects.filter(user=request.user, end_time__lt=timezone.now())
-        for b in qs:
-            b.mark_expired()
-        serializer = self.get_serializer(qs, many=True)
-        return Response(serializer.data)
+        booking.status = Booking.STATUS_CANCELLED
+        booking.save(update_fields=["status"])
+        return Response({"detail": "Бронь отменена"}, status=status.HTTP_200_OK)
 
 
 class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
