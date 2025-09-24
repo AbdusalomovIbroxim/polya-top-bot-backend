@@ -18,7 +18,7 @@ from .views import BookingViewSet, TransactionViewSet, telegram_webhook
 
 router = DefaultRouter()
 router.register(r'bookings', BookingViewSet, basename='booking')
-router.register(r'transactions', TransactionViewSet, basename='transaction')
+# router.register(r'transactions', TransactionViewSet, basename='transaction')
 
 urlpatterns = router.urls
 
