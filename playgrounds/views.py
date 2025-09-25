@@ -48,6 +48,10 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
             openapi.Parameter(
                 'date', openapi.IN_QUERY, type=openapi.TYPE_STRING, format='date',
                 description='Дата в формате YYYY-MM-DD', required=True
+            ),
+            openapi.Parameter(
+                'tz', openapi.IN_QUERY, type=openapi.TYPE_STRING,
+                description='Таймзона клиента (например, Europe/London)', required=True
             )
         ]
     )
@@ -55,6 +59,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
     def available_time(self, request, pk=None):
         sport_venue = self.get_object()
         date_str = request.query_params.get('date')
+        tz_name = request.query_params.get('tz', 'UTC')
 
         try:
             date = datetime.strptime(date_str, '%Y-%m-%d').date()
@@ -63,58 +68,63 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
         except (ValueError, TypeError):
             return Response({'error': 'Неверный формат даты. Используйте YYYY-MM-DD'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Время работы из базы
+        try:
+            user_tz = pytz.timezone(tz_name)
+        except pytz.UnknownTimeZoneError:
+            return Response({'error': f'Неверная таймзона: {tz_name}'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Рабочее время в Ташкенте (основная зона)
         open_time = sport_venue.open_time
         close_time = sport_venue.close_time
+        tz_tashkent = pytz.timezone("Asia/Tashkent")
 
-        start_day = timezone.make_aware(datetime.combine(date, open_time))
-        end_day = timezone.make_aware(datetime.combine(date, close_time))
+        start_day = tz_tashkent.localize(datetime.combine(date, open_time))
+        end_day = tz_tashkent.localize(datetime.combine(date, close_time))
 
-        # Берём все события на это поле, которые пересекаются с рабочими часами
         bookings = Booking.objects.filter(
             stadium=sport_venue,
             start_time__lt=end_day,
             end_time__gte=start_day,
-            status__in=[Booking.STATUS_PENDING, Booking.STATUS_CONFIRMED]  # только активные
+            status__in=[Booking.STATUS_PENDING, Booking.STATUS_CONFIRMED]
         )
 
+        # Все занятые часы (в UTC)
         booked = set()
         for booking in bookings:
             current = booking.start_time
             while current < booking.end_time:
-                booked.add(timezone.localtime(current).strftime('%H:%M'))
+                booked.add(current.astimezone(pytz.UTC).strftime('%H:%M'))
                 current += timedelta(hours=1)
 
-
-        # Формируем слоты по часам
+        # Формируем слоты
         slots = []
-        current = datetime.combine(date, open_time)
-        end = datetime.combine(date, close_time)
-        now = timezone.localtime(timezone.now())
+        current = start_day
+        while current < end_day:
+            # Слот в UTC
+            slot_utc = current.astimezone(pytz.UTC)
+            slot_str_utc = slot_utc.strftime('%H:%M')
 
-        while current < end:
-            aware_time = timezone.make_aware(current)
-            time_str = aware_time.strftime('%H:%M')
+            # Переводим слот в таймзону клиента
+            slot_client = slot_utc.astimezone(user_tz)
+            slot_str_client = slot_client.strftime('%H:%M')
 
-            # по умолчанию слот доступен, если он не в booked
-            is_available = time_str not in booked
-
-            # если дата сегодня — проверяем прошло ли время
-            if date == now.date() and aware_time <= now:
-                is_available = False
+            is_available = slot_str_utc not in booked
 
             slots.append({
-                'time': time_str,
+                'time': slot_str_client,
                 'is_available': is_available
             })
             current += timedelta(hours=1)
 
-
         return Response({
             'date': date_str,
-            'working_hours': {'start': open_time.strftime('%H:%M'), 'end': close_time.strftime('%H:%M')},
+            'working_hours': {
+                'start': open_time.strftime('%H:%M'),
+                'end': close_time.strftime('%H:%M'),
+            },
             'time_points': slots
         })
+        
         
 class FavoriteSportVenueViewSet(
     mixins.ListModelMixin,       # GET /favorites/

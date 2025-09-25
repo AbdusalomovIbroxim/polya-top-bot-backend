@@ -252,10 +252,9 @@ class Booking(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     amount = models.DecimalField(max_digits=12, decimal_places=2)
-
+    provider = models.CharField(max_length=50)  # click, cash, payme, telegram
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     payment_method = models.CharField(max_length=20, choices=PAYMENT_CHOICES, null=True, blank=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     def mark_expired(self):

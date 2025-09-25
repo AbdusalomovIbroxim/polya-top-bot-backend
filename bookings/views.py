@@ -245,6 +245,13 @@ class BookingViewSet(
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet
 ):
+    """
+    Вьюсет для работы с бронями:
+    - список моих броней
+    - создание брони
+    - просмотр детали
+    - отмена
+    """
     serializer_class = BookingSerializer
 
     def get_queryset(self):
@@ -255,6 +262,9 @@ class BookingViewSet(
         return Booking.objects.filter(user=self.request.user).order_by("-created_at")
 
     def perform_create(self, serializer):
+        """
+        При создании брони вызываем сервис с бизнес-логикой.
+        """
         payment_method = self.request.data.get("payment_method", Booking.PAYMENT_CASH)
 
         booking = services.create_booking(
@@ -265,19 +275,29 @@ class BookingViewSet(
             payment_method=payment_method,
         )
 
+        # Если оплата картой → сразу отправляем invoice в TG
         if payment_method == Booking.PAYMENT_CARD:
             try:
                 services.send_telegram_invoice(booking)
             except Exception as exc:
+                # Не фейлим бронь, просто пишем в логи
+                import logging
+                logger = logging.getLogger(__name__)
                 logger.error("Не удалось отправить invoice в Telegram: %s", exc)
 
         return booking
 
     @action(detail=True, methods=["post"])
     def cancel(self, request, pk=None):
+        """
+        Отмена брони пользователем.
+        """
         booking = self.get_object()
         if booking.status != Booking.STATUS_PENDING:
-            return Response({"detail": "Бронь нельзя отменить"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "Бронь нельзя отменить"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         booking.status = Booking.STATUS_CANCELLED
         booking.save(update_fields=["status"])

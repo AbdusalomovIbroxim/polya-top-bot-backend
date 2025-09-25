@@ -12,14 +12,13 @@ from .models import Booking, Transaction
 logger = logging.getLogger(__name__)
 
 
-def create_booking(user, stadium, start_time, end_time, payment_method: str) -> Booking:
+def create_booking(user, stadium: SportVenue, start_time, end_time, payment_method: str) -> Booking:
     """
     Создаёт бронь и транзакцию в статусе pending.
     """
-
     duration_hours = Decimal((end_time - start_time).total_seconds()) / Decimal(3600)
     amount = duration_hours * stadium.price_per_hour
-    
+
     with transaction.atomic():
         booking = Booking.objects.create(
             user=user,
@@ -29,7 +28,7 @@ def create_booking(user, stadium, start_time, end_time, payment_method: str) -> 
             amount=amount,
             payment_method=payment_method,
         )
-        tx  = Transaction.objects.create(
+        Transaction.objects.create(
             booking=booking,
             user=user,
             provider="click" if payment_method == Booking.PAYMENT_CARD else "cash",
@@ -46,17 +45,18 @@ def send_telegram_invoice(booking: Booking) -> dict:
     bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
     provider_token = os.getenv("PAYMENT_PROVIDER_TOKEN")
     if not bot_token or not provider_token:
-        logger.error("Telegram or provider token not configured")
-        raise RuntimeError("Telegram or provider token not configured")
+        raise RuntimeError("Telegram tokens not configured")
 
     if not getattr(booking.user, "telegram_id", None):
-        logger.error("User %s has no telegram_id", booking.user)
         raise RuntimeError("User has no telegram_id")
 
     url = f"https://api.telegram.org/bot{bot_token}/sendInvoice"
 
     payload_str = f"booking_{booking.id}_{int(timezone.now().timestamp())}"
-    prices = [{"label": f"Бронирование {booking.stadium.name}", "amount": int(booking.amount * Decimal(100))}]
+    prices = [{
+        "label": f"Бронирование {booking.stadium.name}",
+        "amount": int(booking.amount * Decimal(100))
+    }]
 
     body = {
         "chat_id": booking.user.telegram_id,
@@ -69,29 +69,9 @@ def send_telegram_invoice(booking: Booking) -> dict:
         "start_parameter": "booking_payment",
     }
 
-    try:
-        resp = requests.post(url, json=body, timeout=10)
-        resp.raise_for_status()
-        data = resp.json()
-        logger.info("Telegram invoice sent for booking %s: %s", booking.id, data.get("ok"))
-
-        # Создаём транзакцию в pending
-        # tx = Transaction.objects.create(
-        #     booking=booking,
-        #     user=booking.user,
-        #     provider="click",
-        #     amount=booking.amount,
-        #     status="pending",
-        # )
-        # сохраняем payload, чтобы потом найти
-        # tx.provider = "click"
-        # tx.status = "pending"
-        # tx.save(update_fields=["provider", "status"])
-
-        return {"ok": True, "payload": payload_str}
-    except Exception as exc:
-        logger.exception("Failed to send Telegram invoice: %s", exc)
-        raise
+    resp = requests.post(url, json=body, timeout=10)
+    resp.raise_for_status()
+    return resp.json()
 
 
 def handle_pre_checkout_query(pre_checkout_query: dict) -> dict:
