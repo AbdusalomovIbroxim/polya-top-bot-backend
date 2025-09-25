@@ -1,5 +1,9 @@
 from rest_framework import serializers
 from .models import SportVenue, SportVenueType, Region, SportVenueImage, FavoriteSportVenue
+from django.contrib.auth import get_user_model
+
+
+User = get_user_model()
 
 
 class SportVenueImageSerializer(serializers.ModelSerializer):
@@ -20,7 +24,13 @@ class RegionSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'slug']
 
 
+class SportVenueOwnerPreviueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'phone', 'photo']        
+
 class SportVenueSerializer(serializers.ModelSerializer):
+    owner = SportVenueOwnerPreviueSerializer(read_only=True)
     sport_venue_type = SportVenueTypeSerializer(read_only=True)
     region = RegionSerializer(read_only=True)
     images = SportVenueImageSerializer(many=True, read_only=True)
@@ -30,7 +40,7 @@ class SportVenueSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'description', 'price_per_hour',
             'city', 'address', 'latitude', 'longitude', 'yandex_map_url',
-            'sport_venue_type', 'region', 'open_time', 'close_time','owner', 'images'
+            'sport_venue_type', 'region', 'open_time', 'close_time', 'owner', 'images'
         ]
 
 
