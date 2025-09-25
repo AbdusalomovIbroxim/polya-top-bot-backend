@@ -35,7 +35,28 @@ class BookingSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "status", "created_at", "amount"]
 
 
+class BookingCreateSerializer(serializers.ModelSerializer):
+    stadium = serializers.PrimaryKeyRelatedField(
+        queryset=SportVenue.objects.all()
+    )
+    start_time = serializers.DateTimeField()
+    end_time = serializers.DateTimeField()
+    client_timezone = serializers.CharField(write_only=True, required=False)
+
+    class Meta:
+        model = Booking
+        fields = [
+            "stadium",
+            "start_time",
+            "end_time",
+            "payment_method",
+            "client_timezone",
+        ]
+
+
+
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = "__all__"
+
