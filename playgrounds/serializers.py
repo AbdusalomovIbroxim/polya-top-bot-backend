@@ -29,6 +29,7 @@ class SportVenueOwnerPreviueSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'phone', 'photo']        
 
+
 class SportVenueSerializer(serializers.ModelSerializer):
     owner = SportVenueOwnerPreviueSerializer(read_only=True)
     sport_venue_type = SportVenueTypeSerializer(read_only=True)

@@ -4,10 +4,15 @@ from playgrounds.models import SportVenue
 
 
 class SportVenuePreviewSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = SportVenue
         fields = ["id", "name", "image", "sport_venue_type"]
 
+    def get_image(self, obj):
+        first_image = obj.images.first()
+        return first_image.image.url if first_image else None
 
 
 class BookingSerializer(serializers.ModelSerializer):
