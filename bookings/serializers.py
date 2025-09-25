@@ -50,7 +50,7 @@ class BookingCreateSerializer(serializers.ModelSerializer):
             "start_time",
             "end_time",
             "payment_method",
-            "client_timezone",
+            "tz",
         ]
 
 
