@@ -1,3 +1,4 @@
+import pytz
 import json
 import logging
 import requests
@@ -50,33 +51,15 @@ class BookingViewSet(
 
     def perform_create(self, serializer):
         payment_method = self.request.data.get("payment_method", Booking.PAYMENT_CASH)
-        client_tz = self.request.data.get("tz")
 
+        # Берем время напрямую из сериализатора
         start_time = serializer.validated_data["start_time"]
         end_time = serializer.validated_data["end_time"]
 
-        if client_tz:
-            import pytz
-            try:
-                tz = pytz.timezone(client_tz)
+        # ❌ Убираем всю логику с tz — сохраняем как есть
+        # Если фронт присылает UTC (с Z), оно уже правильное
+        # Если локальное без tz — Django сам распознает (если USE_TZ=True)
 
-                if is_naive(start_time):
-                    start_time = tz.localize(start_time)
-                else:
-                    start_time = start_time.astimezone(tz)
-
-                if is_naive(end_time):
-                    end_time = tz.localize(end_time)
-                else:
-                    end_time = end_time.astimezone(tz)
-
-                # Переводим в текущую (серверную) таймзону
-                start_time = start_time.astimezone(get_current_timezone())
-                end_time = end_time.astimezone(get_current_timezone())
-
-            except pytz.UnknownTimeZoneError:
-                raise serializers.ValidationError({"tz": "Invalid timezone"})
-            
         booking = services.create_booking(
             user=self.request.user,
             stadium=serializer.validated_data["stadium"],
@@ -93,6 +76,7 @@ class BookingViewSet(
                 logger.error("Не удалось отправить invoice в Telegram: %s", exc)
 
         return booking
+
 
 
     @action(detail=True, methods=["post"])
