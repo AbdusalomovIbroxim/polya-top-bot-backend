@@ -41,7 +41,7 @@ class BookingCreateSerializer(serializers.ModelSerializer):
     )
     start_time = serializers.DateTimeField()
     end_time = serializers.DateTimeField()
-    client_timezone = serializers.CharField(write_only=True, required=False)
+    tz = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Booking

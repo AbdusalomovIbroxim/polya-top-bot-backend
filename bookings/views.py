@@ -50,7 +50,7 @@ class BookingViewSet(
 
     def perform_create(self, serializer):
         payment_method = self.request.data.get("payment_method", Booking.PAYMENT_CASH)
-        client_tz = self.request.data.get("client_timezone")
+        client_tz = self.request.data.get("tz")
 
         start_time = serializer.validated_data["start_time"]
         end_time = serializer.validated_data["end_time"]
@@ -62,7 +62,7 @@ class BookingViewSet(
                 start_time = timezone.make_aware(start_time, tz).astimezone(timezone.get_current_timezone())
                 end_time = timezone.make_aware(end_time, tz).astimezone(timezone.get_current_timezone())
             except Exception:
-                raise serializers.ValidationError({"client_timezone": "Invalid timezone"})
+                raise serializers.ValidationError({"tz": "Invalid timezone"})
 
         booking = services.create_booking(
             user=self.request.user,
