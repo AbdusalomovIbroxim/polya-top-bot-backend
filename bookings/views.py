@@ -9,7 +9,7 @@ from rest_framework import serializers
 
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-from django.utils import timezone
+from django.utils.timezone import is_naive, get_current_timezone
 
 
 from .serializers import BookingSerializer, TransactionSerializer, BookingCreateSerializer
@@ -59,11 +59,24 @@ class BookingViewSet(
             import pytz
             try:
                 tz = pytz.timezone(client_tz)
-                start_time = timezone.make_aware(start_time, tz).astimezone(timezone.get_current_timezone())
-                end_time = timezone.make_aware(end_time, tz).astimezone(timezone.get_current_timezone())
-            except Exception:
-                raise serializers.ValidationError({"tz": "Invalid timezone"})
 
+                if is_naive(start_time):
+                    start_time = tz.localize(start_time)
+                else:
+                    start_time = start_time.astimezone(tz)
+
+                if is_naive(end_time):
+                    end_time = tz.localize(end_time)
+                else:
+                    end_time = end_time.astimezone(tz)
+
+                # Переводим в текущую (серверную) таймзону
+                start_time = start_time.astimezone(get_current_timezone())
+                end_time = end_time.astimezone(get_current_timezone())
+
+            except pytz.UnknownTimeZoneError:
+                raise serializers.ValidationError({"tz": "Invalid timezone"})
+            
         booking = services.create_booking(
             user=self.request.user,
             stadium=serializer.validated_data["stadium"],

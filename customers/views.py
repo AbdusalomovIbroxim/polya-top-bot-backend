@@ -1,81 +1,77 @@
-from django.db import models
-from rest_framework import viewsets, permissions
-from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.db.models import Sum, Count
-from django.utils import timezone
+from rest_framework import viewsets, status
+from rest_framework.permissions import BasePermission, IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
 
-from bookings.models import Booking, Transaction
+
 from playgrounds.models import SportVenue
+from bookings.models import Booking, Transaction
 from playgrounds.serializers import SportVenueSerializer
 from bookings.serializers import BookingSerializer, TransactionSerializer
+from .services import get_financial_summary, get_venue_usage, get_user_activity
+
+
+# 🔹 Кастомные permissions
+class IsOwner(BasePermission):
+    """Доступ только владельцу поля"""
+
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and hasattr(request.user, "is_owner") and request.user.is_owner
+
+
+class IsSuperAdminOrOwner(BasePermission):
+    """Доступ супер-админу или владельцу"""
+
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and (getattr(request.user, "is_superuser", False) or getattr(request.user, "is_owner", False))
 
 
 # 🔹 Владелец может управлять только своими площадками
 class OwnerVenueViewSet(viewsets.ModelViewSet):
     serializer_class = SportVenueSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwner]
 
     def get_queryset(self):
-        if self.request.user.is_anonymous:
-            return SportVenue.objects.none()
         return SportVenue.objects.filter(owner=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        try:
+            serializer.save(owner=self.request.user)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-# 🔹 Владелец может видеть бронирования только по своим площадкам
+# 🔹 Владелец видит только бронирования своих площадок
 class OwnerBookingViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = BookingSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwner]
 
     def get_queryset(self):
-        user = self.request.user
-        if user.is_anonymous or not user.is_authenticated:
-            return Booking.objects.none()
-        return (
-            Booking.objects.filter(stadium__venue__owner=self.request.user)
-            .select_related("stadium", "user")
-        )
+        return Booking.objects.filter(stadium__venue__owner=self.request.user).select_related("stadium", "user")
 
 
-# 🔹 Владелец видит только транзакции по своим площадкам
+# 🔹 Владелец видит только свои транзакции
 class OwnerTransactionViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = TransactionSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwner]
 
     def get_queryset(self):
-        user = self.request.user
-        if user.is_anonymous or not user.is_authenticated:
-            return Transaction.objects.none()
         return Transaction.objects.filter(
             booking__stadium__venue__owner=self.request.user
         ).select_related("booking", "user")
 
 
-# 🔹 Статистика для владельца
-class OwnerStatisticsView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        if getattr(self, "swagger_fake_view", False):
-            return Response({})
-
-        bookings = Booking.objects.filter(stadium__venue__owner=request.user)
-        transactions = Transaction.objects.filter(booking__stadium__venue__owner=request.user)
-
-        # Подсчет бронирований и участников (у каждого booking есть user → считаем брони)
-        stats = bookings.aggregate(
-            total_bookings=Count("id"),
-            upcoming_bookings=Count("id", filter=models.Q(start_time__gte=timezone.now())),
-            total_income=Sum("amount"),
-        )
-
+# 🔹 Аналитика для владельца
+@api_view(["GET"])
+@permission_classes([IsAuthenticated, IsOwner])
+def owner_analytics(request):
+    owner = request.user
+    try:
         data = {
-            "total_bookings": stats["total_bookings"] or 0,
-            "total_income": stats["total_income"] or 0,
-            "upcoming_bookings": stats["upcoming_bookings"] or 0,
-            "total_transactions": transactions.count(),
+            "financial_summary": get_financial_summary(owner),
+            "venue_usage": get_venue_usage(owner, "month"),
+            "user_activity": get_user_activity(owner, "month"),
         }
         return Response(data)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

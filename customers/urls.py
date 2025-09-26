@@ -4,7 +4,7 @@ from .views import (
     OwnerVenueViewSet,
     OwnerBookingViewSet,
     OwnerTransactionViewSet,
-    OwnerStatisticsView,
+    owner_analytics,
 )
 
 router = DefaultRouter()
@@ -15,5 +15,5 @@ router.register(r'owner/transactions', OwnerTransactionViewSet, basename='owner-
 
 urlpatterns = [
     *router.urls,
-    path('owner/statistics/', OwnerStatisticsView.as_view(), name='owner-statistics'),
+    path('owner/statistics/', owner_analytics(), name='owner-statistics'),
 ]

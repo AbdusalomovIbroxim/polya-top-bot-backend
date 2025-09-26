@@ -134,6 +134,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 REST_FRAMEWORK = {
+    # "EXCEPTION_HANDLER": "djangoProject.exception_handler.custom_exception_handler",
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
