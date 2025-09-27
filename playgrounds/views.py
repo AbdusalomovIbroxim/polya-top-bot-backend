@@ -117,7 +117,13 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
 
         # Формируем слоты
         slots = []
-        for hour in range(open_hour, close_hour):
+        
+        last_hour = close_hour
+        if close_time.minute == 0 and close_time.second == 0:
+            last_hour = close_hour
+            
+            
+        for hour in range(open_hour, close_hour):  # оставляем close_hour, а не close_hour - 1
             slot_tashkent = tz_tashkent.localize(datetime.combine(date, time(hour, 0)))
             slot_client = slot_tashkent.astimezone(user_tz)
 
