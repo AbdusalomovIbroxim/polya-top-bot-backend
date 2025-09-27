@@ -114,19 +114,21 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
         # Формируем список слотов
         slots = []
         current = start_day
+        now_client = timezone.now().astimezone(user_tz)
+
         while current < end_day:
             slot_utc = current.astimezone(pytz.UTC)
             slot_str_utc = slot_utc.strftime('%H:%M')
 
-            # Конвертируем слот в TZ клиента (по умолчанию Ташкент)
+            # Конвертируем слот в таймзону клиента
             slot_client = slot_utc.astimezone(user_tz)
             slot_str_client = slot_client.strftime('%H:%M')
 
             # По умолчанию свободен, если не забронирован
             is_available = slot_str_utc not in booked
 
-            # Если слот уже в прошлом относительно клиента → недоступен
-            if slot_client < timezone.now().astimezone(user_tz).replace(minute=0, second=0, microsecond=0):
+            # Если слот уже наступил (или идёт) → делаем False
+            if slot_client <= now_client:
                 is_available = False
 
             slots.append({
@@ -134,6 +136,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
                 'is_available': is_available
             })
             current += timedelta(hours=1)
+
 
         return Response({
             'date': date_str,
