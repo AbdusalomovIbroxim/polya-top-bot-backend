@@ -4,7 +4,7 @@ from playgrounds.models import SportVenue
 def remove_duplicates():
     duplicates = (
         SportVenue.objects
-        .values("name", "address")
+        .values("name", "address", "latitude", "longitude")
         .annotate(min_id=models.Min("id"), count_id=models.Count("id"))
         .filter(count_id__gt=1)
     )
@@ -12,7 +12,9 @@ def remove_duplicates():
     for dup in duplicates:
         SportVenue.objects.filter(
             name=dup["name"],
-            address=dup["address"]
+            address=dup["address"],
+            latitude=dup["latitude"],
+            longitude=dup["longitude"],
         ).exclude(id=dup["min_id"]).delete()
 
     print(f"Удалено {duplicates.count()} групп дубликатов")
