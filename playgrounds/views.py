@@ -189,7 +189,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
             results.append({
                 "id": v["id"],
                 "name": v["name"],
-                "price": v["price_per_hour"],
+                "price_per_hour": v["price_per_hour"],
                 "latitude": v["latitude"],
                 "longitude": v["longitude"],
                 "image": request.build_absolute_uri(v["first_image"]) if v["first_image"] else None
