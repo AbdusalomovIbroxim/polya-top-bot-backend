@@ -63,7 +63,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
     def available_time(self, request, pk=None):
         sport_venue = self.get_object()
         date_str = request.query_params.get('date')
-        tz_name = request.query_params.get('tz', 'UTC')
+        tz_name = request.query_params.get('tz', 'Asia/Tashkent')
 
         # Проверяем дату
         try:
@@ -79,12 +79,12 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
         except pytz.UnknownTimeZoneError:
             return Response({'error': f'Неверная таймзона: {tz_name}'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Рабочее время в Ташкенте
+        # Рабочее время в Ташкенте (базовая TZ системы)
+        tz_tashkent = pytz.timezone("Asia/Tashkent")
         open_time = sport_venue.open_time
         close_time = sport_venue.close_time
-        tz_tashkent = pytz.timezone("Asia/Tashkent")
 
-        # Начало и конец рабочего дня
+        # Начало и конец рабочего дня в Ташкенте
         start_day = tz_tashkent.localize(datetime.combine(date, open_time))
         end_day = tz_tashkent.localize(datetime.combine(date, close_time))
 
@@ -118,7 +118,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
             slot_utc = current.astimezone(pytz.UTC)
             slot_str_utc = slot_utc.strftime('%H:%M')
 
-            # Конвертируем слот в таймзону клиента
+            # Конвертируем слот в TZ клиента (по умолчанию Ташкент)
             slot_client = slot_utc.astimezone(user_tz)
             slot_str_client = slot_client.strftime('%H:%M')
 
@@ -141,7 +141,8 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
                 'start': open_time.strftime('%H:%M'),
                 'end': close_time.strftime('%H:%M'),
             },
-            'time_points': slots
+            'time_points': slots,
+            'timezone': tz_name
         })
 
 
