@@ -142,6 +142,37 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
             "time_points": slots,
             "timezone": tz_name,
         })
+       
+        
+    @swagger_auto_schema(
+        method="get",
+        operation_summary="Получить список стадионов для карты",
+        operation_description="Возвращает список стадионов с координатами и базовой информацией",
+        responses={
+            200: openapi.Response(
+                description="Успешный ответ",
+                examples={
+                    "application/json": {
+                        "venues": [
+                            {
+                                "id": 1,
+                                "name": "Стадион Центральный",
+                                "latitude": 41.311081,
+                                "longitude": 69.240562,
+                                "address": "г. Ташкент, ул. Амир Темур, 15"
+                            }
+                        ]
+                    }
+                }
+            )
+        }
+    )
+    @action(detail=False, methods=["get"], url_path="map")
+    def map(self, request):
+        venues = SportVenue.objects.all().values(
+            "id", "name", "latitude", "longitude", "address"
+        )
+        return Response({"venues": list(venues)})
 
 
 
