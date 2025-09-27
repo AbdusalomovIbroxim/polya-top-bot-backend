@@ -191,6 +191,10 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
             )
 
             results = []
+            image_url = request.build_absolute_uri(
+                
+            )
+            
             for v in venues:
                 results.append({
                     "id": v["id"],
@@ -198,7 +202,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
                     "price_per_hour": v["price_per_hour"],
                     "latitude": v["latitude"],
                     "longitude": v["longitude"],
-                    "image": request.build_absolute_uri(v["first_image"]) if v["first_image"] else None
+                    "image": request.build_absolute_uri(settings.MEDIA_URL + str(v["first_image"])) if v["first_image"] else None
                 })
 
             return Response({"venues": results}, status=status.HTTP_200_OK)
