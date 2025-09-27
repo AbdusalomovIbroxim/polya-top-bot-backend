@@ -1,6 +1,9 @@
 from rest_framework import serializers
 from .models import Booking, Transaction
 from playgrounds.models import SportVenue
+import pytz
+from django.utils import timezone
+from datetime import datetime
 
 
 class SportVenuePreviewSerializer(serializers.ModelSerializer):
@@ -52,6 +55,48 @@ class BookingCreateSerializer(serializers.ModelSerializer):
             "payment_method",
             "tz",
         ]
+        
+    def validate(self, data):
+        stadium = data["stadium"]
+        start_time = data["start_time"]
+        end_time = data["end_time"]
+
+        # Текущий момент (в Ташкенте)
+        tz_tashkent = pytz.timezone("Asia/Tashkent")
+        now_tashkent = timezone.now().astimezone(tz_tashkent)
+
+        # Проверка: нельзя в прошлом
+        if end_time <= now_tashkent:
+            raise serializers.ValidationError("Нельзя бронировать прошедшее время.")
+
+        # Проверка: end > start
+        if end_time <= start_time:
+            raise serializers.ValidationError("Время окончания должно быть позже начала.")
+
+        # Проверка: длительность хотя бы 1 час
+        if (end_time - start_time).total_seconds() < 3600:
+            raise serializers.ValidationError("Минимальная длительность брони — 1 час.")
+
+        # Рабочее время стадиона (Ташкент)
+        start_day = tz_tashkent.localize(datetime.combine(start_time.date(), stadium.open_time))
+        end_day = tz_tashkent.localize(datetime.combine(start_time.date(), stadium.close_time))
+
+        # Проверка, что бронь внутри рабочего времени
+        if start_time < start_day or end_time > end_day:
+            raise serializers.ValidationError("Выбранное время вне рабочего графика площадки.")
+
+        # Проверка пересечений с другими бронями
+        conflicts = Booking.objects.filter(
+            stadium=stadium,
+            start_time__lt=end_time,
+            end_time__gt=start_time,
+            status__in=[Booking.STATUS_PENDING, Booking.STATUS_CONFIRMED]
+        )
+        if conflicts.exists():
+            raise serializers.ValidationError("Это время уже забронировано.")
+
+        return data
+
 
 
 
