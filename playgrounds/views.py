@@ -28,6 +28,11 @@ from .serializers import (
 
 
 import pytz
+import logging
+
+
+logger = logging.getLogger(__name__)
+
 
 
 class SportVenueTypeViewSet(viewsets.ReadOnlyModelViewSet):
@@ -173,29 +178,38 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
     )
     @action(detail=False, methods=["get"], url_path="map")
     def map(self, request):
-        # Берем первое изображение каждого стадиона
-        first_image_subquery = SportVenueImage.objects.filter(
-            sport_venue=OuterRef("pk")
-        ).order_by("id").values("image")[:1]
+        try:
+            # Берем первое изображение каждого стадиона
+            first_image_subquery = SportVenueImage.objects.filter(
+                sport_venue=OuterRef("pk")
+            ).order_by("id").values("image")[:1]
 
-        venues = SportVenue.objects.annotate(
-            first_image=Subquery(first_image_subquery)
-        ).values(
-            "id", "name", "price_per_hour", "latitude", "longitude", "first_image"
-        )
+            venues = SportVenue.objects.annotate(
+                first_image=Subquery(first_image_subquery)
+            ).values(
+                "id", "name", "price_per_hour", "latitude", "longitude", "first_image"
+            )
 
-        results = []
-        for v in venues:
-            results.append({
-                "id": v["id"],
-                "name": v["name"],
-                "price_per_hour": v["price_per_hour"],
-                "latitude": v["latitude"],
-                "longitude": v["longitude"],
-                "image": request.build_absolute_uri(v["first_image"]) if v["first_image"] else None
-            })
+            results = []
+            for v in venues:
+                results.append({
+                    "id": v["id"],
+                    "name": v["name"],
+                    "price_per_hour": v["price_per_hour"],
+                    "latitude": v["latitude"],
+                    "longitude": v["longitude"],
+                    "image": request.build_absolute_uri(v["first_image"]) if v["first_image"] else None
+                })
 
-        return Response({"venues": results})
+            return Response({"venues": results}, status=status.HTTP_200_OK)
+
+        except Exception as exc:
+            logger.error("Ошибка при получении стадионов для карты: %s", exc, exc_info=True)
+            return Response(
+                {"detail": "Не удалось получить список стадионов"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 
 
