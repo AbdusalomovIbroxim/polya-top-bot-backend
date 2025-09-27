@@ -181,7 +181,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
         venues = SportVenue.objects.annotate(
             first_image=Subquery(first_image_subquery)
         ).values(
-            "id", "name", "price", "latitude", "longitude", "first_image"
+            "id", "name", "price_per_hour", "latitude", "longitude", "first_image"
         )
 
         results = []
@@ -189,7 +189,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
             results.append({
                 "id": v["id"],
                 "name": v["name"],
-                "price": v["price"],
+                "price": v["price_per_hour"],
                 "latitude": v["latitude"],
                 "longitude": v["longitude"],
                 "image": request.build_absolute_uri(v["first_image"]) if v["first_image"] else None
