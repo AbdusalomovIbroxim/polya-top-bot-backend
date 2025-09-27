@@ -7,35 +7,61 @@ from django.db import transaction
 from django.utils import timezone
 from playgrounds.models import SportVenue
 
+from django.core.exceptions import ValidationError
+
 from .models import Booking, Transaction
 
 logger = logging.getLogger(__name__)
 
 
+
+class SlotAlreadyBooked(Exception):
+    """Слот уже занят другим пользователем."""
+    pass
+
+
 def create_booking(user, stadium: SportVenue, start_time, end_time, payment_method: str) -> Booking:
     """
     Создаёт бронь и транзакцию в статусе pending.
+    Бросает исключения, если время некорректно или слот занят.
     """
+    if start_time >= end_time:
+        raise ValidationError({"detail": "Некорректное время бронирования"})
+
+    # Проверка на пересечение броней
+    overlap_exists = Booking.objects.filter(
+        stadium=stadium,
+        status=Booking.STATUS_PENDING,  # учитываем только активные брони
+        start_time__lt=end_time,
+        end_time__gt=start_time,
+    ).exists()
+    if overlap_exists:
+        raise SlotAlreadyBooked("Слот уже занят")
+
     duration_hours = Decimal((end_time - start_time).total_seconds()) / Decimal(3600)
     amount = duration_hours * stadium.price_per_hour
 
-    with transaction.atomic():
-        booking = Booking.objects.create(
-            user=user,
-            stadium=stadium,
-            start_time=start_time,
-            end_time=end_time,
-            amount=amount,
-            payment_method=payment_method,
-        )
-        Transaction.objects.create(
-            booking=booking,
-            user=user,
-            provider="click" if payment_method == Booking.PAYMENT_CARD else "cash",
-            amount=amount,
-            status="pending",
-        )
-    return booking
+    try:
+        with transaction.atomic():
+            booking = Booking.objects.create(
+                user=user,
+                stadium=stadium,
+                start_time=start_time,
+                end_time=end_time,
+                amount=amount,
+                payment_method=payment_method,
+            )
+            Transaction.objects.create(
+                booking=booking,
+                user=user,
+                provider="click" if payment_method == Booking.PAYMENT_CARD else "cash",
+                amount=amount,
+                status="pending",
+            )
+        return booking
+    except Exception as exc:
+        raise ValidationError({"detail": f"Ошибка при создании брони: {exc}"})
+
 
 
 def send_telegram_invoice(booking: Booking) -> dict:

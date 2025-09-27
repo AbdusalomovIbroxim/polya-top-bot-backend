@@ -7,6 +7,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import serializers
+from rest_framework.exceptions import APIException, ValidationError
+
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
@@ -16,6 +20,7 @@ from django.utils.timezone import is_naive, get_current_timezone
 from .serializers import BookingSerializer, TransactionSerializer, BookingCreateSerializer
 from .models import Booking, Transaction
 from . import services
+
 
 
 
@@ -49,24 +54,45 @@ class BookingViewSet(
             return Booking.objects.none()
         return Booking.objects.filter(user=self.request.user).order_by("-created_at")
 
+
+    @swagger_auto_schema(
+        request_body=BookingCreateSerializer,
+        responses={
+            201: openapi.Response("Бронь успешно создана", BookingSerializer),
+            400: "Некорректные данные (например: время некорректное)",
+            409: "Слот уже занят другим пользователем",
+            500: "Внутренняя ошибка сервера при создании брони",
+        },
+        operation_summary="Создание брони",
+        operation_description="Создаёт новую бронь на указанный слот",
+    )
+    def create(self, request, *args, **kwargs):
+        """Создание брони"""
+        return super().create(request, *args, **kwargs)
+    
+    
     def perform_create(self, serializer):
         payment_method = self.request.data.get("payment_method", Booking.PAYMENT_CASH)
 
-        # Берем время напрямую из сериализатора
         start_time = serializer.validated_data["start_time"]
         end_time = serializer.validated_data["end_time"]
 
-        # ❌ Убираем всю логику с tz — сохраняем как есть
-        # Если фронт присылает UTC (с Z), оно уже правильное
-        # Если локальное без tz — Django сам распознает (если USE_TZ=True)
-
-        booking = services.create_booking(
-            user=self.request.user,
-            stadium=serializer.validated_data["stadium"],
-            start_time=start_time,
-            end_time=end_time,
-            payment_method=payment_method,
-        )
+        try:
+            booking = services.create_booking(
+                user=self.request.user,
+                stadium=serializer.validated_data["stadium"],
+                start_time=start_time,
+                end_time=end_time,
+                payment_method=payment_method,
+            )
+        except services.SlotAlreadyBooked:
+            raise ValidationError({"detail": "Слот уже занят"})
+        except ValidationError as ve:
+            raise ve
+        except Exception as exc:
+            logger = logging.getLogger(__name__)
+            logger.error("Ошибка при создании брони: %s", exc)
+            raise ValidationError({"detail": "Внутренняя ошибка сервера при создании брони"})
 
         if payment_method == Booking.PAYMENT_CARD:
             try:
@@ -76,7 +102,6 @@ class BookingViewSet(
                 logger.error("Не удалось отправить invoice в Telegram: %s", exc)
 
         return booking
-
 
 
     @action(detail=True, methods=["post"])
