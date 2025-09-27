@@ -1,14 +1,15 @@
 import json
+import requests
+
 from django.http import JsonResponse
 from django.shortcuts import render
-import requests
 from rest_framework import viewsets, permissions, filters
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status, mixins
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
@@ -65,7 +66,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
         date_str = request.query_params.get('date')
         tz_name = request.query_params.get('tz', 'Asia/Tashkent')
 
-        # Проверяем дату
+        # Проверка даты
         try:
             date = datetime.strptime(date_str, '%Y-%m-%d').date()
             if date < timezone.now().date():
@@ -73,80 +74,79 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
         except (ValueError, TypeError):
             return Response({'error': 'Неверный формат даты. Используйте YYYY-MM-DD'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Проверяем таймзону клиента
+        # Проверка таймзоны клиента
         try:
             user_tz = pytz.timezone(tz_name)
         except pytz.UnknownTimeZoneError:
             return Response({'error': f'Неверная таймзона: {tz_name}'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Рабочее время в Ташкенте (базовая TZ системы)
         tz_tashkent = pytz.timezone("Asia/Tashkent")
-        open_time = sport_venue.open_time
-        close_time = sport_venue.close_time
+        open_time = sport_venue.open_time   # типа time(8, 0)
+        close_time = sport_venue.close_time # типа time(22, 0)
 
-        # Начало и конец рабочего дня в Ташкенте
-        start_day = tz_tashkent.localize(datetime.combine(date, open_time))
-        end_day = tz_tashkent.localize(datetime.combine(date, close_time))
+        open_hour = open_time.hour
+        close_hour = close_time.hour
 
-        # Текущее время в Ташкенте
+        # Текущее время
         now_tashkent = timezone.now().astimezone(tz_tashkent)
+        now_client = timezone.now().astimezone(user_tz)
 
-        # Если проверяем сегодняшний день, то начало не раньше текущего часа
+        # Если сегодня → открытие не раньше текущего часа
         if date == now_tashkent.date():
-            start_day = max(start_day, now_tashkent.replace(minute=0, second=0, microsecond=0))
+            open_hour = max(open_hour, now_tashkent.hour)
 
-        # Выбираем активные брони в этот диапазон
+        # Берём все брони за день
+        day_start = tz_tashkent.localize(datetime.combine(date, time(0, 0)))
+        day_end = tz_tashkent.localize(datetime.combine(date, time(23, 59, 59)))
+
         bookings = Booking.objects.filter(
             stadium=sport_venue,
-            start_time__lt=end_day,
-            end_time__gte=start_day,
+            start_time__lt=day_end,
+            end_time__gte=day_start,
             status__in=[Booking.STATUS_PENDING, Booking.STATUS_CONFIRMED]
         )
 
-        # Все занятые часы (в UTC)
+        # ⏱ Занятые часы в Ташкенте
         booked = set()
-        for booking in bookings:
-            current = booking.start_time
-            while current < booking.end_time:
-                booked.add(current.astimezone(pytz.UTC).strftime('%H:%M'))
-                current += timedelta(hours=1)
+        for b in bookings:
+            cur = b.start_time.astimezone(tz_tashkent)
+            end = b.end_time.astimezone(tz_tashkent)
+            while cur < end:
+                booked.add(cur.hour)
+                cur += timedelta(hours=1)
 
-        # Формируем список слотов
+        # Формируем слоты
         slots = []
-        current = start_day
-        now_client = timezone.now().astimezone(user_tz)
+        for hour in range(open_hour, close_hour):
+            slot_tashkent = tz_tashkent.localize(datetime.combine(date, time(hour, 0)))
+            slot_client = slot_tashkent.astimezone(user_tz)
 
-        while current < end_day:
-            slot_utc = current.astimezone(pytz.UTC)
-            slot_str_utc = slot_utc.strftime('%H:%M')
+            is_available = hour not in booked
 
-            # Конвертируем слот в таймзону клиента
-            slot_client = slot_utc.astimezone(user_tz)
-            slot_str_client = slot_client.strftime('%H:%M')
-
-            # По умолчанию свободен, если не забронирован
-            is_available = slot_str_utc not in booked
-
-            # Если слот уже наступил (или идёт) → делаем False
+            # прошлое → занято
             if slot_client <= now_client:
                 is_available = False
 
             slots.append({
-                'time': slot_str_client,
-                'is_available': is_available
+                "time": slot_client.strftime("%H:%M"),
+                "is_available": is_available
             })
-            current += timedelta(hours=1)
 
+        # ❌ убираем одиночные свободные слоты
+        for i in range(1, len(slots) - 1):
+            if slots[i]["is_available"] and not slots[i-1]["is_available"] and not slots[i+1]["is_available"]:
+                slots[i]["is_available"] = False
 
         return Response({
-            'date': date_str,
-            'working_hours': {
-                'start': open_time.strftime('%H:%M'),
-                'end': close_time.strftime('%H:%M'),
+            "date": date_str,
+            "working_hours": {
+                "start": open_time.strftime("%H:%M"),
+                "end": close_time.strftime("%H:%M"),
             },
-            'time_points': slots,
-            'timezone': tz_name
+            "time_points": slots,
+            "timezone": tz_name,
         })
+
 
 
         
