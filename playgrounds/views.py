@@ -81,8 +81,8 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
             return Response({'error': f'Неверная таймзона: {tz_name}'}, status=status.HTTP_400_BAD_REQUEST)
 
         tz_tashkent = pytz.timezone("Asia/Tashkent")
-        open_time = sport_venue.open_time   # типа time(8, 0)
-        close_time = sport_venue.close_time # типа time(22, 0)
+        open_time = sport_venue.open_time   # time(8, 0)
+        close_time = sport_venue.close_time # time(23, 0)
 
         open_hour = open_time.hour
         close_hour = close_time.hour
@@ -90,10 +90,6 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
         # Текущее время
         now_tashkent = timezone.now().astimezone(tz_tashkent)
         now_client = timezone.now().astimezone(user_tz)
-
-        # Если сегодня → открытие не раньше текущего часа
-        if date == now_tashkent.date():
-            open_hour = max(open_hour, now_tashkent.hour)
 
         # Берём все брони за день
         day_start = tz_tashkent.localize(datetime.combine(date, time(0, 0)))
@@ -115,15 +111,9 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
                 booked.add(cur.hour)
                 cur += timedelta(hours=1)
 
-        # Формируем слоты
+        # Формируем слоты (до close_hour невключительно)
         slots = []
-        
-        # last_hour = close_hour
-        # if close_time.minute == 0 and close_time.second == 0:
-        #     last_hour = close_hour
-            
-            
-        for hour in range(open_hour, close_hour+1):  # оставляем close_hour, а не close_hour - 1
+        for hour in range(open_hour, close_hour):
             slot_tashkent = tz_tashkent.localize(datetime.combine(date, time(hour, 0)))
             slot_client = slot_tashkent.astimezone(user_tz)
 
@@ -152,6 +142,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
             "time_points": slots,
             "timezone": tz_name,
         })
+
 
 
 
