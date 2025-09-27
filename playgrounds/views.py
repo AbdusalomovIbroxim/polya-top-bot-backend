@@ -12,6 +12,8 @@ from drf_yasg import openapi
 from datetime import datetime, timedelta, time
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import OuterRef, Subquery
+from django.db import models
 from rest_framework.views import APIView
 
 from djangoProject import settings
@@ -157,10 +159,11 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
                             {
                                 "id": 1,
                                 "name": "Стадион Центральный",
+                                "price": "50.00",
                                 "latitude": 41.311081,
                                 "longitude": 69.240562,
                                 "address": "г. Ташкент, ул. Амир Темур, 15",
-                                "image": "https://example.com/media/sport_venues/1/main.jpg"
+                                "images__image": "https://example.com/media/sport_venues/1/main.jpg"
                             }
                         ]
                     }
@@ -170,10 +173,43 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
     )
     @action(detail=False, methods=["get"], url_path="map")
     def map(self, request):
-        venues = SportVenue.objects.all().values(
-            "id", "name", "latitude", "longitude", "address", "images__image"
+        # --- Удаляем дубликаты (по name + address, оставляем минимальный id) ---
+        duplicates = (
+            SportVenue.objects
+            .values("name", "address")
+            .annotate(min_id=models.Min("id"), count_id=models.Count("id"))
+            .filter(count_id__gt=1)
         )
-        return Response({"venues": list(venues)})
+        for dup in duplicates:
+            SportVenue.objects.filter(
+                name=dup["name"],
+                address=dup["address"]
+            ).exclude(id=dup["min_id"]).delete()
+
+        # Берем первое изображение каждого стадиона
+        first_image_subquery = SportVenueImage.objects.filter(
+            sport_venue=OuterRef("pk")
+        ).order_by("id").values("image")[:1]
+
+        venues = SportVenue.objects.annotate(
+            first_image=Subquery(first_image_subquery)
+        ).values(
+            "id", "name", "price", "latitude", "longitude", "address", "first_image"
+        )
+
+        results = []
+        for v in venues:
+            results.append({
+                "id": v["id"],
+                "name": v["name"],
+                "price": v["price"],
+                "latitude": v["latitude"],
+                "longitude": v["longitude"],
+                "address": v["address"],
+                "image": request.build_absolute_uri(v["first_image"]) if v["first_image"] else None
+            })
+
+        return Response({"venues": results})
 
 
 
