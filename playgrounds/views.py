@@ -85,7 +85,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
         close_time = sport_venue.close_time # time(23, 0)
 
         open_hour = open_time.hour
-        close_hour = close_time.hour
+        close_hour = close_time.hour + 1
 
         # Текущее время
         now_tashkent = timezone.now().astimezone(tz_tashkent)
