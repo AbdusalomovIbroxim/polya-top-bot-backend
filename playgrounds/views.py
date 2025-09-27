@@ -18,7 +18,7 @@ from rest_framework.views import APIView
 
 from djangoProject import settings
 from bookings.models import Booking
-from .models import SportVenue, SportVenueType, Region, FavoriteSportVenue
+from .models import SportVenue, SportVenueImage, SportVenueType, Region, FavoriteSportVenue
 from .serializers import (
     SportVenueSerializer,
     SportVenueTypeSerializer,
@@ -173,19 +173,6 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
     )
     @action(detail=False, methods=["get"], url_path="map")
     def map(self, request):
-        # --- Удаляем дубликаты (по name + address, оставляем минимальный id) ---
-        duplicates = (
-            SportVenue.objects
-            .values("name", "address")
-            .annotate(min_id=models.Min("id"), count_id=models.Count("id"))
-            .filter(count_id__gt=1)
-        )
-        for dup in duplicates:
-            SportVenue.objects.filter(
-                name=dup["name"],
-                address=dup["address"]
-            ).exclude(id=dup["min_id"]).delete()
-
         # Берем первое изображение каждого стадиона
         first_image_subquery = SportVenueImage.objects.filter(
             sport_venue=OuterRef("pk")
@@ -194,7 +181,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
         venues = SportVenue.objects.annotate(
             first_image=Subquery(first_image_subquery)
         ).values(
-            "id", "name", "price", "latitude", "longitude", "address", "first_image"
+            "id", "name", "price", "latitude", "longitude", "first_image"
         )
 
         results = []
@@ -205,7 +192,6 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
                 "price": v["price"],
                 "latitude": v["latitude"],
                 "longitude": v["longitude"],
-                "address": v["address"],
                 "image": request.build_absolute_uri(v["first_image"]) if v["first_image"] else None
             })
 
