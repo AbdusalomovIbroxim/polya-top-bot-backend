@@ -65,6 +65,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
         date_str = request.query_params.get('date')
         tz_name = request.query_params.get('tz', 'UTC')
 
+        # Проверяем дату
         try:
             date = datetime.strptime(date_str, '%Y-%m-%d').date()
             if date < timezone.now().date():
@@ -72,19 +73,29 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
         except (ValueError, TypeError):
             return Response({'error': 'Неверный формат даты. Используйте YYYY-MM-DD'}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Проверяем таймзону клиента
         try:
             user_tz = pytz.timezone(tz_name)
         except pytz.UnknownTimeZoneError:
             return Response({'error': f'Неверная таймзона: {tz_name}'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Рабочее время в Ташкенте (основная зона)
+        # Рабочее время в Ташкенте
         open_time = sport_venue.open_time
         close_time = sport_venue.close_time
         tz_tashkent = pytz.timezone("Asia/Tashkent")
 
+        # Начало и конец рабочего дня
         start_day = tz_tashkent.localize(datetime.combine(date, open_time))
         end_day = tz_tashkent.localize(datetime.combine(date, close_time))
 
+        # Текущее время в Ташкенте
+        now_tashkent = timezone.now().astimezone(tz_tashkent)
+
+        # Если проверяем сегодняшний день, то начало не раньше текущего часа
+        if date == now_tashkent.date():
+            start_day = max(start_day, now_tashkent.replace(minute=0, second=0, microsecond=0))
+
+        # Выбираем брони
         bookings = Booking.objects.filter(
             stadium=sport_venue,
             start_time__lt=end_day,
@@ -104,15 +115,18 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
         slots = []
         current = start_day
         while current < end_day:
-            # Слот в UTC
             slot_utc = current.astimezone(pytz.UTC)
             slot_str_utc = slot_utc.strftime('%H:%M')
 
-            # Переводим слот в таймзону клиента
             slot_client = slot_utc.astimezone(user_tz)
             slot_str_client = slot_client.strftime('%H:%M')
 
+            # По умолчанию слот свободен, если не забронирован
             is_available = slot_str_utc not in booked
+
+            # Если слот уже в прошлом относительно клиента → недоступен
+            if slot_client < timezone.now().astimezone(user_tz).replace(minute=0, second=0, microsecond=0):
+                is_available = False
 
             slots.append({
                 'time': slot_str_client,
@@ -128,7 +142,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
             },
             'time_points': slots
         })
-        
+
         
 class FavoriteSportVenueViewSet(
     mixins.ListModelMixin,       # GET /favorites/
