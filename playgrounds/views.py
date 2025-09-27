@@ -95,7 +95,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
         if date == now_tashkent.date():
             start_day = max(start_day, now_tashkent.replace(minute=0, second=0, microsecond=0))
 
-        # Выбираем брони
+        # Выбираем активные брони в этот диапазон
         bookings = Booking.objects.filter(
             stadium=sport_venue,
             start_time__lt=end_day,
@@ -111,17 +111,18 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
                 booked.add(current.astimezone(pytz.UTC).strftime('%H:%M'))
                 current += timedelta(hours=1)
 
-        # Формируем слоты
+        # Формируем список слотов
         slots = []
         current = start_day
         while current < end_day:
             slot_utc = current.astimezone(pytz.UTC)
             slot_str_utc = slot_utc.strftime('%H:%M')
 
+            # Конвертируем слот в таймзону клиента
             slot_client = slot_utc.astimezone(user_tz)
             slot_str_client = slot_client.strftime('%H:%M')
 
-            # По умолчанию слот свободен, если не забронирован
+            # По умолчанию свободен, если не забронирован
             is_available = slot_str_utc not in booked
 
             # Если слот уже в прошлом относительно клиента → недоступен
@@ -142,6 +143,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
             },
             'time_points': slots
         })
+
 
         
 class FavoriteSportVenueViewSet(
