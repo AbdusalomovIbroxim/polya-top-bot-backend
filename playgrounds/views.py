@@ -159,7 +159,8 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
                                 "name": "Стадион Центральный",
                                 "latitude": 41.311081,
                                 "longitude": 69.240562,
-                                "address": "г. Ташкент, ул. Амир Темур, 15"
+                                "address": "г. Ташкент, ул. Амир Темур, 15",
+                                "image": "https://example.com/media/sport_venues/1/main.jpg"
                             }
                         ]
                     }
@@ -170,7 +171,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=["get"], url_path="map")
     def map(self, request):
         venues = SportVenue.objects.all().values(
-            "id", "name", "latitude", "longitude", "address"
+            "id", "name", "latitude", "longitude", "address", "images__image"
         )
         return Response({"venues": list(venues)})
 
