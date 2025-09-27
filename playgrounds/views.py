@@ -111,15 +111,20 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
                 booked.add(cur.hour)
                 cur += timedelta(hours=1)
 
-        # Формируем слоты (до close_hour невключительно)
+        # Формируем все слоты (включая закрывающий час)
         slots = []
-        for hour in range(open_hour, close_hour):
+        for hour in range(open_hour, close_hour + 1):
             slot_tashkent = tz_tashkent.localize(datetime.combine(date, time(hour, 0)))
             slot_client = slot_tashkent.astimezone(user_tz)
 
-            is_available = hour not in booked
+            # По умолчанию доступно
+            is_available = True
 
-            # прошлое → занято
+            # Если уже забронирован → False
+            if hour in booked:
+                is_available = False
+
+            # Если время прошло → False
             if slot_client <= now_client:
                 is_available = False
 
@@ -127,11 +132,6 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
                 "time": slot_client.strftime("%H:%M"),
                 "is_available": is_available
             })
-
-        # ❌ убираем одиночные свободные слоты
-        for i in range(1, len(slots) - 1):
-            if slots[i]["is_available"] and not slots[i-1]["is_available"] and not slots[i+1]["is_available"]:
-                slots[i]["is_available"] = False
 
         return Response({
             "date": date_str,
@@ -142,6 +142,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
             "time_points": slots,
             "timezone": tz_name,
         })
+
 
 
 
