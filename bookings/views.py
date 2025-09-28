@@ -104,6 +104,7 @@ class BookingViewSet(
 
         return booking
 
+
     @swagger_auto_schema(
         method="post",
         request_body=openapi.Schema(
@@ -111,7 +112,7 @@ class BookingViewSet(
             properties={
                 "booking_id": openapi.Schema(
                     type=openapi.TYPE_INTEGER,
-                    description="ID брони, которую нужно отменить"
+                    description="ID брони для отмены"
                 ),
             },
             required=["booking_id"],
@@ -120,37 +121,47 @@ class BookingViewSet(
         responses={
             200: openapi.Response(
                 description="Бронь успешно отменена",
-                examples={
-                    "application/json": {"detail": "Бронь отменена"}
-                }
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "detail": openapi.Schema(type=openapi.TYPE_STRING)
+                    },
+                    example={"detail": "Бронь отменена"}
+                )
             ),
             400: openapi.Response(
                 description="Некорректные данные или бронь нельзя отменить",
-                examples={
-                    "application/json": {"detail": "Бронь нельзя отменить"}
-                }
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "detail": openapi.Schema(type=openapi.TYPE_STRING)
+                    },
+                    example={"detail": "Бронь нельзя отменить"}
+                )
             ),
             403: openapi.Response(
-                description="Пользователь пытается отменить чужую бронь",
-                examples={
-                    "application/json": {"detail": "Вы не можете отменить чужую бронь"}
-                }
+                description="Чужая бронь",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "detail": openapi.Schema(type=openapi.TYPE_STRING)
+                    },
+                    example={"detail": "Вы не можете отменить чужую бронь"}
+                )
             ),
             404: openapi.Response(
                 description="Бронь не найдена",
-                examples={
-                    "application/json": {"detail": "Бронь не найдена"}
-                }
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "detail": openapi.Schema(type=openapi.TYPE_STRING)
+                    },
+                    example={"detail": "Бронь не найдена"}
+                )
             ),
         },
         operation_summary="Отмена брони пользователем",
-        operation_description=(
-            "Позволяет пользователю отменить свою бронь.\n\n"
-            "📌 В теле запроса нужно передать ID брони:\n\n"
-            "```json\n"
-            "{ \"booking_id\": 123 }\n"
-            "```"
-        )
+        operation_description="Позволяет пользователю отменить свою бронь. В теле запроса нужно передать ID брони."
     )
     @action(detail=False, methods=["post"], url_path="cancel")
     def cancel(self, request):
