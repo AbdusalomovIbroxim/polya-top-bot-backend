@@ -2,6 +2,7 @@ import pytz
 import json
 import logging
 import requests
+from rest_framework import status
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -103,19 +104,93 @@ class BookingViewSet(
 
         return booking
 
-
-    @action(detail=True, methods=["post"])
-    def cancel(self, request, pk=None):
+    @swagger_auto_schema(
+        method="post",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "booking_id": openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description="ID брони, которую нужно отменить"
+                ),
+            },
+            required=["booking_id"],
+            example={"booking_id": 123}
+        ),
+        responses={
+            200: openapi.Response(
+                description="Бронь успешно отменена",
+                examples={
+                    "application/json": {"detail": "Бронь отменена"}
+                }
+            ),
+            400: openapi.Response(
+                description="Некорректные данные или бронь нельзя отменить",
+                examples={
+                    "application/json": {"detail": "Бронь нельзя отменить"}
+                }
+            ),
+            403: openapi.Response(
+                description="Пользователь пытается отменить чужую бронь",
+                examples={
+                    "application/json": {"detail": "Вы не можете отменить чужую бронь"}
+                }
+            ),
+            404: openapi.Response(
+                description="Бронь не найдена",
+                examples={
+                    "application/json": {"detail": "Бронь не найдена"}
+                }
+            ),
+        },
+        operation_summary="Отмена брони пользователем",
+        operation_description=(
+            "Позволяет пользователю отменить свою бронь.\n\n"
+            "📌 В теле запроса нужно передать ID брони:\n\n"
+            "```json\n"
+            "{ \"booking_id\": 123 }\n"
+            "```"
+        )
+    )
+    @action(detail=False, methods=["post"], url_path="cancel")
+    def cancel(self, request):
         """
         Отмена брони пользователем.
+        Ожидает в теле JSON:
+        {
+            "booking_id": <id>
+        }
         """
-        booking = self.get_object()
+        booking_id = request.data.get("booking_id")
+        if not booking_id:
+            return Response(
+                {"detail": "Не указан booking_id"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            booking = Booking.objects.get(id=booking_id)
+        except Booking.DoesNotExist:
+            return Response(
+                {"detail": "Бронь не найдена"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Проверяем, что бронь принадлежит текущему пользователю
+        if booking.user != request.user:
+            return Response(
+                {"detail": "Вы не можете отменить чужую бронь"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Проверяем статус
         if booking.status != Booking.STATUS_PENDING:
             return Response(
                 {"detail": "Бронь нельзя отменить"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        # Отменяем
         booking.status = Booking.STATUS_CANCELLED
         booking.save(update_fields=["status"])
         return Response({"detail": "Бронь отменена"}, status=status.HTTP_200_OK)
