@@ -134,6 +134,13 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
             # Если время прошло → False
             if slot_client <= now_client:
                 is_available = False
+                
+            if (
+                is_available and
+                (hour - 1 in booked) and
+                (hour + 1 in booked)
+            ):
+                is_available = False
 
             slots.append({
                 "time": slot_client.strftime("%H:%M"),
