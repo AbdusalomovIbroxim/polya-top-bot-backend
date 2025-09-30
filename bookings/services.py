@@ -56,7 +56,6 @@ def create_booking(user, stadium: SportVenue, start_time, end_time, payment_meth
                 user=user,
                 provider="click" if payment_method == Booking.PAYMENT_CARD else "cash",
                 amount=amount,
-                status="pending",
             )
         return booking
     except Exception as exc:
