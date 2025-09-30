@@ -205,6 +205,82 @@ class BookingViewSet(
         booking.status = Booking.STATUS_CANCELLED
         booking.save(update_fields=["status"])
         return Response({"detail": "Бронь отменена"}, status=status.HTTP_200_OK)
+    
+    @swagger_auto_schema(
+        method="post",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "payload": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Payload, переданный в invoice"
+                ),
+                "amount": openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description="Сумма платежа в копейках/тиынах"
+                ),
+                "telegram_charge_id": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="ID транзакции от Telegram"
+                ),
+            },
+            required=["payload", "amount", "telegram_charge_id"],
+            example={
+                "payload": "booking_123",
+                "amount": 100000,
+                "telegram_charge_id": "abc123"
+            }
+        ),
+        responses={
+            200: openapi.Response(
+                description="Оплата подтверждена",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={"detail": openapi.Schema(type=openapi.TYPE_STRING)},
+                    example={"detail": "Оплата подтверждена"}
+                )
+            ),
+            400: "Некорректные данные",
+            404: "Бронь не найдена",
+        },
+        operation_summary="Подтверждение оплаты от Telegram",
+        operation_description="Вызывается ботом после успешной оплаты для подтверждения брони."
+    )
+    @action(detail=False, methods=["post"], url_path="confirm_payment")
+    def confirm_payment(self, request):
+        payload = request.data.get("payload")
+        amount = request.data.get("amount")
+        charge_id = request.data.get("telegram_charge_id")
+
+        if not payload or not amount or not charge_id:
+            return Response(
+                {"detail": "Отсутствуют обязательные поля"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # payload например "booking_123"
+            booking_id = int(payload.replace("booking_", ""))
+            booking = Booking.objects.get(id=booking_id)
+        except (ValueError, Booking.DoesNotExist):
+            return Response(
+                {"detail": "Бронь не найдена"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if booking.status != Booking.STATUS_PENDING:
+            return Response(
+                {"detail": "Бронь уже обработана"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # фиксируем оплату
+        booking.status = Booking.STATUS_PAID
+        booking.payment_id = charge_id  # можно сохранить ID транзакции
+        booking.save(update_fields=["status", "payment_id"])
+
+        return Response({"detail": "Оплата подтверждена"}, status=status.HTTP_200_OK)
+
 
 
 class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
