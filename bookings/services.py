@@ -19,19 +19,13 @@ class SlotAlreadyBooked(Exception):
     """Слот уже занят другим пользователем."""
     pass
 
-
 def create_booking(user, stadium: SportVenue, start_time, end_time, payment_method: str) -> Booking:
-    """
-    Создаёт бронь и транзакцию в статусе pending.
-    Бросает исключения, если время некорректно или слот занят.
-    """
     if start_time >= end_time:
         raise ValidationError({"detail": "Некорректное время бронирования"})
 
-    # Проверка на пересечение броней
     overlap_exists = Booking.objects.filter(
         stadium=stadium,
-        status=Booking.STATUS_PENDING,  # учитываем только активные брони
+        status=Booking.STATUS_PENDING,
         start_time__lt=end_time,
         end_time__gt=start_time,
     ).exists()
@@ -54,13 +48,11 @@ def create_booking(user, stadium: SportVenue, start_time, end_time, payment_meth
             Transaction.objects.create(
                 booking=booking,
                 user=user,
-                provider="click" if payment_method == Booking.PAYMENT_CARD else "cash",
                 amount=amount,
             )
         return booking
     except Exception as exc:
         raise ValidationError({"detail": f"Ошибка при создании брони: {exc}"})
-
 
 
 def send_telegram_invoice(booking: Booking) -> dict:
@@ -120,25 +112,22 @@ def handle_pre_checkout_query(pre_checkout_query: dict) -> dict:
         return {"ok": False}
 
 
+
 @transaction.atomic
-def handle_successful_payment(invoice_payload: str, provider_info: dict) -> dict:
+def handle_successful_payment(payload: str, external_id: str) -> dict:
     """
-    Обработка успешной оплаты (через Telegram или другого провайдера).
-    Находим Transaction по payload → отмечаем как success → подтверждаем бронь.
+    Подтверждает транзакцию и бронь.
     """
     try:
-        tx = Transaction.objects.select_for_update().get(booking__transactions__provider="click", booking__transactions__status="pending")
+        tx = Transaction.objects.select_for_update().get(
+            booking__id=int(payload.split("_")[1]),
+            status=Transaction.STATUS_PENDING
+        )
     except Transaction.DoesNotExist:
-        logger.error("Transaction with payload=%s not found", invoice_payload)
+        logger.error("Transaction with payload=%s not found", payload)
         return {"ok": False, "reason": "transaction_not_found"}
 
-    tx.status = "success"
-    tx.provider = "click"
-    tx.save(update_fields=["status", "provider"])
-
-    booking = tx.booking
-    booking.status = Booking.STATUS_CONFIRMED
-    booking.save(update_fields=["status"])
-
-    logger.info("Payment confirmed for booking %s via transaction %s", booking.id, tx.id)
-    return {"ok": True, "transaction_id": tx.id, "booking_id": booking.id}
+    tx.confirm(external_id=external_id)
+    tx.booking.confirm_payment(external_id=external_id)
+    logger.info("Payment confirmed for booking %s via transaction %s", tx.booking.id, tx.id)
+    return {"ok": True, "transaction_id": tx.id, "booking_id": tx.booking.id}
