@@ -71,13 +71,13 @@ class TransactionAdmin(admin.ModelAdmin):
     Настраивает отображение, фильтрацию и поиск транзакций.
     """
     # Список полей для отображения
-    list_display = ('id', 'booking', 'user', 'provider', 'amount', 'status', 'created_at')
+    list_display = ('id', 'booking', 'user', 'amount', 'status', 'created_at')
     
     # Поля для фильтрации
-    list_filter = ('status', 'provider', 'created_at')
+    list_filter = ('status', 'created_at')
     
     # Поля для поиска
-    search_fields = ('booking__id', 'user__username', 'provider')
+    search_fields = ('booking__id', 'user__username')
     
     # Поля, доступные только для чтения
     readonly_fields = ('created_at', 'updated_at')
