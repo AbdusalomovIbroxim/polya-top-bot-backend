@@ -52,6 +52,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.AllowAny]
     filter_backends = [DjangoFilterBackend]
     filterset_class = SportVenueFilter
+    ordering_fields = ["id", "price_per_hour"]
 
     
     @swagger_auto_schema(
