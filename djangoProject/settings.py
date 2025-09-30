@@ -302,3 +302,12 @@ CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
 # FORCE_SCRIPT_NAME = '/api'
+
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn="https://236ec593eb9b0372785b126de9a217be@o4510109069672448.ingest.us.sentry.io/4510109071048704",
+    # Add data like request headers and IP for users,
+    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+    send_default_pii=True,
+)

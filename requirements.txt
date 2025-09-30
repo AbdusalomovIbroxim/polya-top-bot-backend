@@ -16,3 +16,4 @@ pytest
 pytest-django
 telegram-webapp-auth==3.0.6
 pytz
+sentry-sdk==2.39.0
