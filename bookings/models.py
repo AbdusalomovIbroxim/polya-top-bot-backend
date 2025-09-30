@@ -43,10 +43,17 @@ class Booking(models.Model):
 
 
 class Transaction(models.Model):
+    STATUS_PENDING = "pending"
+    STATUS_PAID = "paid"
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, "Ожидает оплаты"),
+        (STATUS_PAID, "Оплачена"),
+    ]
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name="transactions")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     provider = models.CharField(max_length=50)  # click, cash
     amount = models.DecimalField(max_digits=12, decimal_places=2)
-    status = models.CharField(max_length=20, default="pending")  # pending, success, failed
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

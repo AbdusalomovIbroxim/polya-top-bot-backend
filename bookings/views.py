@@ -274,9 +274,11 @@ class BookingViewSet(
             )
 
         # фиксируем оплату
-        booking.status = Booking.STATUS_PAID
+        booking.status = Booking.STATUS_CONFIRMED
         booking.payment_id = charge_id  # можно сохранить ID транзакции
         booking.save(update_fields=["status", "payment_id"])
+        booking.transactions.update(status=Transaction.STATUS_PAID)
+
 
         return Response({"detail": "Оплата подтверждена"}, status=status.HTTP_200_OK)
 
