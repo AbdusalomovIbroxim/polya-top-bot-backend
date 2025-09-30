@@ -29,13 +29,9 @@ schema_view = get_schema_view(
     url="https://polya.top/api",  # Your API base URL
 )
 
-def trigger_error(request):
-    division_by_zero = 1 / 0
-
 
 
 urlpatterns = [
-    path('sentry-debug/', trigger_error),
     path('admin/', admin.site.urls),
     path('api/', include('accounts.urls')),
     path('api/', include('playgrounds.urls')),
