@@ -20,7 +20,7 @@ class CustomUserAdmin(UserAdmin):
         'football_experience',
         'football_frequency',
         'football_competitions',
-        'city'
+        # 'city'
     )
     
     # Поля для поиска

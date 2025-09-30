@@ -40,7 +40,7 @@ class SportVenueSerializer(serializers.ModelSerializer):
         model = SportVenue
         fields = [
             'id', 'name', 'description', 'price_per_hour',
-            'city', 'address', 'latitude', 'longitude', 'yandex_map_url',
+            'address', 'latitude', 'longitude', 'yandex_map_url',
             'sport_venue_type', 'region', 'open_time', 'close_time', 'owner', 'images'
         ]
 

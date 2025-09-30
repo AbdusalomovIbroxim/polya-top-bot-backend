@@ -8,4 +8,4 @@ class SportVenueFilter(django_filters.FilterSet):
 
     class Meta:
         model = SportVenue
-        fields = ["sport_venue_type", "region", "city", "min_price", "max_price"]
+        fields = ["sport_venue_type", "region", "min_price", "max_price"]

@@ -19,9 +19,9 @@ class SportVenueImageInline(admin.TabularInline):
 @admin.register(SportVenue)
 class SportVenueAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'price_per_hour', 'city', 'region', 'owner', 'image_preview', 'created_at'
+        'name', 'price_per_hour', 'region', 'owner', 'image_preview', 'created_at'
     )
-    list_filter = ('city', 'region', 'sport_venue_type', 'created_at', 'updated_at')
+    list_filter = ('region', 'sport_venue_type', 'created_at', 'updated_at')
     search_fields = ('name', 'description', 'address')
     readonly_fields = ('created_at', 'updated_at')
     inlines = [SportVenueImageInline]
@@ -31,7 +31,7 @@ class SportVenueAdmin(admin.ModelAdmin):
             'fields': ('name', 'description', 'price_per_hour', 'sport_venue_type', 'owner')
         }),
         ('Локация', {
-            'fields': ('city', 'region', 'address', 'latitude', 'longitude', 'yandex_map_url')
+            'fields': ('region', 'address', 'latitude', 'longitude', 'yandex_map_url')
         }),
     )
 
