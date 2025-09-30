@@ -259,8 +259,7 @@ class BookingViewSet(
             )
 
         try:
-            # payload например "booking_123"
-            booking_id = int(payload.replace("booking_", ""))
+            booking_id = int(payload.split("_")[1])
             booking = Booking.objects.get(id=booking_id)
         except (ValueError, Booking.DoesNotExist):
             return Response(
@@ -295,41 +294,3 @@ class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
             return Transaction.objects.none()
         
         return Transaction.objects.filter(user=self.request.user).order_by("-created_at")
-
-
-
-@csrf_exempt
-def telegram_webhook(request):
-    """
-    Обрабатывает Telegram webhook:
-    - pre_checkout_query -> подтверждаем
-    - successful_payment -> отмечаем платеж через services.handle_successful_payment
-    """
-    logger = logging.getLogger(__name__)
-    if request.method != "POST":
-        return JsonResponse({"ok": False, "reason": "invalid_method"}, status=405)
-
-    try:
-        data = json.loads(request.body)
-    except Exception:
-        logger.exception("Invalid JSON in telegram webhook")
-        return JsonResponse({"ok": False, "reason": "invalid_json"}, status=400)
-
-    # pre_checkout_query
-    if "pre_checkout_query" in data:
-        result = services.handle_pre_checkout_query(data["pre_checkout_query"])
-        return JsonResponse(result)
-
-    # successful_payment
-    if "message" in data and "successful_payment" in data["message"]:
-        payment_info = data["message"]["successful_payment"]
-        payload = payment_info.get("invoice_payload")
-        provider_info = {
-            "provider_payment_charge_id": payment_info.get("provider_payment_charge_id"),
-            "telegram_payment": payment_info
-        }
-        result = services.handle_successful_payment(payload, provider_info)
-        status_code = 200 if result.get("ok") else 404
-        return JsonResponse(result, status=status_code)
-
-    return JsonResponse({"ok": True})
