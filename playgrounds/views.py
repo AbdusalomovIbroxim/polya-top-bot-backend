@@ -1,8 +1,9 @@
 import json
 import requests
 
-from django.http import JsonResponse
+from djangoProject import settings
 from django.shortcuts import render
+from django.http import JsonResponse
 from rest_framework import viewsets, permissions, filters
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -16,8 +17,8 @@ from django.db.models import OuterRef, Subquery
 from django.db import models
 from rest_framework.views import APIView
 
-from djangoProject import settings
 from bookings.models import Booking
+from .filters import SportVenueFilter
 from .models import SportVenue, SportVenueImage, SportVenueType, Region, FavoriteSportVenue
 from .serializers import (
     SportVenueSerializer,
@@ -49,11 +50,10 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = SportVenue.objects.all().prefetch_related('images', 'sport_venue_type', 'region')
     serializer_class = SportVenueSerializer
     permission_classes = [permissions.AllowAny]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['sport_venue_type', 'region', 'city']
-    search_fields = ['name', 'description', 'address']
-    ordering_fields = ["id", 'price_per_hour']
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = SportVenueFilter
 
+    
     @swagger_auto_schema(
         operation_description="Проверить доступность площадки на определённую дату",
         manual_parameters=[
