@@ -50,7 +50,7 @@ class ClientSportVenueViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = SportVenue.objects.all().prefetch_related('images', 'sport_venue_type', 'region')
     serializer_class = SportVenueSerializer
     permission_classes = [permissions.AllowAny]
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = SportVenueFilter
     ordering_fields = ["id", "price_per_hour"]
 
