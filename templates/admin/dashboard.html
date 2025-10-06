@@ -1,7 +1,41 @@
 {% extends "admin/base_site.html" %}
 {% block content %}
-<h1>📊 Аналитика</h1>
-<hr>
-<p><strong>Общий доход:</strong> {{ total_income }} сум</p>
-<p><strong>Количество броней:</strong> {{ total_bookings }}</p>
+<div class="container-fluid mt-4">
+    <h2>📊 Аналитика PolyaTop</h2>
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white p-3 rounded-3 shadow">
+                <h5>Пользователи</h5>
+                <h2>{{ total_users }}</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white p-3 rounded-3 shadow">
+                <h5>Брони</h5>
+                <h2>{{ total_bookings }}</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark p-3 rounded-3 shadow">
+                <h5>Поля</h5>
+                <h2>{{ total_fields }}</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white p-3 rounded-3 shadow">
+                <h5>Выручка</h5>
+                <h2>{{ total_income }} сум</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card p-4 shadow">
+                <h4>Сегодняшние бронирования: {{ today_bookings }}</h4>
+                <p class="text-muted">Статистика обновляется ежедневно</p>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
