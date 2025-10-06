@@ -1,6 +1,18 @@
 {% extends "admin/base.html" %}
 {% load static %}
 
+{% block branding %}
+    {% include "unfold/helpers/site_branding.html" %}
+{% endblock %}
+
+{% block header %}
+    {{ site_header }}
+{% endblock %}
+
+{% block subheader %}
+    {{ site_subheader }}
+{% endblock %}
+
 {% block content %}
 <div class="space-y-8 animate-fade-in">
     <!-- Заголовок -->
