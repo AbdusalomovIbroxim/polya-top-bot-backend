@@ -4,7 +4,6 @@ from django.urls import path
 from django.db.models import Sum
 from django.utils import timezone
 
-from accounts.admin_dashboard import CustomAdminSite
 from accounts.models import User
 from bookings.models import Booking, Transaction
 from playgrounds.models import SportVenue
