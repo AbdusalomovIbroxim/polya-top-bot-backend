@@ -1,18 +1,19 @@
-from django.contrib import admin
 from django.urls import path
 from django.db.models import Sum, Count
-from django.shortcuts import render
-from django.shortcuts import redirect
-from accounts.models import User
-from bookings.models import Booking, Transaction
-from playgrounds.models import SportVenue
+from django.shortcuts import render, redirect
+from django.contrib import admin
 from unfold.sites import UnfoldAdminSite
 
+from accounts.models import User
+from bookings.models import Booking, BookingTransaction
+from playgrounds.models import SportVenue
+
+
 class CustomAdminSite(UnfoldAdminSite):
-    
+    """Кастомная админка с дашбордом на Unfold"""
+
     def index(self, request, extra_context=None):
         return redirect("admin:dashboard")
-
 
     def get_urls(self):
         urls = super().get_urls()
@@ -25,10 +26,10 @@ class CustomAdminSite(UnfoldAdminSite):
         total_users = User.objects.count()
         total_venues = SportVenue.objects.count()
         total_bookings = Booking.objects.count()
-        total_revenue = Transaction.objects.aggregate(total=Sum("amount"))["total"] or 0
+        total_revenue = BookingTransaction.objects.aggregate(total=Sum("amount"))["total"] or 0
 
         top_venues = (
-            Booking.objects.values("stadium__name")
+            Booking.objects.values("sport_venue__name")
             .annotate(total=Count("id"))
             .order_by("-total")[:5]
         )
@@ -46,18 +47,6 @@ class CustomAdminSite(UnfoldAdminSite):
 
 custom_admin = CustomAdminSite(name="custom_admin")
 
-
+# Регистрируем все модели, чтобы не потерять существующие админки
 for model, model_admin in admin.site._registry.items():
     custom_admin.register(model, model_admin.__class__)
-
-
-# from accounts.admin_dashboard import custom_admin, CustomAdminSite
-# from unfold.sites import UnfoldAdminSite
-
-# Наследуем твой CustomAdminSite от UnfoldAdminSite
-# class CustomUnfoldAdminSite(CustomAdminSite, UnfoldAdminSite):
-#     pass
-
-# custom_admin = CustomUnfoldAdminSite(name="custom_admin")
-
-# Регистрируем все модели, как раньше

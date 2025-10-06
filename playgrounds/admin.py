@@ -1,8 +1,9 @@
-from django.contrib import admin
 from django.utils.html import format_html
+from unfold.admin import ModelAdmin
+from django.contrib import admin
 from .models import SportVenue, SportVenueImage, SportVenueType, Region, FavoriteSportVenue
 
-# Inline для изображений
+
 class SportVenueImageInline(admin.TabularInline):
     model = SportVenueImage
     extra = 1
@@ -11,13 +12,14 @@ class SportVenueImageInline(admin.TabularInline):
 
     def preview_image(self, obj):
         if obj.image:
-            return format_html('<img src="{}" style="max-height:100px;"/>', obj.image.url)
+            return format_html('<img src="{}" style="max-height:100px; border-radius:8px;"/>', obj.image.url)
         return 'Нет изображения'
+
     preview_image.short_description = 'Превью'
 
-# Админ для площадок
+
 @admin.register(SportVenue)
-class SportVenueAdmin(admin.ModelAdmin):
+class SportVenueAdmin(ModelAdmin):  # <— Unfold admin
     list_display = (
         'name', 'price_per_hour', 'region', 'owner', 'image_preview', 'created_at'
     )
@@ -25,7 +27,7 @@ class SportVenueAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description', 'address')
     readonly_fields = ('created_at', 'updated_at')
     inlines = [SportVenueImageInline]
-    
+
     fieldsets = (
         ('Основная информация', {
             'fields': ('name', 'description', 'price_per_hour', 'sport_venue_type', 'owner')
@@ -38,33 +40,33 @@ class SportVenueAdmin(admin.ModelAdmin):
     @admin.display(description='Превью')
     def image_preview(self, obj):
         if obj.images.exists():
-            return format_html('<img src="{}" style="max-height:100px;"/>', obj.images.first().image.url)
+            return format_html('<img src="{}" style="max-height:100px; border-radius:8px;"/>', obj.images.first().image.url)
         return 'Нет изображений'
-    
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.role == 'owner':
             qs = qs.filter(owner=request.user)
         return qs
 
-# Админ для типов площадок
+
 @admin.register(SportVenueType)
-class SportVenueTypeAdmin(admin.ModelAdmin):
+class SportVenueTypeAdmin(ModelAdmin):  # <— Unfold admin
     list_display = ('id', 'name', 'slug', 'created_at', 'updated_at')
     search_fields = ('name',)
     list_filter = ('created_at', 'updated_at')
     ordering = ('name',)
 
-# Админ для регионов
+
 @admin.register(Region)
-class RegionAdmin(admin.ModelAdmin):
+class RegionAdmin(ModelAdmin):  # <— Unfold admin
     list_display = ('id', 'name', 'slug', 'created_at', 'updated_at')
     search_fields = ('name',)
     ordering = ('id',)
 
-# Админ для избранного
+
 # @admin.register(FavoriteSportVenue)
-# class FavoriteSportVenueAdmin(admin.ModelAdmin):
+# class FavoriteSportVenueAdmin(ModelAdmin):  # <— Unfold admin
 #     list_display = ('user', 'sport_venue', 'created_at')
 #     list_filter = ('created_at',)
 #     search_fields = ('user__username', 'sport_venue__name')

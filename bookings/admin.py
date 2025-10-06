@@ -1,11 +1,12 @@
-from django.contrib import admin
-from .models import Booking, Transaction
 from django.utils import timezone
 from datetime import timedelta
+from django.contrib import admin
+from unfold.admin import ModelAdmin  # 🌈 добавляем Unfold
+from .models import Booking, Transaction
 
 
 @admin.register(Booking)
-class BookingAdmin(admin.ModelAdmin):
+class BookingAdmin(ModelAdmin):  # ✅ заменили admin.ModelAdmin → ModelAdmin
     """
     Админка для модели Booking.
     Настраивает отображение, фильтрацию и поиск броней.
@@ -63,7 +64,7 @@ class BookingAdmin(admin.ModelAdmin):
 
 
 @admin.register(Transaction)
-class TransactionAdmin(admin.ModelAdmin):
+class TransactionAdmin(ModelAdmin):  # ✅ тоже заменили
     """
     Админка для модели Transaction.
     Доступна только суперадминам.
