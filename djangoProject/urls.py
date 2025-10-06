@@ -30,9 +30,19 @@ schema_view = get_schema_view(
 )
 
 
+from accounts.admin_dashboard import CustomAdminSite
+from accounts.models import User
+from bookings.models import Booking
+from playgrounds.models import Playground
+
+custom_admin = CustomAdminSite(name="custom_admin")
+custom_admin.register(User)
+custom_admin.register(Booking)
+custom_admin.register(Playground)
+
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', custom_admin.urls),
     path('api/', include('accounts.urls')),
     path('api/', include('playgrounds.urls')),
     path('api/', include('bookings.urls')),
