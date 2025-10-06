@@ -56,7 +56,7 @@ from playgrounds.models import SportVenue
 from django.db.models import Count, Sum
 from accounts.models import User
 from playgrounds.models import SportVenue
-from bookings.models import Booking, BookingTransaction
+from bookings.models import Booking, Transaction as BookingTransaction
 
 def dashboard_view(request, context=None):
     if context is None:
