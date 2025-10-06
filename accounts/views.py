@@ -7,11 +7,12 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from urllib.parse import unquote
-
+from django.core.exceptions import ObjectDoesNotExist
 from accounts.models import FootballExperience, FootballFormat, FootballFrequency, FootballPosition, User
 from djangoProject import settings
 from .serializers import UserSerializer, UpdateUserSerializer, RegisterSerializer, LoginSerializer, get_choices_from_enum
 from .utils import check_telegram_auth
+from .models import User
 
 import logging
 
@@ -57,17 +58,17 @@ class UserViewSet(viewsets.ViewSet):
             return Response({"allowed": False}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # Делаем запрос к вашему серверу/базе, чтобы проверить роль
-            user = request.user  # или получаем по telegram_id из базы
-            # Если используете модель User с полем role и telegram_id:
-            # from .models import User
-            # user = User.objects.filter(telegram_id=telegram_id).first()
-            if user and user.role in ["superadmin", "owner"]:
+            user = User.objects.get(telegram_id=telegram_id)
+            if user.role in ["superadmin", "owner"]:
                 return Response({"allowed": True})
-        except Exception:
+        except ObjectDoesNotExist:
+            # Пользователь не найден
             pass
+        except Exception as e:
+            print(f"[ERROR] check_admin_access: {e}")
 
         return Response({"allowed": False})
+
 
 
 class AuthViewSet(viewsets.ViewSet):
