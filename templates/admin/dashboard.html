@@ -2,46 +2,66 @@
 {% load static %}
 
 {% block content %}
-<div class="dashboard">
-    <h1 style="margin-bottom: 20px;">📊 Аналитика</h1>
+<div class="container-fluid">
+    <h1 class="mb-4">📊 Аналитика</h1>
 
-    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-        <div style="background: white; padding: 20px; border-radius: 10px; flex: 1; min-width: 250px;">
-            <h3>👤 Пользователи</h3>
-            <p style="font-size: 24px; font-weight: bold;">{{ total_users }}</p>
+    <div class="row">
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">👤 Пользователи</h5>
+                    <p class="card-text display-6 fw-bold">{{ total_users }}</p>
+                </div>
+            </div>
         </div>
-        <div style="background: white; padding: 20px; border-radius: 10px; flex: 1; min-width: 250px;">
-            <h3>🏟️ Площадки</h3>
-            <p style="font-size: 24px; font-weight: bold;">{{ total_venues }}</p>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">🏟️ Площадки</h5>
+                    <p class="card-text display-6 fw-bold">{{ total_venues }}</p>
+                </div>
+            </div>
         </div>
-        <div style="background: white; padding: 20px; border-radius: 10px; flex: 1; min-width: 250px;">
-            <h3>📅 Брони</h3>
-            <p style="font-size: 24px; font-weight: bold;">{{ total_bookings }}</p>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">📅 Брони</h5>
+                    <p class="card-text display-6 fw-bold">{{ total_bookings }}</p>
+                </div>
+            </div>
         </div>
-        <div style="background: white; padding: 20px; border-radius: 10px; flex: 1; min-width: 250px;">
-            <h3>💰 Доход</h3>
-            <p style="font-size: 24px; font-weight: bold;">{{ total_revenue }} сум</p>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">💰 Доход</h5>
+                    <p class="card-text display-6 fw-bold">{{ total_revenue|floatformat:0 }} сум</p>
+                </div>
+            </div>
         </div>
     </div>
 
-    <h2 style="margin-top: 40px;">🏆 Популярные площадки</h2>
-    <table class="table" style="background:white; border-radius:10px;">
-        <thead>
-            <tr>
-                <th>Площадка</th>
-                <th>Количество броней</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for venue in top_venues %}
-            <tr>
-                <td>{{ venue.stadium__name }}</td>
-                <td>{{ venue.total }}</td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="2">Нет данных</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <h2 class="mt-5 mb-3">🏆 Популярные площадки</h2>
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Площадка</th>
+                        <th>Количество броней</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for venue in top_venues %}
+                    <tr>
+                        <td>{{ venue.stadium__name }}</td>
+                        <td>{{ venue.total }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="2" class="text-center">Нет данных</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 {% endblock %}
