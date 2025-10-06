@@ -326,12 +326,7 @@ JAZZMIN_SETTINGS = {
     "copyright": "PolyaTop © 2025",
     "show_sidebar": True,
     "navigation_expanded": True,
-    "theme": "flatly",
-    "dark_mode_theme": "cyborg",
-    "topmenu_links": [
-        {"name": "📊 Дашборд", "url": "admin:dashboard", "permissions": ["auth.view_user"]},
-        {"model": "accounts.User"},
-        {"model": "bookings.Booking"},
-        {"model": "playgrounds.SportVenue"},
-    ],
+    "theme": "cyborg",  # варианты: "flatly", "cosmo", "minty", "cyborg" (тёмная)
+    # "dark_mode_theme": "cyborg",
+    
 }
