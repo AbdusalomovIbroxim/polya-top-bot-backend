@@ -63,6 +63,13 @@ class BookingAdmin(admin.ModelAdmin):
             'fields': ('start_time', 'end_time', 'created_at')
         }),
     )
+    
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.role == 'owner':
+            qs = qs.filter(stadium__owner=request.user)
+        return qs
+
 
 @admin.register(Transaction)
 class TransactionAdmin(admin.ModelAdmin):
@@ -81,3 +88,11 @@ class TransactionAdmin(admin.ModelAdmin):
     
     # Поля, доступные только для чтения
     readonly_fields = ('created_at', 'updated_at')
+    
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.role == 'owner':
+            qs = qs.filter(booking__stadium__owner=request.user)
+        return qs
+
+    

@@ -40,6 +40,12 @@ class SportVenueAdmin(admin.ModelAdmin):
         if obj.images.exists():
             return format_html('<img src="{}" style="max-height:100px;"/>', obj.images.first().image.url)
         return 'Нет изображений'
+    
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.role == 'owner':
+            qs = qs.filter(owner=request.user)
+        return qs
 
 # Админ для типов площадок
 @admin.register(SportVenueType)

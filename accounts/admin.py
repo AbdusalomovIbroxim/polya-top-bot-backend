@@ -74,6 +74,7 @@ class CustomUserAdmin(UserAdmin):
             ),
         }),
     )
+    
 
     # Управляет отображением полей в зависимости от роли пользователя
     def get_list_display(self, request):
@@ -93,3 +94,8 @@ class CustomUserAdmin(UserAdmin):
                 if 'is_staff' in fs[1]['fields'] and not request.user.is_superuser:
                     fs[1]['fields'] = tuple(f for f in fs[1]['fields'] if f != 'is_staff')
         return fieldsets
+    
+    
+    def has_module_permission(self, request):
+        """Показывать раздел 'Пользователи' только супер-админу"""
+        return request.user.is_superuser or getattr(request.user, 'role', None) == 'superadmin'
