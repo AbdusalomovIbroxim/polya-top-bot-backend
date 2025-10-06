@@ -5,7 +5,7 @@ from django.contrib import admin
 from unfold.sites import UnfoldAdminSite
 
 from accounts.models import User
-from bookings.models import Booking, BookingTransaction
+from bookings.models import Booking, Transaction as BookingTransaction
 from playgrounds.models import SportVenue
 
 
