@@ -5,274 +5,150 @@
     {% include "unfold/helpers/site_branding.html" %}
 {% endblock %}
 
-{% block header %}
-    {{ site_header }}
-{% endblock %}
-
-{% block extrahead %}
-<style>
-    /* Блок CSS: Стили для гарантированного отображения,
-    заменяющие большинство классов Tailwind 
-    */
-
-    /* Глобальные стили для контейнеров */
-    .dashboard-container {
-        margin-top: 1.5rem; /* space-y-6 */
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem; /* gap-6 */
-    }
-
-    /* Секция KPI-карточек */
-    .kpi-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 1rem; /* gap-4 */
-    }
-    @media (min-width: 768px) { /* md:grid-cols-4 */
-        .kpi-grid {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 1.5rem; /* sm:gap-6 */
-        }
-    }
-
-    /* Общие стили для KPI-карточки */
-    .kpi-card {
-        padding: 1rem; /* p-4 */
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Мягкая тень */
-        background-color: var(--color-white); /* bg-white */
-        transition: opacity 150ms; /* transition duration-150 */
-        border-left: 4px solid; /* border-l-4 - цвет задается инлайном */
-    }
-    .kpi-card:hover {
-        opacity: 0.9; /* hover:opacity-90 */
-    }
-    .dark .kpi-card {
-        background-color: var(--color-gray-800); /* dark:bg-gray-800 */
-    }
-    .dark .kpi-card:hover {
-        opacity: 0.9;
-    }
-
-    /* Внутренние стили KPI-карточки */
-    .kpi-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 0.5rem; /* mb-2 */
-    }
-    .kpi-title {
-        font-size: 0.875rem; /* sm:text-sm */
-        font-weight: 600; /* font-semibold */
-    }
-    .kpi-value {
-        font-size: 2.25rem; /* text-3xl */
-        font-weight: 800; /* font-extrabold */
-        color: var(--color-gray-900); /* text-gray-900 */
-    }
-    .dark .kpi-value {
-        color: var(--color-white); /* dark:text-white */
-    }
-    .kpi-value-sum {
-        font-size: 1.125rem; /* text-lg */
-        font-weight: 400; /* font-normal */
-    }
-    
-    /* Секция таблицы */
-    .table-container {
-        /* Устанавливаем отступ 15px сверху для компенсации space-y-6 */
-        margin-top: 0.75rem; /* ~12px, близко к 15px */ 
-        border-radius: 12px;
-        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-        background-color: var(--color-white); /* bg-white */
-        overflow: hidden; /* overflow-hidden */
-    }
-    .dark .table-container {
-        background-color: var(--color-gray-800); /* dark:bg-gray-800 */
-    }
-
-    .table-header {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: space-between;
-        padding: 1.25rem; /* p-5 */
-        border-bottom: 1px solid var(--color-gray-100); /* border-b border-gray-100 */
-    }
-    @media (min-width: 640px) {
-        .table-header {
-            flex-direction: row;
-            align-items: center;
-        }
-    }
-    .dark .table-header {
-        border-color: var(--color-gray-700); /* dark:border-gray-700 */
-    }
-
-    .table-title {
-        font-size: 1.5rem; /* sm:text-2xl */
-        font-weight: 700; /* font-bold */
-        color: var(--color-gray-900);
-    }
-    .dark .table-title {
-        color: var(--color-white);
-    }
-
-    /* Стили для таблицы */
-    .table-responsive {
-        overflow-x: auto;
-    }
-    .data-table {
-        min-width: 100%;
-        font-size: 0.875rem; /* text-sm */
-        text-align: left;
-        border-collapse: collapse;
-    }
-    .data-table th {
-        padding: 0.75rem 1.25rem; /* px-5 py-3 */
-        font-weight: 600; /* font-semibold */
-        letter-spacing: 0.05em; /* tracking-wider */
-        text-transform: uppercase;
-        font-size: 0.75rem; /* text-xs */
-        color: var(--color-gray-500);
-        border-bottom: 1px solid var(--color-gray-200);
-    }
-    .dark .data-table th {
-        color: var(--color-gray-400);
-        border-bottom-color: var(--color-gray-700);
-    }
-
-    .data-table tr {
-        border-bottom: 1px solid var(--color-gray-100);
-        transition: background-color 150ms;
-    }
-    .data-table tr:last-child {
-        border-bottom: none;
-    }
-    .dark .data-table tr {
-        border-bottom-color: var(--color-gray-700);
-    }
-    .data-table tr:hover {
-        background-color: rgba(243, 244, 246, 0.5); /* hover:bg-gray-100/50 */
-    }
-    .dark .data-table tr:hover {
-        background-color: rgba(55, 65, 81, 0.5); /* dark:hover:bg-gray-700/50 */
-    }
-
-    .data-table td {
-        padding: 0.75rem 1.25rem; /* px-5 py-3 */
-        color: var(--color-gray-800);
-        font-weight: 500; /* font-medium */
-    }
-    .dark .data-table td {
-        color: var(--color-gray-100);
-    }
-
-    .data-table .booking-count {
-        text-align: right;
-        font-weight: 700; /* font-bold */
-        color: var(--color-indigo-600);
-    }
-    .dark .data-table .booking-count {
-        color: var(--color-indigo-400);
-    }
-
-    .empty-row td {
-        text-align: center;
-        padding: 2rem 1.25rem; /* px-5 py-8 */
-        font-size: 1rem; /* text-base */
-        font-weight: 500;
-        color: var(--color-gray-500);
-    }
-</style>
-{% endblock %}
-
 {% block subheader %}
     {{ site_subheader }}
 {% endblock %}
 
+{% block extrahead %}
+<style>
+/* === Общие контейнеры === */
+.dashboard-container {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* === KPI карточки === */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+}
+@media (min-width: 640px) { grid-template-columns: repeat(2, 1fr); }
+@media (min-width: 1024px) { grid-template-columns: repeat(4, 1fr); }
+
+.kpi-card {
+    position: relative;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    color: white;
+    overflow: hidden;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.kpi-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.12); }
+
+.kpi-icon {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    opacity: 0.15;
+    width: 3rem;
+    height: 3rem;
+}
+.kpi-title { font-weight: 600; font-size: 0.875rem; opacity: 0.9; }
+.kpi-value { font-size: 2.5rem; font-weight: 800; margin-top: 0.5rem; }
+.kpi-suffix { font-size: 1rem; font-weight: 500; margin-left: 0.25rem; }
+
+/* === Таблица топ-площадок === */
+.table-container {
+    background-color: var(--color-white);
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 10px 15px rgba(0,0,0,0.05);
+}
+.dark .table-container { background-color: #1f2937; }
+
+.table-header {
+    padding: 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+}
+.dark .table-header { border-color: #374151; }
+
+.table-title { font-weight: 700; font-size: 1.5rem; }
+.table-subtitle { font-size: 0.875rem; color: #6b7280; }
+.dark .table-subtitle { color: #9ca3af; }
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+.data-table th, .data-table td { padding: 0.75rem 1.25rem; text-align: left; }
+.data-table th { font-weight: 600; text-transform: uppercase; color: #6b7280; font-size: 0.75rem; border-bottom: 1px solid #e5e7eb; }
+.dark .data-table th { color: #9ca3af; border-bottom-color: #374151; }
+.data-table tr:hover { background-color: #f3f4f6; }
+.dark .data-table tr:hover { background-color: #374151; }
+.data-table td { font-weight: 500; color: #111827; }
+.dark .data-table td { color: #f9fafb; }
+.data-table .booking-count { text-align: right; font-weight: 700; color: #4f46e5; }
+.dark .data-table .booking-count { color: #818cf8; }
+
+.empty-row td { text-align: center; padding: 2rem 0; color: #6b7280; }
+.dark .empty-row td { color: #9ca3af; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="dashboard-container animate-fade-in">
-    
+
+    <!-- KPI -->
     <div class="kpi-grid">
-        
-        <div class="kpi-card" style="border-left-color: var(--color-indigo-500);">
-            <div class="kpi-header">
-                <span class="kpi-title" style="color: var(--color-indigo-600); /* text-indigo-600 */">👤 Пользователи</span>
-                <svg class="w-5 h-5" style="color: var(--color-indigo-400);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M10 12H7a3 3 0 00-3 3v2M10 12h4m-4 0a3 3 0 00-3-3H7m7 3h3a3 3 0 013 3v2m-3-3a3 3 0 00-3-3h-4m-7 3a3 3 0 013-3h4"></path></svg>
-            </div>
+        <div class="kpi-card" style="background: linear-gradient(135deg, #6366f1, #4f46e5);">
+            <div class="kpi-title">👤 Пользователи</div>
             <div class="kpi-value">{{ total_users|default:0 }}</div>
+            <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A5 5 0 0112 21a5 5 0 016.879-3.196M15 10a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
         </div>
-
-        <div class="kpi-card" style="border-left-color: var(--color-emerald-500);">
-            <div class="kpi-header">
-                <span class="kpi-title" style="color: var(--color-emerald-600);">🏟️ Площадки</span>
-                <svg class="w-5 h-5" style="color: var(--color-emerald-400);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-            </div>
+        <div class="kpi-card" style="background: linear-gradient(135deg, #10b981, #047857);">
+            <div class="kpi-title">🏟️ Площадки</div>
             <div class="kpi-value">{{ total_venues|default:0 }}</div>
+            <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
         </div>
-        
-        <div class="kpi-card" style="border-left-color: var(--color-amber-500);">
-            <div class="kpi-header">
-                <span class="kpi-title" style="color: var(--color-amber-600);">📅 Брони</span>
-                <svg class="w-5 h-5" style="color: var(--color-amber-400);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h8M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-            </div>
+        <div class="kpi-card" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+            <div class="kpi-title">📅 Брони</div>
             <div class="kpi-value">{{ total_bookings|default:0 }}</div>
+            <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h8M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
         </div>
-
-        <div class="kpi-card" style="border-left-color: var(--color-rose-500);">
-            <div class="kpi-header">
-                <span class="kpi-title" style="color: var(--color-rose-600);">💰 Доход</span>
-                <svg class="w-5 h-5" style="color: var(--color-rose-400);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V3m0 2v3m0 3.5c0 1.488 2.08 2.599 3 3.5m0 0a1 1 0 01-1 1h-2a1 1 0 01-1-1m0 0c-1.11 0-2.08-.402-2.599-1M12 21v-3m0-2.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z"></path></svg>
-            </div>
-            <div class="kpi-value">
-                {{ total_revenue|default:0 }} 
-                <span class="kpi-value-sum">сум</span>
-            </div> 
+        <div class="kpi-card" style="background: linear-gradient(135deg, #f43f5e, #be123c);">
+            <div class="kpi-title">💰 Доход</div>
+            <div class="kpi-value">{{ total_revenue|default:0 }} <span class="kpi-suffix">сум</span></div>
+            <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2"></path></svg>
         </div>
     </div>
 
-    <div class="table-container-wrapper">
-        <div class="table-container">
-            
-            <div class="table-header">
-                <h2 class="table-title">
-                    🏆 Популярные площадки
-                </h2>
-                <span style="font-size: 0.875rem; color: var(--color-gray-500); margin-top: 0.25rem;">Топ-5 по количеству броней</span>
-            </div>
-
-            <div class="table-responsive">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Площадка</th>
-                            <th style="text-align: right;">Брони</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for venue in top_venues %}
-                        <tr>
-                            <td>
-                                {{ venue.stadium__name }}
-                            </td>
-                            <td class="booking-count">
-                                {{ venue.total }}
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr class="empty-row">
-                            <td colspan="2">
-                                <p>Нет данных о популярных площадках.</p>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+    <!-- Топ площадок -->
+    <div class="table-container">
+        <div class="table-header">
+            <h2 class="table-title">🏆 Популярные площадки</h2>
+            <span class="table-subtitle">Топ-5 по количеству броней</span>
         </div>
-        
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Площадка</th>
+                        <th style="text-align: right;">Брони</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for venue in top_venues %}
+                    <tr>
+                        <td>{{ venue.stadium__name }}</td>
+                        <td class="booking-count">{{ venue.total }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr class="empty-row">
+                        <td colspan="2">Нет данных о популярных площадках.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}
