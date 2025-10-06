@@ -2,168 +2,133 @@
 {% load static %}
 
 {% block branding %}
-    {% include "unfold/helpers/site_branding.html" %}
+    {% include "unfold.helpers.site-branding.html" %}
 {% endblock %}
 
 {% block subheader %}
     {{ site_subheader }}
 {% endblock %}
 
-{% block extrahead %}
-<style>
-/* === Общие контейнеры === */
-.dashboard-container {
-    margin: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-}
-
-/* === KPI карточки === */
-.kpi-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-}
-@media (min-width: 640px) { grid-template-columns: repeat(2, 1fr); }
-@media (min-width: 1024px) { grid-template-columns: repeat(4, 1fr); }
-
-.kpi-card {
-    position: relative;
-    padding: 1.5rem;
-    border-radius: 1rem;
-    color: white;
-    overflow: hidden;
-    background: linear-gradient(135deg, #6366f1, #4f46e5);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-.kpi-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
-}
-
-.kpi-title { font-weight: 600; font-size: 0.875rem; opacity: 0.9; }
-.kpi-value { font-size: 2rem; font-weight: 800; margin-top: 0.5rem; }
-.kpi-suffix { font-size: 1rem; font-weight: 500; margin-left: 0.25rem; }
-
-.kpi-icon {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    opacity: 0.15;
-    width: 2.5rem;
-    height: 2.5rem;
-}
-
-/* === Таблица топ-площадок === */
-.table-container {
-    border-radius: 1rem;
-    overflow: hidden;
-    box-shadow: 0 10px 15px rgba(0,0,0,0.05);
-    background-color: var(--color-white);
-}
-.dark .table-container { background-color: #1f2937; }
-
-.table-header {
-    padding: 1.25rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-@media (min-width: 640px) { .table-header { flex-direction: row; justify-content: space-between; align-items: center; } }
-
-.table-title { font-weight: 700; font-size: 1.5rem; }
-.table-subtitle { font-size: 0.875rem; color: #6b7280; }
-.dark .table-subtitle { color: #9ca3af; }
-
-.table-responsive {
-    overflow-x: auto;
-}
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.875rem;
-}
-.data-table th, .data-table td { padding: 0.75rem 1.25rem; text-align: left; }
-.data-table th {
-    font-weight: 600;
-    text-transform: uppercase;
-    color: #6b7280;
-    font-size: 0.75rem;
-    border-bottom: 1px solid #e5e7eb;
-}
-.dark .data-table th { color: #9ca3af; border-bottom-color: #374151; }
-.data-table tr:hover { background-color: #f3f4f6; }
-.dark .data-table tr:hover { background-color: #374151; }
-.data-table td { font-weight: 500; color: #111827; }
-.dark .data-table td { color: #f9fafb; }
-.data-table .booking-count { text-align: right; font-weight: 700; color: #4f46e5; }
-.dark .data-table .booking-count { color: #818cf8; }
-
-.empty-row td { text-align: center; padding: 2rem 0; color: #6b7280; }
-.dark .empty-row td { color: #9ca3af; }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="dashboard-container animate-fade-in">
+<div class="p-4 md:p-6 space-y-6">
 
-    <!-- KPI -->
-    <div class="kpi-grid">
-        <div class="kpi-card" style="background: linear-gradient(135deg, #6366f1, #4f46e5);">
-            <div class="kpi-title">👤 Пользователи</div>
-            <div class="kpi-value">{{ total_users|default:0 }}</div>
-            <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A5 5 0 0112 21a5 5 0 016.879-3.196M15 10a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+    <!-- Верхний блок: Приветствие -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+            📊 Панель аналитики
+        </h1>
+        <p class="text-gray-500 dark:text-gray-400 text-sm md:text-base">
+            Добро пожаловать, {{ request.user.username }} 👋
+        </p>
+    </div>
+
+    <!-- KPI карточки с мини-графиками -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <!-- Пользователи -->
+        <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-xl p-4 shadow hover:opacity-95 transition">
+            <div class="flex items-center justify-between">
+                <span class="font-semibold text-sm">👤 Пользователи</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M10 12H7a3 3 0 00-3 3v2M10 12h4m-4 0a3 3 0 00-3-3H7m7 3h3a3 3 0 013 3v2m-3-3a3 3 0 00-3-3h-4m-7 3a3 3 0 013-3h4"></path>
+                </svg>
+            </div>
+            <div class="mt-2 text-2xl md:text-3xl font-extrabold">{{ total_users|default:0 }}</div>
+            <canvas id="usersChart" class="mt-2 h-10 w-full"></canvas>
         </div>
 
-        <div class="kpi-card" style="background: linear-gradient(135deg, #10b981, #047857);">
-            <div class="kpi-title">🏟️ Площадки</div>
-            <div class="kpi-value">{{ total_venues|default:0 }}</div>
-            <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+        <!-- Площадки -->
+        <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-xl p-4 shadow hover:opacity-95 transition">
+            <div class="flex items-center justify-between">
+                <span class="font-semibold text-sm">🏟️ Площадки</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+            </div>
+            <div class="mt-2 text-2xl md:text-3xl font-extrabold">{{ total_venues|default:0 }}</div>
+            <canvas id="venuesChart" class="mt-2 h-10 w-full"></canvas>
         </div>
 
-        <div class="kpi-card" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-            <div class="kpi-title">📅 Брони</div>
-            <div class="kpi-value">{{ total_bookings|default:0 }}</div>
-            <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h8M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        <!-- Брони -->
+        <div class="bg-gradient-to-br from-amber-500 to-orange-600 text-white rounded-xl p-4 shadow hover:opacity-95 transition">
+            <div class="flex items-center justify-between">
+                <span class="font-semibold text-sm">📅 Брони</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h8M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+            <div class="mt-2 text-2xl md:text-3xl font-extrabold">{{ total_bookings|default:0 }}</div>
+            <canvas id="bookingsChart" class="mt-2 h-10 w-full"></canvas>
         </div>
 
-        <div class="kpi-card" style="background: linear-gradient(135deg, #f43f5e, #be123c);">
-            <div class="kpi-title">💰 Доход</div>
-            <div class="kpi-value">{{ total_revenue|default:0 }} <span class="kpi-suffix">сум</span></div>
-            <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2"></path></svg>
+        <!-- Доход -->
+        <div class="bg-gradient-to-br from-rose-500 to-pink-600 text-white rounded-xl p-4 shadow hover:opacity-95 transition">
+            <div class="flex items-center justify-between">
+                <span class="font-semibold text-sm">💰 Доход</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V3m0 2v3m0 3.5c0 1.488 2.08 2.599 3 3.5m0 0a1 1 0 01-1 1h-2a1 1 0 01-1-1m0 0c-1.11 0-2.08-.402-2.599-1M12 21v-3m0-2.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z"></path>
+                </svg>
+            </div>
+            <div class="mt-2 text-2xl md:text-3xl font-extrabold">{{ total_revenue|default:0 }} сум</div>
+            <canvas id="revenueChart" class="mt-2 h-10 w-full"></canvas>
         </div>
     </div>
 
-    <!-- Топ площадок -->
-    <div class="table-container">
-        <div class="table-header">
-            <h2 class="table-title">🏆 Популярные площадки</h2>
-            <span class="table-subtitle">Топ-5 по количеству броней</span>
-        </div>
-        <div class="table-responsive">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Площадка</th>
-                        <th style="text-align: right;">Брони</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for venue in top_venues %}
-                    <tr>
-                        <td>{{ venue.stadium__name }}</td>
-                        <td class="booking-count">{{ venue.total }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr class="empty-row">
-                        <td colspan="2">Нет данных о популярных площадках.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <!-- Таблица популярных площадок -->
+    <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-xl shadow p-4 md:p-6 mt-6">
+        <h2 class="text-lg md:text-2xl font-bold text-gray-900 dark:text-white mb-2">🏆 Популярные площадки</h2>
+        <span class="text-gray-500 dark:text-gray-400 text-sm">Топ-5 по количеству броней</span>
+        <table class="min-w-full mt-4 text-sm md:text-base">
+            <thead class="border-b border-gray-200 dark:border-gray-700 text-left">
+                <tr>
+                    <th class="px-2 md:px-4 py-2">Площадка</th>
+                    <th class="px-2 md:px-4 py-2 text-right">Брони</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for venue in top_venues %}
+                <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                    <td class="px-2 md:px-4 py-2">{{ venue.stadium__name }}</td>
+                    <td class="px-2 md:px-4 py-2 text-right font-bold text-indigo-600 dark:text-indigo-400">{{ venue.total }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="text-center py-4 text-gray-500">Нет данных</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
+
+<!-- Подключение Chart.js для мини-графиков -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Пример простых мини-графиков для KPI (можно заменить на реальные данные)
+    const usersChart = new Chart(document.getElementById('usersChart'), {
+        type: 'line',
+        data: {
+            labels: ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],
+            datasets: [{ data: [5,8,6,10,12,7,9], borderColor: '#6366F1', tension: 0.4, fill: false }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+    });
+
+    const venuesChart = new Chart(document.getElementById('venuesChart'), {
+        type: 'line',
+        data: { labels: ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'], datasets: [{ data: [2,3,3,4,5,3,2], borderColor: '#10B981', tension: 0.4, fill: false }] },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+    });
+
+    const bookingsChart = new Chart(document.getElementById('bookingsChart'), {
+        type: 'line',
+        data: { labels: ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'], datasets: [{ data: [15,20,18,25,30,22,19], borderColor: '#F59E0B', tension: 0.4, fill: false }] },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+    });
+
+    const revenueChart = new Chart(document.getElementById('revenueChart'), {
+        type: 'line',
+        data: { labels: ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'], datasets: [{ data: [5000,8000,6000,12000,15000,9000,11000], borderColor: '#F43F5E', tension: 0.4, fill: false }] },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+    });
+</script>
 {% endblock %}
