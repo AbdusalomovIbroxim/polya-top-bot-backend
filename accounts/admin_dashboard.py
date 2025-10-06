@@ -27,13 +27,13 @@ class CustomAdminSite(UnfoldAdminSite):
         total_venues = SportVenue.objects.count()
         total_bookings = Booking.objects.count()
         total_revenue = BookingTransaction.objects.aggregate(total=Sum("amount"))["total"] or 0
-
+    
         top_venues = (
-            Booking.objects.values("sport_venue__name")
+            Booking.objects.values("stadium__name")
             .annotate(total=Count("id"))
             .order_by("-total")[:5]
         )
-
+    
         context = {
             "total_users": total_users,
             "total_venues": total_venues,
@@ -43,6 +43,7 @@ class CustomAdminSite(UnfoldAdminSite):
             "title": "📊 Аналитика",
         }
         return render(request, "admin/dashboard.html", context)
+
 
 
 custom_admin = CustomAdminSite(name="custom_admin")
