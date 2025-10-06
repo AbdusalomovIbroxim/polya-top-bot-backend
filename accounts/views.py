@@ -46,7 +46,7 @@ class UserViewSet(viewsets.ViewSet):
             status=status.HTTP_400_BAD_REQUEST
         )
     
-    @action(detail=False, methods=['post'], , permission_classes=[AllowAny])
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def check_admin_access(self, request):
         """
         Проверка, может ли пользователь получить доступ к админке.
