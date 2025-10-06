@@ -6,28 +6,26 @@ from .models import User, Role, FootballExperience, FootballFrequency, FootballF
 class CustomUserAdmin(UserAdmin):
     # Поля, отображаемые в списке пользователей
     list_display = (
-        'id', 'username', 'telegram_id', 'email', 'phone', 'first_name', 
-        'last_name', 'role', 'is_active', 'is_staff'
+        'username', 'phone', 'first_name', 
+        'last_name'
     )
     
     # Поля для фильтрации
-    list_filter = (
-        'role', 
-        'is_active', 
-        'is_staff', 
-        'is_superuser', 
-        'date_joined',
-        'football_experience',
-        'football_frequency',
-        'football_competitions',
-        # 'city'
-    )
+    # list_filter = (
+    #     'role', 
+    #     'is_superuser', 
+    #     'date_joined',
+    #     'football_experience',
+    #     'football_frequency',
+    #     'football_competitions',
+    #     # 'city'
+    # )
     
     # Поля для поиска
     search_fields = (
         'username', 
-        'email', 
-        'phone', 
+        # 'email', 
+        # 'phone', 
         'first_name', 
         'last_name', 
         'telegram_id'
@@ -76,7 +74,6 @@ class CustomUserAdmin(UserAdmin):
     )
     
 
-    # Управляет отображением полей в зависимости от роли пользователя
     def get_list_display(self, request):
         list_display = super().get_list_display(request)
         if not request.user.is_superuser:
@@ -86,10 +83,8 @@ class CustomUserAdmin(UserAdmin):
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
         if not request.user.is_superuser:
-            # Скрываем поле is_superuser для не-суперпользователей
             fieldsets = [fieldset for fieldset in fieldsets if 'is_superuser' not in fieldset[1]['fields']]
             
-            # Скрываем поле is_staff для не-суперпользователей, если оно находится в том же наборе полей
             for fs in fieldsets:
                 if 'is_staff' in fs[1]['fields'] and not request.user.is_superuser:
                     fs[1]['fields'] = tuple(f for f in fs[1]['fields'] if f != 'is_staff')
@@ -97,5 +92,4 @@ class CustomUserAdmin(UserAdmin):
     
     
     def has_module_permission(self, request):
-        """Показывать раздел 'Пользователи' только супер-админу"""
         return request.user.is_superuser or getattr(request.user, 'role', None) == 'superadmin'

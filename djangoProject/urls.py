@@ -29,7 +29,7 @@ schema_view = get_schema_view(
     url="https://polya.top/api",  # Your API base URL
 )
 
-from accounts.admin_dashboard import custom_admin
+from accounts.admin import custom_admin
 
 
 urlpatterns = [

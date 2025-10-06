@@ -21,7 +21,7 @@ ALLOWED_HOSTS = [
 ]
 
 INSTALLED_APPS = [
-    'jazzmin', 
+    'unfold', 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -317,16 +317,30 @@ sentry_sdk.init(
 )
 
 
-JAZZMIN_SETTINGS = {
-    "site_title": "Админка PolyaTop",
-    "site_header": "PolyaTop Администрирование",
-    "site_brand": "PolyaTop",
-    "site_logo": 'logo.png',
-    "welcome_sign": "Добро пожаловать в панель администратора PolyaTop",
-    "copyright": "PolyaTop © 2025",
-    "show_sidebar": True,
-    "navigation_expanded": True,
-    "theme": "cyborg",  # варианты: "flatly", "cosmo", "minty", "cyborg" (тёмная)
-    # "dark_mode_theme": "cyborg",
+# JAZZMIN_SETTINGS = {
+#     "site_title": "Админка PolyaTop",
+#     "site_header": "PolyaTop Администрирование",
+#     "site_brand": "PolyaTop",
+#     "site_logo": 'logo.png',
+#     "welcome_sign": "Добро пожаловать в панель администратора PolyaTop",
+#     "copyright": "PolyaTop © 2025",
+#     "show_sidebar": True,
+#     "navigation_expanded": True,
+#     "theme": "cyborg",  # варианты: "flatly", "cosmo", "minty", "cyborg" (тёмная)
+#     # "dark_mode_theme": "cyborg",
+#     "hide_models": [
+#         "auth.Group",              # скрыть группы
+#         "authtoken.Token",         # скрыть токены DRF
+#     ],
     
+# }
+
+
+UNFOLD = {
+    "SITE_TITLE": "PolyaTop Admin",
+    "SITE_HEADER": "PolyaTop Панель управления",
+    "SITE_SUBHEADER": "Статистика и управление",
+    "SHOW_HISTORY": False,
+    "SHOW_VIEW_ON_SITE": False,
+    "DARK_MODE": True,
 }

@@ -6,8 +6,9 @@ from django.shortcuts import redirect
 from accounts.models import User
 from bookings.models import Booking, Transaction
 from playgrounds.models import SportVenue
+from unfold.sites import UnfoldAdminSite
 
-class CustomAdminSite(admin.AdminSite):
+class CustomAdminSite(UnfoldAdminSite):
     
     def index(self, request, extra_context=None):
         return redirect("admin:dashboard")
@@ -45,5 +46,18 @@ class CustomAdminSite(admin.AdminSite):
 
 custom_admin = CustomAdminSite(name="custom_admin")
 
+from django.contrib import admin
 for model, model_admin in admin.site._registry.items():
     custom_admin.register(model, model_admin.__class__)
+
+
+# from accounts.admin_dashboard import custom_admin, CustomAdminSite
+# from unfold.sites import UnfoldAdminSite
+
+# Наследуем твой CustomAdminSite от UnfoldAdminSite
+# class CustomUnfoldAdminSite(CustomAdminSite, UnfoldAdminSite):
+#     pass
+
+# custom_admin = CustomUnfoldAdminSite(name="custom_admin")
+
+# Регистрируем все модели, как раньше

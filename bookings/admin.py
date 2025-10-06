@@ -1,40 +1,8 @@
-# import logging
-
-# from django.contrib import admin
-# from .models import Event, EventParticipant, Payment
-
-# logger = logging.getLogger(__name__)
-
-
-# class EventParticipantInline(admin.TabularInline):
-#     model = EventParticipant
-#     extra = 0
-#     readonly_fields = ("user", "payment_method", "payment_status", "joined_at")
-#     can_delete = True
-
-
-# @admin.register(Event)
-# class EventAdmin(admin.ModelAdmin):
-#     list_display = ("id", "creator", "field", "game_time", "rounds", "is_private", "created_at")
-#     list_filter = ("is_private", "game_time", "rounds")
-#     search_fields = ("creator__username", "field__name")
-#     inlines = [EventParticipantInline]
-#     readonly_fields = ("location", "created_at")
-
-
-# @admin.register(EventParticipant)
-# class EventParticipantAdmin(admin.ModelAdmin):
-#     list_display = ("id", "event", "user", "payment_method", "payment_status", "joined_at")
-#     search_fields = ("user__username", "event__id")
-
-
-# @admin.register(Payment)
-# class PaymentAdmin(admin.ModelAdmin):
-#     list_display = ("id", "event_participant", "amount", "method", "status", "created_at")
-#     search_fields = ("event_participant__user__username",)
-
 from django.contrib import admin
 from .models import Booking, Transaction
+from django.utils import timezone
+from datetime import timedelta
+
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
@@ -42,19 +10,19 @@ class BookingAdmin(admin.ModelAdmin):
     Админка для модели Booking.
     Настраивает отображение, фильтрацию и поиск броней.
     """
-    # Список полей, которые будут отображаться на странице списка броней
-    list_display = ('user', 'stadium', 'start_time', 'end_time', 'amount', 'status', 'payment_method', 'created_at')
-    
-    # Поля, по которым можно фильтровать брони
+
+    list_display = (
+        'user',
+        'stadium',
+        'formatted_start',
+        'formatted_end',
+        'amount',
+        'status',
+        'payment_method',
+    )
     list_filter = ('status', 'payment_method', 'stadium', 'start_time')
-    
-    # Поля для поиска
-    search_fields = ('user__username', 'stadium__name', 'status')
-    
-    # Поля, доступные только для чтения в форме редактирования
+    search_fields = ('user__username', 'stadium__name')
     readonly_fields = ('created_at',)
-    
-    # Группировка полей в форме редактирования
     fieldsets = (
         (None, {
             'fields': ('user', 'stadium', 'amount', 'status', 'payment_method')
@@ -63,7 +31,30 @@ class BookingAdmin(admin.ModelAdmin):
             'fields': ('start_time', 'end_time', 'created_at')
         }),
     )
-    
+
+    def formatted_start(self, obj):
+        return self._format_datetime(obj.start_time)
+    formatted_start.short_description = "Начало"
+
+    def formatted_end(self, obj):
+        return self._format_datetime(obj.end_time)
+    formatted_end.short_description = "Окончание"
+
+    def _format_datetime(self, dt):
+        """Форматирует дату: 'Сегодня, 19:00', 'Завтра, 21:30', '15.10.2025 19:00'."""
+        local_dt = timezone.localtime(dt)
+        now = timezone.localtime(timezone.now()).date()
+        date = local_dt.date()
+
+        if date == now:
+            prefix = "Сегодня"
+        elif date == now + timedelta(days=1):
+            prefix = "Завтра"
+        else:
+            prefix = local_dt.strftime("%d.%m.%Y")
+
+        return f"{prefix}, {local_dt.strftime('%H:%M')}"
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.role == 'owner':
@@ -75,24 +66,33 @@ class BookingAdmin(admin.ModelAdmin):
 class TransactionAdmin(admin.ModelAdmin):
     """
     Админка для модели Transaction.
-    Настраивает отображение, фильтрацию и поиск транзакций.
+    Доступна только суперадминам.
     """
-    # Список полей для отображения
+
     list_display = ('id', 'booking', 'user', 'amount', 'status', 'created_at')
-    
-    # Поля для фильтрации
     list_filter = ('status', 'created_at')
-    
-    # Поля для поиска
     search_fields = ('booking__id', 'user__username')
-    
-    # Поля, доступные только для чтения
     readonly_fields = ('created_at', 'updated_at')
-    
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.role == 'owner':
             qs = qs.filter(booking__stadium__owner=request.user)
         return qs
 
-    
+    # --- доступ только суперадминам ---
+    def has_module_permission(self, request):
+        """Скрывает раздел 'Транзакции' для всех, кроме суперадминов."""
+        return request.user.is_superuser
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    def has_add_permission(self, request):
+        return request.user.is_superuser
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser

@@ -63,8 +63,8 @@ class RegionAdmin(admin.ModelAdmin):
     ordering = ('id',)
 
 # Админ для избранного
-@admin.register(FavoriteSportVenue)
-class FavoriteSportVenueAdmin(admin.ModelAdmin):
-    list_display = ('user', 'sport_venue', 'created_at')
-    list_filter = ('created_at',)
-    search_fields = ('user__username', 'sport_venue__name')
+# @admin.register(FavoriteSportVenue)
+# class FavoriteSportVenueAdmin(admin.ModelAdmin):
+#     list_display = ('user', 'sport_venue', 'created_at')
+#     list_filter = ('created_at',)
+#     search_fields = ('user__username', 'sport_venue__name')
