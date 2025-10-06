@@ -11,7 +11,7 @@
 
 {% block extrahead %}
 <style>
-/* Общие стили контейнера */
+/* --- Контейнер --- */
 .dashboard-container {
     padding: 1rem;
     display: flex;
@@ -19,7 +19,7 @@
     gap: 1.5rem;
 }
 
-/* Сетка KPI-карточек */
+/* --- Сетка KPI-карточек --- */
 .kpi-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -27,17 +27,13 @@
 }
 
 @media (min-width: 640px) {
-    .kpi-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (min-width: 1024px) {
-    .kpi-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
+    .kpi-grid { grid-template-columns: repeat(4, 1fr); }
 }
 
-/* Карточка KPI */
+/* --- Карточка KPI --- */
 .kpi-card {
     padding: 1rem;
     border-radius: 12px;
@@ -57,22 +53,31 @@
     font-weight: 600;
     margin-bottom: 0.5rem;
 }
+.kpi-value-wrapper {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+}
 .kpi-value {
     font-size: 2rem;
     font-weight: 800;
+    white-space: nowrap;
+}
+.kpi-value-unit {
+    font-size: 1rem;
+    font-weight: 600;
 }
 
-/* Цвета для карточек */
+/* Цвета карточек */
 .kpi-users { background: linear-gradient(135deg, #6366F1, #4F46E5); }
 .kpi-venues { background: linear-gradient(135deg, #10B981, #059669); }
 .kpi-bookings { background: linear-gradient(135deg, #F59E0B, #D97706); }
 .kpi-revenue { background: linear-gradient(135deg, #F43F5E, #BE185D); }
 
-/* Таблица популярных площадок */
+/* --- Таблица популярных площадок --- */
 .table-container {
-    {% comment %} background: white; {% endcomment %}
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     overflow-x: auto;
 }
 .table-container table {
@@ -90,14 +95,10 @@
     text-transform: uppercase;
     color: #6B7280;
     border-bottom: 1px solid #E5E7EB;
+    background: transparent; /* Убираем hover и фон */
 }
-.table-container tr:hover {
-    background-color: #F3F4F6;
-}
-
-.table-container td:hover {
-    cursor: pointer;
-    color: #374151;
+.table-container tbody tr:hover td {
+    background-color: #F3F4F6; /* hover только по данным */
 }
 
 .table-container td.booking-count {
@@ -106,11 +107,9 @@
     color: #6366F1;
 }
 
-/* Адаптивные отступы для мобильных */
+/* --- Мобильная адаптация --- */
 @media (max-width: 640px) {
-    .kpi-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); gap:0.5rem; }
     .kpi-value { font-size: 1.5rem; }
 }
 </style>
@@ -123,19 +122,28 @@
     <div class="kpi-grid">
         <div class="kpi-card kpi-users">
             <span class="kpi-title">👤 Пользователи</span>
-            <span class="kpi-value">{{ total_users|default:0 }}</span>
+            <div class="kpi-value-wrapper">
+                <span class="kpi-value">{{ total_users|default:0 }}</span>
+            </div>
         </div>
         <div class="kpi-card kpi-venues">
             <span class="kpi-title">🏟️ Площадки</span>
-            <span class="kpi-value">{{ total_venues|default:0 }}</span>
+            <div class="kpi-value-wrapper">
+                <span class="kpi-value">{{ total_venues|default:0 }}</span>
+            </div>
         </div>
         <div class="kpi-card kpi-bookings">
             <span class="kpi-title">📅 Брони</span>
-            <span class="kpi-value">{{ total_bookings|default:0 }}</span>
+            <div class="kpi-value-wrapper">
+                <span class="kpi-value">{{ total_bookings|default:0 }}</span>
+            </div>
         </div>
         <div class="kpi-card kpi-revenue">
             <span class="kpi-title">💰 Доход</span>
-            <span class="kpi-value">{{ total_revenue|default:0 }} сум</span>
+            <div class="kpi-value-wrapper">
+                <span class="kpi-value">{{ total_revenue|default:0 }}</span>
+                <span class="kpi-value-unit">сум</span>
+            </div>
         </div>
     </div>
 
