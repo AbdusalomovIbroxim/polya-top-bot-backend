@@ -70,7 +70,7 @@
 
 /* Таблица популярных площадок */
 .table-container {
-    background: white;
+    {% comment %} background: white; {% endcomment %}
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     overflow-x: auto;
@@ -102,6 +102,9 @@
 
 /* Адаптивные отступы для мобильных */
 @media (max-width: 640px) {
+    .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
     .kpi-value { font-size: 1.5rem; }
 }
 </style>
