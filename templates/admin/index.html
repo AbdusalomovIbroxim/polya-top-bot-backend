@@ -17,22 +17,22 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div class="p-5 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-md">
             <div class="text-sm opacity-80 mb-1">👤 Пользователи</div>
-            <div class="text-4xl font-bold">{{ total_users }}</div>
+            <div class="text-4xl font-bold">{{ total_users|default:0 }}</div>
         </div>
 
         <div class="p-5 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-md">
             <div class="text-sm opacity-80 mb-1">🏟️ Площадки</div>
-            <div class="text-4xl font-bold">{{ total_venues }}</div>
+            <div class="text-4xl font-bold">{{ total_venues|default:0 }}</div>
         </div>
 
         <div class="p-5 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-md">
             <div class="text-sm opacity-80 mb-1">📅 Брони</div>
-            <div class="text-4xl font-bold">{{ total_bookings }}</div>
+            <div class="text-4xl font-bold">{{ total_bookings|default:0 }}</div>
         </div>
 
         <div class="p-5 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-md">
             <div class="text-sm opacity-80 mb-1">💰 Доход</div>
-            <div class="text-4xl font-bold">{{ total_revenue }} сум</div>
+            <div class="text-4xl font-bold">{{ total_revenue|default:0 }} сум</div>
         </div>
     </div>
 

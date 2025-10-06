@@ -53,7 +53,15 @@ from playgrounds.models import SportVenue
 #     custom_admin.register(model, model_admin.__class__)
 
 
+from django.db.models import Count, Sum
+from accounts.models import User
+from playgrounds.models import SportVenue
+from bookings.models import Booking, BookingTransaction
+
 def dashboard_view(request, context=None):
+    if context is None:
+        context = {}
+
     total_users = User.objects.count()
     total_venues = SportVenue.objects.count()
     total_bookings = Booking.objects.count()
@@ -65,10 +73,6 @@ def dashboard_view(request, context=None):
         .order_by("-total")[:5]
     )
 
-    # если Unfold передал context
-    if context is None:
-        context = {}
-
     context.update({
         "total_users": total_users,
         "total_venues": total_venues,
@@ -76,6 +80,9 @@ def dashboard_view(request, context=None):
         "total_revenue": total_revenue,
         "top_venues": top_venues,
         "title": "📊 Аналитика",
+        "SITE_TITLE": "PolyaTop Admin",
+        "SITE_HEADER": "PolyaTop Панель управления",
+        "SITE_SUBHEADER": "Статистика и управление",
     })
 
     return context
