@@ -346,5 +346,5 @@ UNFOLD = {
     "DARK_MODE": True,
     "SIDEBAR_COLLAPSED": True,  # 👉 сворачивает боковую панель по умолчанию
     "MOBILE_MENU": True,        # 👉 включает мобильное меню (важно!)
-    "CUSTOM_CSS": ["unfold_custom.css"],
+    # "CUSTOM_CSS": ["unfold_custom.css"],
 }
