@@ -14,11 +14,11 @@
 {% endblock %}
 
 {% block content %}
-<div class="space-y-6 lg:space-y-8 animate-fade-in">
+<div class="space-y-5 animate-fade-in">
     
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
         
-        <div class="p-4 sm:p-5 rounded-xl border-l-4 border-indigo-500 transition duration-150 hover:bg-gray-100 dark:hover:bg-gray-700/60">
+        <div style="border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);" class="p-4 sm:p-5 bg-white dark:bg-gray-800 border-l-4 border-indigo-500 transition duration-150 hover:opacity-90">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-xs sm:text-sm font-semibold text-indigo-600 dark:text-indigo-400">👤 Пользователи</span>
                 <svg class="w-5 h-5 text-indigo-400 dark:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M10 12H7a3 3 0 00-3 3v2M10 12h4m-4 0a3 3 0 00-3-3H7m7 3h3a3 3 0 013 3v2m-3-3a3 3 0 00-3-3h-4m-7 3a3 3 0 013-3h4"></path></svg>
@@ -26,7 +26,7 @@
             <div class="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">{{ total_users|default:0 }}</div>
         </div>
 
-        <div class="p-4 sm:p-5 rounded-xl border-l-4 border-emerald-500 transition duration-150 hover:bg-gray-100 dark:hover:bg-gray-700/60">
+        <div style="border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);" class="p-4 sm:p-5 bg-white dark:bg-gray-800 border-l-4 border-emerald-500 transition duration-150 hover:opacity-90">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-xs sm:text-sm font-semibold text-emerald-600 dark:text-emerald-400">🏟️ Площадки</span>
                 <svg class="w-5 h-5 text-emerald-400 dark:text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
@@ -34,7 +34,7 @@
             <div class="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">{{ total_venues|default:0 }}</div>
         </div>
         
-        <div class="p-4 sm:p-5 rounded-xl border-l-4 border-amber-500 transition duration-150 hover:bg-gray-100 dark:hover:bg-gray-700/60">
+        <div style="border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);" class="p-4 sm:p-5 bg-white dark:bg-gray-800 border-l-4 border-amber-500 transition duration-150 hover:opacity-90">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-xs sm:text-sm font-semibold text-amber-600 dark:text-amber-400">📅 Брони</span>
                 <svg class="w-5 h-5 text-amber-400 dark:text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h8M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -42,7 +42,7 @@
             <div class="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">{{ total_bookings|default:0 }}</div>
         </div>
 
-        <div class="p-4 sm:p-5 rounded-xl border-l-4 border-rose-500 transition duration-150 hover:bg-gray-100 dark:hover:bg-gray-700/60">
+        <div style="border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);" class="p-4 sm:p-5 bg-white dark:bg-gray-800 border-l-4 border-rose-500 transition duration-150 hover:opacity-90">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-xs sm:text-sm font-semibold text-rose-600 dark:text-rose-400">💰 Доход</span>
                 <svg class="w-5 h-5 text-rose-400 dark:text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V3m0 2v3m0 3.5c0 1.488 2.08 2.599 3 3.5m0 0a1 1 0 01-1 1h-2a1 1 0 01-1-1m0 0c-1.11 0-2.08-.402-2.599-1M12 21v-3m0-2.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z"></path></svg>
@@ -51,19 +51,19 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+    <div class="space-y-6">
         
-        <div class="shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div style="border-radius: 12px; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);" class="bg-white dark:bg-gray-800 overflow-hidden">
             
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700">
                 <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                     🏆 Популярные площадки
                 </h2>
-                {% comment %} <span class="text-sm text-gray-500 dark:text-gray-400 mt-1 sm:mt-0">Топ-5 по количеству броней</span> {% endcomment %}
+                <span class="text-sm text-gray-500 dark:text-gray-400 mt-1 sm:mt-0">Топ-5 по количеству броней</span>
             </div>
 
             <div class="overflow-x-auto">
-                <table class="min-w-full text-sm text-left border-collapse w-100%">
+                <table class="min-w-full text-sm text-left border-collapse">
                     <thead class="bg-transparent text-gray-500 dark:text-gray-400 uppercase text-xs border-b border-gray-200 dark:border-gray-700">
                         <tr>
                             <th class="px-5 py-3 font-semibold tracking-wider">Площадка</th>
