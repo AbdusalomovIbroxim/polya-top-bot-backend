@@ -46,7 +46,7 @@ class CustomAdminSite(UnfoldAdminSite):
 
 custom_admin = CustomAdminSite(name="custom_admin")
 
-from django.contrib import admin
+
 for model, model_admin in admin.site._registry.items():
     custom_admin.register(model, model_admin.__class__)
 
