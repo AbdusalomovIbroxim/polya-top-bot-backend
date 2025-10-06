@@ -321,7 +321,7 @@ JAZZMIN_SETTINGS = {
     "site_title": "Админка PolyaTop",
     "site_header": "PolyaTop Администрирование",
     "site_brand": "PolyaTop",
-    "site_logo": 'static/logo.png',
+    "site_logo": 'logo.png',
     "welcome_sign": "Добро пожаловать в панель администратора PolyaTop",
     "copyright": "PolyaTop © 2025",
     "show_sidebar": True,
