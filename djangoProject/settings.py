@@ -36,6 +36,9 @@ INSTALLED_APPS = [
     'playgrounds.apps.PlaygroundsConfig',
     'bookings.apps.BookingsConfig',
     'customers.apps.CustomersConfig',
+    
+    # вспомогательные
+    'django_admin_listfilter_dropdown',
 ]
 
 MIDDLEWARE = [
