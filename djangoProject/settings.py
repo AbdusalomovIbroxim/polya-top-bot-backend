@@ -344,7 +344,8 @@ UNFOLD = {
     "SHOW_HISTORY": False,
     "SHOW_VIEW_ON_SITE": False,
     "DARK_MODE": True,
-    # "SIDEBAR_COLLAPSED": True,  # 👉 сворачивает боковую панель по умолчанию
-    # "MOBILE_MENU": True,        # 👉 включает мобильное меню (важно!)
-    # "CUSTOM_CSS": ["unfold_custom.css"],
+    "SIDEBAR_COLLAPSED": True,  # 👉 сворачивает боковую панель по умолчанию
+    "MOBILE_MENU": True,        # 👉 включает мобильное меню (важно!)
+    "CUSTOM_CSS": ["unfold_custom.css"],
+    "DASHBOARD_CALLBACK": "accounts.admin_dashboard.dashboard_view",
 }

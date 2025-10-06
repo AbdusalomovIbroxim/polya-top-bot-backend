@@ -158,6 +158,7 @@ class FootballFormatView(APIView):
         return Response(choices)
 
 class FootballChoicesView(APIView):
+    
     def get(self, request):
         data = {
             'experience': get_choices_from_enum(FootballExperience),
@@ -166,3 +167,5 @@ class FootballChoicesView(APIView):
             'format': get_choices_from_enum(FootballFormat),
         }
         return Response(data)
+    
+    
