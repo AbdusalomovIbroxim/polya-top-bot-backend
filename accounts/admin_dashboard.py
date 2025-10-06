@@ -1,12 +1,13 @@
 from django.contrib.admin import AdminSite
 from django.template.response import TemplateResponse
 from django.urls import path
-from bookings.models import Booking, Transaction
-from accounts.models import User
-from playgrounds.models import Playground
-# from wallet.models import WalletTransaction
 from django.db.models import Sum
 from django.utils import timezone
+
+from accounts.admin_dashboard import CustomAdminSite
+from accounts.models import User
+from bookings.models import Booking, Transaction
+from playgrounds.models import SportVenue
 
 
 class CustomAdminSite(AdminSite):
@@ -24,7 +25,7 @@ class CustomAdminSite(AdminSite):
     def dashboard_view(self, request):
         total_users = User.objects.count()
         total_bookings = Booking.objects.count()
-        total_fields = Playground.objects.count()
+        total_fields = SportVenue.objects.count()
         total_income = Transaction.objects.filter(type="income").aggregate(total=Sum("amount"))["total"] or 0
 
         today = timezone.now().date()
@@ -40,3 +41,11 @@ class CustomAdminSite(AdminSite):
             today_bookings=today_bookings,
         )
         return TemplateResponse(request, "admin/dashboard.html", context)
+
+
+
+
+custom_admin = CustomAdminSite(name="custom_admin")
+custom_admin.register(User)
+custom_admin.register(Booking)
+custom_admin.register(SportVenue)
