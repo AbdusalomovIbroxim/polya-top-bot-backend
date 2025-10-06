@@ -45,6 +45,29 @@ class UserViewSet(viewsets.ViewSet):
             {"error": "Ошибка валидации данных", "details": serializer.errors},
             status=status.HTTP_400_BAD_REQUEST
         )
+    
+    @action(detail=False, methods=['post'])
+    def check_admin_access(self, request):
+        """
+        Проверка, может ли пользователь получить доступ к админке.
+        Входные данные: telegram_id
+        """
+        telegram_id = request.data.get("telegram_id")
+        if not telegram_id:
+            return Response({"allowed": False}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Делаем запрос к вашему серверу/базе, чтобы проверить роль
+            user = request.user  # или получаем по telegram_id из базы
+            # Если используете модель User с полем role и telegram_id:
+            # from .models import User
+            # user = User.objects.filter(telegram_id=telegram_id).first()
+            if user and user.role in ["superadmin", "owner"]:
+                return Response({"allowed": True})
+        except Exception:
+            pass
+
+        return Response({"allowed": False})
 
 
 class AuthViewSet(viewsets.ViewSet):
