@@ -21,6 +21,7 @@ ALLOWED_HOSTS = [
 ]
 
 INSTALLED_APPS = [
+    'jazzmin', 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -314,3 +315,18 @@ sentry_sdk.init(
     environment="development",
     traces_sample_rate=1.0,
 )
+
+
+JAZZMIN_SETTINGS = {
+    "site_title": "Админка PolyaTop",
+    "site_header": "PolyaTop Администрирование",
+    "site_brand": "PolyaTop",
+    "site_logo": 'static/logo.png',
+    "welcome_sign": "Добро пожаловать в панель администратора PolyaTop",
+    "copyright": "PolyaTop © 2025",
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "theme": "cosmo",  # варианты: "flatly", "cosmo", "minty", "cyborg" (тёмная)
+    "dark_mode_theme": "cyborg",
+    
+}
