@@ -7,12 +7,12 @@ from .views.user import UserManagementViewSet
 from .views.bookings import BookingViewSet
 
 router = DefaultRouter()
-router.register(r'admin-panel', AdminAuthViewSet, basename='admin-auth')
+router.register(r'', AdminAuthViewSet, basename='admin-auth')
 router.register(r'sportvenues', AdminSportVenueViewSet, basename='admin-sportvenues')
 router.register(r'bookings', BookingViewSet, basename='booking-management')
 router.register(r'users', UserManagementViewSet, basename='user-management')
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('admin-panel', include(router.urls)),
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
 ]
