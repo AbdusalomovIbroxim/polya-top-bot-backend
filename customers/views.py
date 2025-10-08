@@ -1,77 +1,88 @@
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework import viewsets, status
-from rest_framework.permissions import BasePermission, IsAuthenticated
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework_simplejwt.tokens import RefreshToken
+from drf_yasg.utils import swagger_auto_schema
+import logging
+
+from accounts.models import User  # путь подстрой под свой проект
+from accounts.serializers import UserSerializer, LoginSerializer
+from accounts.utils import check_telegram_auth  # путь к твоей функции проверки initData
+from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 
-from playgrounds.models import SportVenue
-from bookings.models import Booking, Transaction
-from playgrounds.serializers import SportVenueSerializer
-from bookings.serializers import BookingSerializer, TransactionSerializer
-from .services import get_financial_summary, get_venue_usage, get_user_activity
+class AdminAuthViewSet(viewsets.ViewSet):
+    """
+    Авторизация для админ-панели:
+    принимает initData из Telegram WebApp и проверяет, что пользователь — админ, супер-админ или владелец.
+    """
 
+    permission_classes = [AllowAny]
 
-# 🔹 Кастомные permissions
-class IsOwner(BasePermission):
-    """Доступ только владельцу поля"""
+    @swagger_auto_schema(
+        operation_description="Логин администратора по initData (Telegram WebApp)",
+        request_body=LoginSerializer,
+        responses={200: UserSerializer()}
+    )
+    @action(detail=False, methods=["post"])
+    def login(self, request):
+        logger.info("Получен запрос на /admin/auth/login/")
 
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and hasattr(request.user, "is_owner") and request.user.is_owner
+        init_data = request.data.get("initData")
+        if not init_data:
+            return Response(
+                {"error": "initData не предоставлены"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
+        logger.info("Проверка initData...")
+        auth_result = check_telegram_auth(init_data, settings.TELEGRAM_BOT_TOKEN)
 
-class IsSuperAdminOrOwner(BasePermission):
-    """Доступ супер-админу или владельцу"""
+        if not auth_result:
+            logger.warning("Авторизация не пройдена. Некорректные данные Telegram.")
+            return Response(
+                {"error": "Некорректные данные авторизации Telegram."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
 
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and (getattr(request.user, "is_superuser", False) or getattr(request.user, "is_owner", False))
+        user_data = auth_result.get("user")
+        if not user_data or "id" not in user_data:
+            logger.error("В данных авторизации отсутствует информация о пользователе (user.id).")
+            return Response(
+                {"error": "Неполные данные пользователя от Telegram."},
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
 
+        telegram_id = user_data["id"]
 
-# 🔹 Владелец может управлять только своими площадками
-class OwnerVenueViewSet(viewsets.ModelViewSet):
-    serializer_class = SportVenueSerializer
-    permission_classes = [IsAuthenticated, IsOwner]
-
-    def get_queryset(self):
-        return SportVenue.objects.filter(owner=self.request.user)
-
-    def perform_create(self, serializer):
         try:
-            serializer.save(owner=self.request.user)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            user = User.objects.get(telegram_id=telegram_id)
+            logger.info("Пользователь с telegram_id=%s найден", telegram_id)
 
+        except User.DoesNotExist:
+            logger.warning("Пользователь не найден в базе (telegram_id=%s)", telegram_id)
+            return Response(
+                {"error": "Пользователь не найден или не зарегистрирован"},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
-# 🔹 Владелец видит только бронирования своих площадок
-class OwnerBookingViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = BookingSerializer
-    permission_classes = [IsAuthenticated, IsOwner]
+        # --- Проверка роли ---
+        allowed_roles = ["owner", "admin", "superadmin"]
+        if user.role not in allowed_roles:
+            logger.warning("Доступ запрещен: роль '%s' не входит в список разрешенных", user.role)
+            return Response(
+                {"error": "Доступ запрещен. Недостаточно прав."},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
-    def get_queryset(self):
-        return Booking.objects.filter(stadium__venue__owner=self.request.user).select_related("stadium", "user")
-
-
-# 🔹 Владелец видит только свои транзакции
-class OwnerTransactionViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = TransactionSerializer
-    permission_classes = [IsAuthenticated, IsOwner]
-
-    def get_queryset(self):
-        return Transaction.objects.filter(
-            booking__stadium__venue__owner=self.request.user
-        ).select_related("booking", "user")
-
-
-# 🔹 Аналитика для владельца
-@api_view(["GET"])
-@permission_classes([IsAuthenticated, IsOwner])
-def owner_analytics(request):
-    owner = request.user
-    try:
-        data = {
-            "financial_summary": get_financial_summary(owner),
-            "venue_usage": get_venue_usage(owner, "month"),
-            "user_activity": get_user_activity(owner, "month"),
-        }
-        return Response(data)
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        # --- Генерация JWT токенов ---
+        refresh = RefreshToken.for_user(user)
+        logger.info("Авторизация администратора успешна (роль=%s)", user.role)
+        return Response({
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+            "user": UserSerializer(user).data
+        }, status=status.HTTP_200_OK)
