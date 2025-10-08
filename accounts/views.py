@@ -36,7 +36,7 @@ class UserViewSet(viewsets.ViewSet):
         request_body=UpdateUserSerializer,
         responses={200: UserSerializer(), 400: "Ошибка валидации"}
     )
-    @action(detail=False, methods=['patch'])
+    @action(detail=False, methods=['patch'], url_path='update-me', url_name='update_me')
     def update_me(self, request):
         serializer = UpdateUserSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
