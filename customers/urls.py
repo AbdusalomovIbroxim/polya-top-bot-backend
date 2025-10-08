@@ -13,6 +13,6 @@ router.register(r'bookings', BookingViewSet, basename='booking-management')
 router.register(r'users', UserManagementViewSet, basename='user-management')
 
 urlpatterns = [
-    path('admin-panel', include(router.urls)),
+    path('admin-panel/', include(router.urls)),
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
 ]
