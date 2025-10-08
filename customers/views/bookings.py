@@ -1,0 +1,46 @@
+from rest_framework import viewsets, filters
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from django_filters.rest_framework import DjangoFilterBackend
+from bookings.models import Booking
+from bookings.serializers import BookingSerializer
+from accounts.models import Role
+from customers.permissions import IsOwnerOrSuperAdmin
+from rest_framework.permissions import IsAuthenticated
+
+class BookingViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Управление бронями (для владельцев полей и супер админов).
+    - Владелец видит только брони своих полей.
+    - Супер админ видит все брони.
+    """
+    serializer_class = BookingSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrSuperAdmin]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter]
+    filterset_fields = ['status', 'field', 'date']
+    ordering_fields = ['date', 'created_at']
+    search_fields = ['client__full_name', 'client__phone']
+
+    def get_queryset(self):
+        user = self.request.user
+
+        # --- Супер админ видит все брони ---
+        if user.is_superuser or user.role == Role.SUPERADMIN:
+            return Booking.objects.all().select_related('client', 'field')
+
+        # --- Владелец видит только свои поля ---
+        if getattr(user, "is_owner", False) or user.role == Role.OWNER:
+            return Booking.objects.filter(field__owner=user).select_related('client', 'field')
+
+        # Остальные роли — без доступа
+        return Booking.objects.none()
+
+    @action(detail=True, methods=['get'])
+    def details(self, request, pk=None):
+        """
+        Просмотр деталей конкретной брони.
+        """
+        booking = self.get_object()
+        self.check_object_permissions(request, booking)
+        serializer = self.get_serializer(booking)
+        return Response(serializer.data)
