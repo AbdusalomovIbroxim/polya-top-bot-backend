@@ -310,12 +310,13 @@ SESSION_COOKIE_SECURE = True
 # FORCE_SCRIPT_NAME = '/api'
 
 import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
 sentry_sdk.init(
-    dsn=os.getenv("SENTRY_DSN"),
-    send_default_pii=True,
-    environment="development",
-    traces_sample_rate=1.0,
+    dsn=os.getenv('SENTRY_DSN'),
+    integrations=[DjangoIntegration()],
+    auto_session_tracking=False,
+    traces_sample_rate=0
 )
 
 
