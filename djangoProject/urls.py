@@ -34,14 +34,14 @@ schema_view = get_schema_view(
 
 
 urlpatterns = [
-    path('i18n/', include('django.conf.urls.i18n')),
+    # path('i18n/', include('django.conf.urls.i18n')),
     path('admin/', admin.site.urls),
     path('api/', include('accounts.urls')),
     path('api/', include('playgrounds.urls')),
     path('api/', include('bookings.urls')),
     path('api/', include('customers.urls')),
     path('', welcome, name='welcome'),
-    path('set-language/<str:language_code>/', set_language, name='set_language'),
+    path('set-language/', set_language, name='set_language'),
 
     # Swagger URLs
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0),
