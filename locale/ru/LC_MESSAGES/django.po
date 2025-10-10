@@ -25,228 +25,237 @@ msgstr ""
 
 #: .\djangoProject\settings.py:132
 msgid "O‘zbekcha"
-msgstr ""
+msgstr "Узбекский"
 
 #: .\djangoProject\settings.py:133
 msgid "English"
-msgstr ""
+msgstr "Английский"
 
 #: .\templates\index.html:41
 msgid "Бронирование спортивных площадок"
-msgstr ""
+msgstr "Бронирование спортивных площадок"
 
 #: .\templates\index.html:226 .\templates\index.html:338
 #: .\templates\index.html:457
 msgid "О проекте"
-msgstr ""
+msgstr "О проекте"
 
 #: .\templates\index.html:227 .\templates\index.html:363
 #: .\templates\index.html:458
 msgid "Возможности"
-msgstr ""
+msgstr "Возможности"
 
 #: .\templates\index.html:228 .\templates\index.html:414
 #: .\templates\index.html:459
 msgid "Контакты"
-msgstr ""
+msgstr "Контакты"
 
 #: .\templates\index.html:229
 msgid "Забронировать"
-msgstr ""
+msgstr "Забронировать"
 
 #: .\templates\index.html:304
 msgid "Безопасные оплаты"
-msgstr ""
+msgstr "Безопасные оплаты"
 
 #: .\templates\index.html:305
 msgid "Бронирование за 30 сек"
-msgstr ""
+msgstr "Бронирование за 30 сек"
 
 #: .\templates\index.html:307
 msgid "Ищи, бронируй и играй"
-msgstr ""
+msgstr "Ищи, бронируй и играй"
 
 #: .\templates\index.html:308
 msgid "на лучших площадках"
-msgstr ""
+msgstr "на лучших площадках"
 
 #: .\templates\index.html:309
 msgid ""
 "Polyatop объединяет игроков и владельцев площадок: прозрачное расписание, "
 "мгновенная бронь, удобные оплаты и управление арендами — всё в одном месте."
 msgstr ""
+"Polyatop объединяет игроков и владельцев площадок: прозрачное расписание, "
+"мгновенная бронь, удобные оплаты и управление арендами — всё в одном месте."
 
 #: .\templates\index.html:311
 msgid "Начать бронирование"
-msgstr ""
+msgstr "Начать бронирование"
 
 #: .\templates\index.html:312
 msgid "Как это работает"
-msgstr ""
+msgstr "Как это работает"
 
 #: .\templates\index.html:318
 msgid "Для владельцев:"
-msgstr ""
+msgstr "Для владельцев:"
 
 #: .\templates\index.html:319
 msgid ""
 "Онлайн-календарь, депозиты, частичная/групповая оплата, оповещения и API."
 msgstr ""
+"Онлайн-календарь, депозиты, частичная/групповая оплата, оповещения и API."
 
 #: .\templates\index.html:328
 msgid "Загрузим сюда скриншот веб‑приложения / 3D"
-msgstr ""
+msgstr "Загрузим сюда скриншот веб‑приложения / 3D"
 
 #: .\templates\index.html:339
 msgid ""
 "цифровая платформа, которая соединяет игроков и владельцев площадок. В "
 "основе — простота и скорость: от поиска до оплаты."
 msgstr ""
+"цифровая платформа, которая соединяет игроков и владельцев площадок. В "
+"основе — простота и скорость: от поиска до оплаты."
 
 #: .\templates\index.html:343
 msgid "Игрокам"
-msgstr ""
+msgstr "Игрокам"
 
 #: .\templates\index.html:344
 msgid ""
 "Находи площадку рядом, смотри свободные слоты и моментально бронируй без "
 "звонков."
 msgstr ""
+"Находи площадку рядом, смотри свободные слоты и моментально бронируй без "
+"звонков."
 
 #: .\templates\index.html:348
 msgid "Владельцам"
-msgstr ""
+msgstr "Владельцам"
 
 #: .\templates\index.html:349
 msgid ""
 "Онлайн‑расписание, депозиты, гибкие тарифы, уведомления и аналитика загрузки."
 msgstr ""
+"Онлайн‑расписание, депозиты, гибкие тарифы, уведомления и аналитика загрузки."
 
 #: .\templates\index.html:353
 msgid "Командам"
-msgstr ""
+msgstr "Командам"
 
 #: .\templates\index.html:354
 msgid "Групповые оплаты, приглашения друзей и общий календарь тренировок."
-msgstr ""
+msgstr "Групповые оплаты, приглашения друзей и общий календарь тренировок."
 
 #: .\templates\index.html:364
 msgid "Набор инструментов для быстрого старта и удобного управления."
-msgstr ""
+msgstr "Набор инструментов для быстрого старта и удобного управления."
 
 #: .\templates\index.html:368
 msgid "Каталог площадок"
-msgstr ""
+msgstr "Каталог площадок"
 
 #: .\templates\index.html:369
 msgid "Фильтры по виду спорта, цене, покрытию, доступности и расположению."
-msgstr ""
+msgstr "Фильтры по виду спорта, цене, покрытию, доступности и расположению."
 
 #: .\templates\index.html:373
 msgid "Онлайн‑бронирование"
-msgstr ""
+msgstr "Онлайн‑бронирование"
 
 #: .\templates\index.html:374
 msgid ""
 "Реальное расписание, моментальная бронь, напоминания и отмена по правилам."
 msgstr ""
+"Реальное расписание, моментальная бронь, напоминания и отмена по правилам."
 
 #: .\templates\index.html:378
 msgid "Управление"
-msgstr ""
+msgstr "Управление"
 
 #: .\templates\index.html:379
 msgid "Гибкие тарифы, блокировка слотов, акционные предложения и промокоды."
-msgstr ""
+msgstr "Гибкие тарифы, блокировка слотов, акционные предложения и промокоды."
 
 #: .\templates\index.html:383
 msgid "Оплаты"
-msgstr ""
+msgstr "Оплаты"
 
 #: .\templates\index.html:384
 msgid "Поддержка частичной/групповой оплаты, депозитов и возвратов."
-msgstr ""
+msgstr "Поддержка частичной/групповой оплаты, депозитов и возвратов."
 
 #: .\templates\index.html:388
 msgid "Локализация"
-msgstr ""
+msgstr "Локализация"
 
 #: .\templates\index.html:389
 msgid "Русский, узбекский и английский языки. Часовые пояса и валюты."
-msgstr ""
+msgstr "Русский, узбекский и английский языки. Часовые пояса и валюты."
 
 #: .\templates\index.html:393
 msgid "API интеграция"
-msgstr ""
+msgstr "API интеграция"
 
 #: .\templates\index.html:394
 msgid "Подключение к сайту/боту, webhooks и экспорт данных."
-msgstr ""
+msgstr "Подключение к сайту/боту, webhooks и экспорт данных."
 
 #: .\templates\index.html:403
 msgid "Готовы попробовать?"
-msgstr ""
+msgstr "Готовы попробовать?"
 
 #: .\templates\index.html:403
 msgid "Забронируйте площадку онлайн — быстро и без звонков."
-msgstr ""
+msgstr "Забронируйте площадку онлайн — быстро и без звонков."
 
 #: .\templates\index.html:405
 msgid "Открыть в Telegram"
-msgstr ""
+msgstr "Открыть в Telegram"
 
 #: .\templates\index.html:406
 msgid "Связаться"
-msgstr ""
+msgstr "Связаться"
 
 #: .\templates\index.html:415
 msgid "Оставьте заявку — мы свяжемся в ближайшее время."
-msgstr ""
+msgstr "Оставьте заявку — мы свяжемся в ближайшее время."
 
 #: .\templates\index.html:425
 msgid "Ваше имя"
-msgstr ""
+msgstr "Ваше имя"
 
 #: .\templates\index.html:429
 msgid "Номер телефона"
-msgstr ""
+msgstr "Номер телефона"
 
 #: .\templates\index.html:433
 msgid "Telegram"
-msgstr ""
+msgstr "Телеграм"
 
 #: .\templates\index.html:437
 msgid "Сообщение"
-msgstr ""
+msgstr "Сообщение"
 
 #: .\templates\index.html:440
 msgid "Отправить"
-msgstr ""
+msgstr "Отправить"
 
 #: .\templates\index.html:453
 msgid "Платформа для поиска и бронирования спортивных площадок."
-msgstr ""
+msgstr "Платформа для поиска и бронирования спортивных площадок."
 
 #: .\templates\index.html:456
 msgid "Навигация"
-msgstr ""
+msgstr "Навигация"
 
 #: .\templates\index.html:462
 msgid "Поддержка"
-msgstr ""
+msgstr "Поддержка"
 
 #: .\templates\index.html:463
 msgid "Политика конфиденциальности"
-msgstr ""
+msgstr "Политика конфиденциальности"
 
 #: .\templates\index.html:464
 msgid "Пользовательское соглашение"
-msgstr ""
+msgstr "Пользовательское соглашение"
 
 #: .\templates\index.html:468
 msgid "Все права защищены."
-msgstr ""
+msgstr "Все права защищены."
 
 #: .\templates\index.html:469
 msgid "Сделано с любовью к спорту"
-msgstr ""
+msgstr "Сделано с любовью к спорту"
