@@ -3,6 +3,7 @@ from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.static import serve   
+from django.conf.urls.i18n import i18n_patterns
 from djangoProject.settings import BASE_DIR
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
@@ -33,6 +34,7 @@ schema_view = get_schema_view(
 
 
 urlpatterns = [
+    path('i18n/', include('django.conf.urls.i18n')),
     path('admin/', admin.site.urls),
     path('api/', include('accounts.urls')),
     path('api/', include('playgrounds.urls')),
@@ -62,6 +64,10 @@ urlpatterns += [
         'document_root': os.path.join(BASE_DIR, "static")
     }),
 ]
+
+urlpatterns += i18n_patterns(
+    path('', include('main.urls')),
+)
 
 
 handler404 = custom_page_not_found_view

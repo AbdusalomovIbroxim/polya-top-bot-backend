@@ -124,7 +124,17 @@ USE_TZ = True
 TIME_ZONE = "Asia/Tashkent"
 
 
+from django.utils.translation import gettext_lazy as _
+
+LANGUAGES = [
+    ('ru', _('Русский')),
+    ('uz', _('O‘zbekcha')),
+    ('en', _('English')),
+]
+
 USE_I18N = True
+LOCALE_PATHS = [BASE_DIR / 'locale']
+
 
 
 STATIC_URL = 'static/'

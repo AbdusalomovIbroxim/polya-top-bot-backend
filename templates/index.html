@@ -1,26 +1,44 @@
 {% load static %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- SEO Meta -->
+  <!-- 🔍 SEO Meta -->
   <meta name="title" content="Polyatop — Онлайн-бронирование спортивных площадок" />
-  <meta name="description" content="Polyatop — это цифровая платформа для онлайн-бронирования спортивных площадок. Ищи, бронируй и управляй арендами легко." />
-  <meta name="keywords" content="Polyatop, Полятоп, бронирование спорт площадок, аренда футбольного поля, аренда баскетбольного зала, спортивные площадки онлайн" />
+  <meta name="description" content="Polyatop — цифровая платформа для онлайн-бронирования спортивных площадок. Ищи, бронируй и управляй арендами легко." />
+  <meta name="keywords" content="Polyatop, Полятоп, бронирование спортивных площадок, аренда футбольного поля, аренда спортзала, бронировать поле, спортивные площадки, спорт поля, аренда корта, теннисный корт, футбольное поле Ташкент" />
   <meta name="author" content="Polyatop Team" />
   <meta name="robots" content="index, follow" />
 
-  <!-- Open Graph -->
+  <!-- 🌐 Multilingual SEO -->
+  <link rel="alternate" href="https://polyatop.com/" hreflang="ru" />
+  <link rel="alternate" href="https://polyatop.com/uz/" hreflang="uz" />
+  <link rel="alternate" href="https://polyatop.com/en/" hreflang="en" />
+  <link rel="alternate" href="https://polyatop.com/" hreflang="x-default" />
+
+  <!-- 🏞 Open Graph -->
   <meta property="og:title" content="Polyatop — Онлайн-бронирование спортивных площадок" />
-  <meta property="og:description" content="Удобный сервис для поиска и бронирования спортивных площадок." />
+  <meta property="og:description" content="Удобный сервис для поиска и бронирования спортивных площадок. Ищи и арендуй поле онлайн." />
   <meta property="og:image" content="https://polyatop.com/preview.png" />
   <meta property="og:url" content="https://polyatop.com/" />
   <meta property="og:type" content="website" />
 
+  <!-- 🌍 Uzbek -->
+  <meta name="title" content="Polyatop — Sport maydonlarini onlayn bron qilish platformasi" lang="uz" />
+  <meta name="description" content="Polyatop — bu sport maydonlarini onlayn bron qilish uchun qulay raqamli platforma. Maydon toping, band qiling va oson boshqaring." lang="uz" />
+  <meta name="keywords" content="Polyatop, sport maydon ijarasi, futbol maydoni, sport zal, maydon bron qilish, tennis kort ijarasi, Toshkent sport maydonlari" lang="uz" />
+
+  <!-- 🇬🇧 English -->
+  <meta name="title" content="Polyatop — Online Sports Field Booking Platform" lang="en" />
+  <meta name="description" content="Polyatop is a digital platform for easy online booking of sports fields. Find, book, and manage your reservations effortlessly." lang="en" />
+  <meta name="keywords" content="Polyatop, sports field booking, football field rental, gym rental, book sports venue, tennis court booking, sports arenas Tashkent" lang="en" />
+
+
   <!-- Favicon -->
   <link rel="icon" href="{% static 'logo.png' %}" type="image/png" />
-  <title>Polyatop — Бронирование спортивных площадок</title>
+  <title>Polyatop — {% trans "Бронирование спортивных площадок" %}</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <style>
@@ -171,6 +189,24 @@
     /* Back-to-top */
     .to-top { position: fixed; right: 18px; bottom: 18px; z-index: 1001; opacity: 0; visibility: hidden; transform: translateY(8px); transition: .25s ease; }
     .to-top.show { opacity: 1; visibility: visible; transform: translateY(0); }
+    .lang-switcher {
+      margin-left: 1rem;
+    }
+    
+    .lang-switcher select {
+      background: transparent;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 4px 8px;
+      color: #333;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    
+    .lang-switcher select:hover {
+      border-color: #666;
+    }
+    
   </style>
 </head>
 <body>
@@ -187,12 +223,24 @@
           <i class="fa-solid fa-bars"></i>
         </button>
         <div id="menu" class="nav-links" role="menu">
-          <a href="#about" role="menuitem">О проекте</a>
-          <a href="#features" role="menuitem">Возможности</a>
-          <a href="#contacts" role="menuitem">Контакты</a>
-          <a href="#cta" class="btn btn-ghost" role="menuitem"><i class="fa-regular fa-calendar-check"></i> Забронировать</a>
+          <a href="#about" role="menuitem">{%trans "О проекте" %}</a>
+          <a href="#features" role="menuitem">{% trans "Возможности" %}</a>
+          <a href="#contacts" role="menuitem">{% trans "Контакты" %}</a>
+          <a href="#cta" class="btn btn-ghost" role="menuitem"><i class="fa-regular fa-calendar-check"></i>{% trans "Забронировать" %}</a>
         </div>
       </nav>
+      <!-- 🔽 Переключатель языка -->
+      <div class="lang-switcher">
+        <form action="{% url 'set_language' %}" method="post">
+          {% csrf_token %}
+          <select name="language" onchange="this.form.submit()" aria-label="Выбор языка">
+            <option value="ru" {% if LANGUAGE_CODE == 'ru' %}selected{% endif %}>🇷🇺 RU</option>
+            <option value="uz" {% if LANGUAGE_CODE == 'uz' %}selected{% endif %}>🇺🇿 UZ</option>
+            <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>🇬🇧 EN</option>
+          </select>
+        </form>
+      </div>
+    </div>
     </div>
   </header>
 
@@ -202,22 +250,22 @@
       <div class="container hero-grid">
         <div>
           <div class="badges">
-            <span class="badge"><i class="fa-solid fa-shield-check"></i> Безопасные оплаты</span>
-            <span class="badge"><i class="fa-regular fa-clock"></i> Бронирование за 30 сек</span>
+            <span class="badge"><i class="fa-solid fa-shield-check"></i>{% trans "Безопасные оплаты" %}</span>
+            <span class="badge"><i class="fa-regular fa-clock"></i>{% trans "Бронирование за 30 сек" %}</span>
           </div>
-          <h1>Ищи, бронируй и играй
-            <br /><span style="background: linear-gradient(90deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent;">на лучших площадках</span></h1>
-          <p>Polyatop объединяет игроков и владельцев площадок: прозрачное расписание, мгновенная бронь, удобные оплаты и управление арендами — всё в одном месте.</p>
+          <h1>{% trans "Ищи, бронируй и играй" %}
+            <br /><span style="background: linear-gradient(90deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent;">{% trans "на лучших площадках" %}</span></h1>
+          <p>{% trans "Polyatop объединяет игроков и владельцев площадок: прозрачное расписание, мгновенная бронь, удобные оплаты и управление арендами — всё в одном месте." %}</p>
           <div class="cta">
-            <a href="#features" class="btn btn-primary"><i class="fa-regular fa-calendar-check"></i> Начать бронирование</a>
-            <a href="#about" class="btn btn-ghost"><i class="fa-regular fa-circle-question"></i> Как это работает</a>
+            <a href="#features" class="btn btn-primary"><i class="fa-regular fa-calendar-check"></i>{% trans "Начать бронирование" %}</a>
+            <a href="#about" class="btn btn-ghost"><i class="fa-regular fa-circle-question"></i>{% trans "Как это работает" %}</a>
           </div>
           <div class="divider"></div>
           <div class="hero-card">
             <i class="fa-solid fa-chart-line"></i>
             <div>
-              <strong>Для владельцев:</strong>
-              <div style="color: var(--muted)">Онлайн-календарь, депозиты, частичная/групповая оплата, оповещения и API.</div>
+              <strong>{% trans "Для владельцев:" %}</strong>
+              <div style="color: var(--muted)">{% trans "Онлайн-календарь, депозиты, частичная/групповая оплата, оповещения и API." %}</div>
             </div>
           </div>
         </div>
@@ -226,7 +274,7 @@
           <div class="card" style="aspect-ratio: 4/3; display:grid; place-items:center; background: linear-gradient(135deg, rgba(0,188,212,.08), rgba(124,58,237,.08)); border: 1px dashed rgba(255,255,255,.14);">
             <div style="text-align:center; color: var(--muted)">
               <i class="fa-regular fa-image" style="font-size: 2rem; display:block; margin-bottom:8px"></i>
-              Загрузим сюда скриншот веб‑приложения / 3D
+              {% trans "Загрузим сюда скриншот веб‑приложения / 3D" %}
             </div>
           </div>
         </div>
@@ -236,23 +284,23 @@
     <!-- About -->
     <section id="about" class="section about">
       <div class="container">
-        <h2 class="section-title">О проекте</h2>
-        <p class="section-sub">Polyatop — цифровая платформа, которая соединяет игроков и владельцев площадок. В основе — простота и скорость: от поиска до оплаты.</p>
+        <h2 class="section-title">{% trans "О проекте" %}</h2>
+        <p class="section-sub">Polyatop — {% trans "цифровая платформа, которая соединяет игроков и владельцев площадок. В основе — простота и скорость: от поиска до оплаты." %}</p>
         <div class="audiences">
           <div class="card">
             <div class="icon"><i class="fa-solid fa-users"></i></div>
-            <h3>Игрокам</h3>
-            <p>Находи площадку рядом, смотри свободные слоты и моментально бронируй без звонков.</p>
+            <h3>{% trans "Игрокам" %}</h3>
+            <p>{% trans "Находи площадку рядом, смотри свободные слоты и моментально бронируй без звонков." %}</p>
           </div>
           <div class="card">
             <div class="icon"><i class="fa-solid fa-store"></i></div>
-            <h3>Владельцам</h3>
-            <p>Онлайн‑расписание, депозиты, гибкие тарифы, уведомления и аналитика загрузки.</p>
+            <h3>{% trans "Владельцам" %}</h3>
+            <p>{% trans "Онлайн‑расписание, депозиты, гибкие тарифы, уведомления и аналитика загрузки." %}</p>
           </div>
           <div class="card">
             <div class="icon"><i class="fa-solid fa-people-group"></i></div>
-            <h3>Командам</h3>
-            <p>Групповые оплаты, приглашения друзей и общий календарь тренировок.</p>
+            <h3>{% trans "Командам" %}</h3>
+            <p>{% trans "Групповые оплаты, приглашения друзей и общий календарь тренировок." %}</p>
           </div>
         </div>
       </div>
@@ -261,38 +309,38 @@
     <!-- Features -->
     <section id="features" class="section features">
       <div class="container">
-        <h2 class="section-title">Возможности</h2>
-        <p class="section-sub">Набор инструментов для быстрого старта и удобного управления.</p>
+        <h2 class="section-title">{% trans "Возможности" %}</h2>
+        <p class="section-sub">{% trans "Набор инструментов для быстрого старта и удобного управления." %}</p>
         <div class="grid">
           <div class="feature">
             <div class="icon"><i class="fa-solid fa-magnifying-glass-plus"></i></div>
-            <h4>Каталог площадок</h4>
-            <p>Фильтры по виду спорта, цене, покрытию, доступности и расположению.</p>
+            <h4>{% trans "Каталог площадок" %}</h4>
+            <p>{% trans "Фильтры по виду спорта, цене, покрытию, доступности и расположению." %}</p>
           </div>
           <div class="feature">
             <div class="icon"><i class="fa-regular fa-calendar-check"></i></div>
-            <h4>Онлайн‑бронирование</h4>
-            <p>Реальное расписание, моментальная бронь, напоминания и отмена по правилам.</p>
+            <h4>{% trans "Онлайн‑бронирование" %}</h4>
+            <p>{% trans "Реальное расписание, моментальная бронь, напоминания и отмена по правилам." %}</p>
           </div>
           <div class="feature">
             <div class="icon"><i class="fa-solid fa-wrench"></i></div>
-            <h4>Управление</h4>
-            <p>Гибкие тарифы, блокировка слотов, акционные предложения и промокоды.</p>
+            <h4>{% trans "Управление" %}</h4>
+            <p>{% trans "Гибкие тарифы, блокировка слотов, акционные предложения и промокоды." %}</p>
           </div>
           <div class="feature">
             <div class="icon"><i class="fa-regular fa-credit-card"></i></div>
-            <h4>Оплаты</h4>
-            <p>Поддержка частичной/групповой оплаты, депозитов и возвратов.</p>
+            <h4>{% trans "Оплаты" %}</h4>
+            <p>{% trans "Поддержка частичной/групповой оплаты, депозитов и возвратов." %}</p>
           </div>
           <div class="feature">
             <div class="icon"><i class="fa-solid fa-globe"></i></div>
-            <h4>Локализация</h4>
-            <p>Русский, узбекский и английский языки. Часовые пояса и валюты.</p>
+            <h4>{% trans "Локализация" %}</h4>
+            <p>{% trans "Русский, узбекский и английский языки. Часовые пояса и валюты." %}</p>
           </div>
           <div class="feature">
             <div class="icon"><i class="fa-solid fa-code"></i></div>
-            <h4>API интеграция</h4>
-            <p>Подключение к сайту/боту, webhooks и экспорт данных.</p>
+            <h4>{% trans "API интеграция" %}</h4>
+            <p>{% trans "Подключение к сайту/боту, webhooks и экспорт данных." %}</p>
           </div>
         </div>
       </div>
@@ -301,10 +349,10 @@
     <!-- CTA strip -->
     <section id="cta" class="section cta-strip">
       <div class="container cta-wrap">
-        <p><strong>Готовы попробовать?</strong> Забронируйте площадку онлайн — быстро и без звонков.</p>
+        <p><strong>{% trans "Готовы попробовать?" %}</strong>{% trans "Забронируйте площадку онлайн — быстро и без звонков." %}</p>
         <div class="cta">
-          <a href="https://t.me/ibr6xim" class="btn btn-primary"><i class="fa-brands fa-telegram"></i> Открыть в Telegram</a>
-          <a href="#contacts" class="btn btn-ghost"><i class="fa-regular fa-envelope"></i> Связаться</a>
+          <a href="https://t.me/ibr6xim" class="btn btn-primary"><i class="fa-brands fa-telegram"></i>{% trans "Открыть в Telegram" %}</a>
+          <a href="#contacts" class="btn btn-ghost"><i class="fa-regular fa-envelope"></i> {% trans "Связаться" %}</a>
         </div>
       </div>
     </section>
@@ -312,8 +360,8 @@
     <!-- Contacts -->
     <section id="contacts" class="section contacts">
       <div class="container">
-        <h2 class="section-title">Контакты</h2>
-        <p class="section-sub">Оставьте заявку — мы свяжемся в ближайшее время.</p>
+        <h2 class="section-title">{% trans "Контакты" %}</h2>
+        <p class="section-sub">{% trans "Оставьте заявку — мы свяжемся в ближайшее время." %}</p>
         <div class="grid">
           <div class="contact-card">
             <div class="contact-row"><i class="fa-brands fa-telegram"></i> <a href="https://t.me/ibr6xim" target="_blank" rel="noopener">@ibr6xim</a></div>
@@ -323,22 +371,22 @@
           <div class="contact-card">
             <form method="post" action="#" id="contactForm" onsubmit="sendContact(event);">
               <div class="field">
-                <label for="name">Ваше имя</label>
+                <label for="name">{% trans "Ваше имя" %}</label>
                 <input class="input" id="name" name="name" placeholder="Иван" required />
               </div>
               <div class="field">
-                <label for="phone">Номер телефона</label>
+                <label for="phone">{% trans "Номер телефона" %}</label>
                 <input class="input" id="phone" name="phone" placeholder="+998 90 123 45 67" required />
               </div>
               <div class="field">
-                <label for="telegram">Telegram</label>
+                <label for="telegram">{% trans "Telegram" %}</label>
                 <input class="input" id="telegram" name="telegram" placeholder="@username" required />
               </div>
               <div class="field">
-                <label for="message">Сообщение</label>
+                <label for="message">{% trans "Сообщение" %}</label>
                 <textarea class="input" id="message" name="message" placeholder="Коротко опишите задачу"></textarea>
               </div>
-              <button class="btn btn-primary" type="submit"><i class="fa-regular fa-paper-plane"></i> Отправить</button>
+              <button class="btn btn-primary" type="submit"><i class="fa-regular fa-paper-plane"></i> {% trans "Отправить" %}</button>
             </form>
           </div>
         </div>
@@ -351,23 +399,23 @@
     <div class="container footer-grid">
       <div class="footer-col">
         <h5>Polyatop</h5>
-        <p style="color:var(--muted); margin:0">Платформа для поиска и бронирования спортивных площадок.</p>
+        <p style="color:var(--muted); margin:0">{% trans "Платформа для поиска и бронирования спортивных площадок." %}</p>
       </div>
       <div class="footer-col">
-        <h5>Навигация</h5>
-        <a href="#about">О проекте</a><br />
-        <a href="#features">Возможности</a><br />
-        <a href="#contacts">Контакты</a>
+        <h5>{% trans "Навигация" %}</h5>
+        <a href="#about">{% trans "О проекте" %}</a><br />
+        <a href="#features">{% trans "Возможности" %}</a><br />
+        <a href="#contacts">{% trans "Контакты" %}</a>
       </div>
       <div class="footer-col">
-        <h5>Поддержка</h5>
-        <a href="#">Политика конфиденциальности</a><br />
-        <a href="#">Пользовательское соглашение</a>
+        <h5>{% trans "Поддержка" %}</h5>
+        <a href="#">{% trans "Политика конфиденциальности" %}</a><br />
+        <a href="#">{% trans "Пользовательское соглашение" %}</a>
       </div>
     </div>
     <div class="container footer-bottom">
-      <span>© {{ now|date:'Y' }} Polyatop. Все права защищены.</span>
-      <span>Сделано с любовью к спорту ⚽</span>
+      <span>© {{ now|date:'Y' }} Polyatop. {% trans "Все права защищены." %}</span>
+      <span>{% trans "Сделано с любовью к спорту" %} ⚽</span>
     </div>
   </footer>
 
