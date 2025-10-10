@@ -1,0 +1,252 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-11 01:44+0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+#: .\djangoProject\settings.py:130
+msgid "Русский"
+msgstr "Russian"
+
+#: .\djangoProject\settings.py:131
+msgid "O‘zbekcha"
+msgstr "Uzbek"
+
+#: .\djangoProject\settings.py:132
+msgid "English"
+msgstr "English"
+
+#: .\templates\index.html:41
+msgid "Бронирование спортивных площадок"
+msgstr "Sports ground booking"
+
+#: .\templates\index.html:226 .\templates\index.html:287
+#: .\templates\index.html:406
+msgid "О проекте"
+msgstr "About the project"
+
+#: .\templates\index.html:227 .\templates\index.html:312
+#: .\templates\index.html:407
+msgid "Возможности"
+msgstr "Features"
+
+#: .\templates\index.html:228 .\templates\index.html:363
+#: .\templates\index.html:408
+msgid "Контакты"
+msgstr "Contacts"
+
+#: .\templates\index.html:229
+msgid "Забронировать"
+msgstr "Book now"
+
+#: .\templates\index.html:253
+msgid "Безопасные оплаты"
+msgstr "Secure payments"
+
+#: .\templates\index.html:254
+msgid "Бронирование за 30 сек"
+msgstr "Booking in 30 seconds"
+
+#: .\templates\index.html:256
+msgid "Ищи, бронируй и играй"
+msgstr "Find, book, and play"
+
+#: .\templates\index.html:257
+msgid "на лучших площадках"
+msgstr "on the best fields"
+
+#: .\templates\index.html:258
+msgid ""
+"Polyatop объединяет игроков и владельцев площадок: прозрачное расписание, "
+"мгновенная бронь, удобные оплаты и управление арендами — всё в одном месте."
+msgstr ""
+"Polyatop connects players and venue owners: transparent schedules, instant booking,"
+"convenient payments, and rental management — all in one place."
+
+#: .\templates\index.html:260
+msgid "Начать бронирование"
+msgstr "Start booking"
+
+#: .\templates\index.html:261
+msgid "Как это работает"
+msgstr "How it's work"
+
+#: .\templates\index.html:267
+msgid "Для владельцев:"
+msgstr "For owners:"
+
+#: .\templates\index.html:268
+msgid ""
+"Онлайн-календарь, депозиты, частичная/групповая оплата, оповещения и API."
+msgstr "Online calendar, deposits, partial/group payments, notifications, and API."
+
+#: .\templates\index.html:277
+msgid "Загрузим сюда скриншот веб‑приложения / 3D"
+msgstr "We’ll upload a screenshot of the web app / 3D view here."
+
+#: .\templates\index.html:288
+msgid ""
+"цифровая платформа, которая соединяет игроков и владельцев площадок. В "
+"основе — простота и скорость: от поиска до оплаты."
+msgstr "A digital platform that connects players and venue owners. It’s built on simplicity and speed — from search to payment."
+
+#: .\templates\index.html:292
+msgid "Игрокам"
+msgstr "For players"
+
+#: .\templates\index.html:293
+msgid ""
+"Находи площадку рядом, смотри свободные слоты и моментально бронируй без "
+"звонков."
+msgstr "Find a nearby field, check available slots, and book instantly without calls."
+
+#: .\templates\index.html:297
+msgid "Владельцам"
+msgstr "For owners"
+
+#: .\templates\index.html:298
+msgid ""
+"Онлайн‑расписание, депозиты, гибкие тарифы, уведомления и аналитика загрузки."
+msgstr "Online schedule, deposits, flexible rates, notifications, and usage analytics."
+
+#: .\templates\index.html:302
+msgid "Командам"
+msgstr "For teams"
+
+#: .\templates\index.html:303
+msgid "Групповые оплаты, приглашения друзей и общий календарь тренировок."
+msgstr "Group payments, friend invitations, and a shared training calendar."
+
+#: .\templates\index.html:313
+msgid "Набор инструментов для быстрого старта и удобного управления."
+msgstr "A set of tools for a quick start and easy management."
+
+#: .\templates\index.html:317
+msgid "Каталог площадок"
+msgstr "Venue catalog"
+
+#: .\templates\index.html:318
+msgid "Фильтры по виду спорта, цене, покрытию, доступности и расположению."
+msgstr "Filters by sport type, price, surface, availability, and location."
+
+#: .\templates\index.html:322
+msgid "Онлайн‑бронирование"
+msgstr "Online booking"
+
+#: .\templates\index.html:323
+msgid ""
+"Реальное расписание, моментальная бронь, напоминания и отмена по правилам."
+msgstr "Real-time schedule, instant booking, reminders, and cancellations according to the rules."
+
+#: .\templates\index.html:327
+msgid "Управление"
+msgstr "Management"
+
+#: .\templates\index.html:328
+msgid "Гибкие тарифы, блокировка слотов, акционные предложения и промокоды."
+msgstr "Flexible rates, slot blocking, promotional offers, and promo codes"
+
+#: .\templates\index.html:332
+msgid "Оплаты"
+msgstr "Payments"
+
+#: .\templates\index.html:333
+msgid "Поддержка частичной/групповой оплаты, депозитов и возвратов."
+msgstr "Support for partial/group payments, deposits, and refunds."
+
+#: .\templates\index.html:337
+msgid "Локализация"
+msgstr "Localization"
+
+#: .\templates\index.html:338
+msgid "Русский, узбекский и английский языки. Часовые пояса и валюты."
+msgstr "Russian, Uzbek, and English languages. Time zones and currencies."
+
+#: .\templates\index.html:342
+msgid "API интеграция"
+msgstr "API integration"
+
+#: .\templates\index.html:343
+msgid "Подключение к сайту/боту, webhooks и экспорт данных."
+msgstr "Connection to the website/bot, webhooks, and data export."
+
+#: .\templates\index.html:352
+msgid "Готовы попробовать?"
+msgstr "Ready to try?"
+
+#: .\templates\index.html:352
+msgid "Забронируйте площадку онлайн — быстро и без звонков."
+msgstr "Book a sports field online — fast and without calls."
+
+#: .\templates\index.html:354
+msgid "Открыть в Telegram"
+msgstr "Open in Telegram"
+
+#: .\templates\index.html:355
+msgid "Связаться"
+msgstr "Contact us"
+
+#: .\templates\index.html:364
+msgid "Оставьте заявку — мы свяжемся в ближайшее время."
+msgstr "Leave a request — we will contact you shortly."
+
+#: .\templates\index.html:374
+msgid "Ваше имя"
+msgstr "Your name"
+
+#: .\templates\index.html:378
+msgid "Номер телефона"
+msgstr "Phone number"
+
+#: .\templates\index.html:382
+msgid "Telegram"
+msgstr "Telegram"
+
+#: .\templates\index.html:386
+msgid "Сообщение"
+msgstr "Message"
+
+#: .\templates\index.html:389
+msgid "Отправить"
+msgstr "Send"
+
+#: .\templates\index.html:402
+msgid "Платформа для поиска и бронирования спортивных площадок."
+msgstr "A platform for finding and booking sports venues."
+
+#: .\templates\index.html:405
+msgid "Навигация"
+msgstr "Navigation"
+
+#: .\templates\index.html:411
+msgid "Поддержка"
+msgstr "Support"
+
+#: .\templates\index.html:412
+msgid "Политика конфиденциальности"
+msgstr "Privacy Policy"
+
+#: .\templates\index.html:413
+msgid "Пользовательское соглашение"
+msgstr "User Agreement"
+
+#: .\templates\index.html:417
+msgid "Все права защищены."
+msgstr "All rights reserved."
+
+#: .\templates\index.html:418
+msgid "Сделано с любовью к спорту"
+msgstr "Made with love for sports"

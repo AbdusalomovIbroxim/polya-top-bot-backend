@@ -1,0 +1,250 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-11 01:43+0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+#: .\djangoProject\settings.py:130
+msgid "Русский"
+msgstr ""
+
+#: .\djangoProject\settings.py:131
+msgid "O‘zbekcha"
+msgstr "O‘zbekcha"
+
+#: .\djangoProject\settings.py:132
+msgid "English"
+msgstr "Ingilizcha"
+
+#: .\templates\index.html:41
+msgid "Бронирование спортивных площадок"
+msgstr "Sport maydonlarini bron qilish"
+
+#: .\templates\index.html:226 .\templates\index.html:287
+#: .\templates\index.html:406
+msgid "О проекте"
+msgstr "Loyiha haqida"
+
+#: .\templates\index.html:227 .\templates\index.html:312
+#: .\templates\index.html:407
+msgid "Возможности"
+msgstr "Imkoniyatlar"
+
+#: .\templates\index.html:228 .\templates\index.html:363
+#: .\templates\index.html:408
+msgid "Контакты"
+msgstr "Kontaktlar"
+
+#: .\templates\index.html:229
+msgid "Забронировать"
+msgstr "Bron qilish"
+
+#: .\templates\index.html:253
+msgid "Безопасные оплаты"
+msgstr "Xavfsiz to‘lovlar"
+
+#: .\templates\index.html:254
+msgid "Бронирование за 30 сек"
+msgstr "30 soniyada bron qilish"
+
+#: .\templates\index.html:256
+msgid "Ищи, бронируй и играй"
+msgstr "Qidiring, bron qiling va o‘ynang"
+
+#: .\templates\index.html:257
+msgid "на лучших площадках"
+msgstr "eng yaxshi maydonlarda"
+
+#: .\templates\index.html:258
+msgid ""
+"Polyatop объединяет игроков и владельцев площадок: прозрачное расписание, "
+"мгновенная бронь, удобные оплаты и управление арендами — всё в одном месте."
+msgstr "Polyatop o‘yinchilar va maydon egalari o‘rtasida aloqa o‘rnatadi: shaffof jadval, tezkor bron qilish, qulay to‘lovlar va ijaralarni boshqarish — barchasi bir joyda."
+
+#: .\templates\index.html:260
+msgid "Начать бронирование"
+msgstr "Bron qilishni boshlash"
+
+#: .\templates\index.html:261
+msgid "Как это работает"
+msgstr "Bu qanday ishlaydi"
+
+#: .\templates\index.html:267
+msgid "Для владельцев:"
+msgstr "Maydon egalari uchun:"
+
+#: .\templates\index.html:268
+msgid ""
+"Онлайн-календарь, депозиты, частичная/групповая оплата, оповещения и API."
+msgstr "Onlayn kalendar, depozitlar, qisman/guruhli to‘lovlar, bildirishnomalar va API."
+
+#: .\templates\index.html:277
+msgid "Загрузим сюда скриншот веб‑приложения / 3D"
+msgstr "Bu yerga veb-ilova yoki 3D ko‘rinishining skrinshotini joylaymiz."
+
+#: .\templates\index.html:288
+msgid ""
+"цифровая платформа, которая соединяет игроков и владельцев площадок. В "
+"основе — простота и скорость: от поиска до оплаты."
+msgstr "O‘yinchilar va maydon egalari o‘rtasida aloqa o‘rnatadigan raqamli platforma. Asosi — soddalik va tezlik: qidiruvdan to to‘lovgacha."
+
+#: .\templates\index.html:292
+msgid "Игрокам"
+msgstr "O‘yinchilar uchun"
+
+#: .\templates\index.html:293
+msgid ""
+"Находи площадку рядом, смотри свободные слоты и моментально бронируй без "
+"звонков."
+msgstr "Yaqin maydonni toping, bo‘sh joylarni ko‘ring va qo‘ng‘iroqsiz darhol bron qiling."
+
+#: .\templates\index.html:297
+msgid "Владельцам"
+msgstr "Maydon egalari uchun"
+
+#: .\templates\index.html:298
+msgid ""
+"Онлайн‑расписание, депозиты, гибкие тарифы, уведомления и аналитика загрузки."
+msgstr "Onlayn jadval, depozitlar, moslashuvchan tariflar, bildirishnomalar va yuklama tahlili."
+
+#: .\templates\index.html:302
+msgid "Командам"
+msgstr "Jamoalar uchun"
+
+#: .\templates\index.html:303
+msgid "Групповые оплаты, приглашения друзей и общий календарь тренировок."
+msgstr "Guruhli to‘lovlar, do‘stlarni taklif qilish va umumiy mashg‘ulot taqvimi."
+
+#: .\templates\index.html:313
+msgid "Набор инструментов для быстрого старта и удобного управления."
+msgstr "Tez boshlash va qulay boshqaruv uchun vositalar to‘plami."
+
+#: .\templates\index.html:317
+msgid "Каталог площадок"
+msgstr "Maydonchalar katalogi"
+
+#: .\templates\index.html:318
+msgid "Фильтры по виду спорта, цене, покрытию, доступности и расположению."
+msgstr "Sport turi, narx, qoplama, mavjudlik va joylashuv bo‘yicha filtrlar."
+
+#: .\templates\index.html:322
+msgid "Онлайн‑бронирование"
+msgstr "Onlayn bron qilish"
+
+#: .\templates\index.html:323
+msgid ""
+"Реальное расписание, моментальная бронь, напоминания и отмена по правилам."
+msgstr "Haqiqiy jadval, darhol bron qilish, eslatmalar va qoidalar bo‘yicha bekor qilish."
+
+#: .\templates\index.html:327
+msgid "Управление"
+msgstr "Boshqaruv"
+
+#: .\templates\index.html:328
+msgid "Гибкие тарифы, блокировка слотов, акционные предложения и промокоды."
+msgstr "Moslashuvchan tariflar, joylarni bloklash, aksiyalar va promo-kodlar."
+
+#: .\templates\index.html:332
+msgid "Оплаты"
+msgstr "To‘lovlar"
+
+#: .\templates\index.html:333
+msgid "Поддержка частичной/групповой оплаты, депозитов и возвратов."
+msgstr "Qisman/guruhli to‘lovlar, depozitlar va qaytarishlarni qo‘llab-quvvatlash."
+
+#: .\templates\index.html:337
+msgid "Локализация"
+msgstr "Lokalizatsiya"
+
+#: .\templates\index.html:338
+msgid "Русский, узбекский и английский языки. Часовые пояса и валюты."
+msgstr "Rus, o‘zbek va ingliz tillari. Vaqt zonalari va valyutalar."
+
+#: .\templates\index.html:342
+msgid "API интеграция"
+msgstr "API integratsiyasi"
+
+#: .\templates\index.html:343
+msgid "Подключение к сайту/боту, webhooks и экспорт данных."
+msgstr "Veb-sayt/botga ulanish, webhooks va ma’lumotlarni eksport qilish."
+
+#: .\templates\index.html:352
+msgid "Готовы попробовать?"
+msgstr "Sinab ko‘rishga tayyormisiz?"
+
+#: .\templates\index.html:352
+msgid "Забронируйте площадку онлайн — быстро и без звонков."
+msgstr "Sport maydonini onlayn band qiling — tez va qo‘ng‘iroqlarsiz."
+
+#: .\templates\index.html:354
+msgid "Открыть в Telegram"
+msgstr "Telegramda ochish"
+
+#: .\templates\index.html:355
+msgid "Связаться"
+msgstr "Biz bilan bog‘lanish"
+
+#: .\templates\index.html:364
+msgid "Оставьте заявку — мы свяжемся в ближайшее время."
+msgstr "So‘rovingizni qoldiring — tez orada siz bilan bog‘lanamiz."
+
+#: .\templates\index.html:374
+msgid "Ваше имя"
+msgstr "Ismingiz"
+
+#: .\templates\index.html:378
+msgid "Номер телефона"
+msgstr "Telefon raqamingiz"
+
+#: .\templates\index.html:382
+msgid "Telegram"
+msgstr "Telegram"
+
+#: .\templates\index.html:386
+msgid "Сообщение"
+msgstr "Habar"
+
+#: .\templates\index.html:389
+msgid "Отправить"
+msgstr "Jo'natish"
+
+#: .\templates\index.html:402
+msgid "Платформа для поиска и бронирования спортивных площадок."
+msgstr "Sport maydonlarini topish va band qilish uchun platforma."
+
+#: .\templates\index.html:405
+msgid "Навигация"
+msgstr "Navigatsiya"
+
+#: .\templates\index.html:411
+msgid "Поддержка"
+msgstr "Qo‘llab-quvvatlash"
+
+#: .\templates\index.html:412
+msgid "Политика конфиденциальности"
+msgstr "Maxfiylik siyosati"
+
+#: .\templates\index.html:413
+msgid "Пользовательское соглашение"
+msgstr "Foydalanuvchi shartnomasi"
+
+#: .\templates\index.html:417
+msgid "Все права защищены."
+msgstr "Barcha huquqlar himoyalangan."
+
+#: .\templates\index.html:418
+msgid "Сделано с любовью к спорту"
+msgstr "Sportga bo‘lgan muhabbat bilan yaratilgan."

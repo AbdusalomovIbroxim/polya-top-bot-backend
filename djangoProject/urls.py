@@ -40,7 +40,7 @@ urlpatterns = [
     path('api/', include('playgrounds.urls')),
     path('api/', include('bookings.urls')),
     path('api/', include('customers.urls')),
-    path('', welcome, name='welcome'),
+    # path('', welcome, name='welcome'),
 
     # Swagger URLs
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0),
@@ -66,7 +66,7 @@ urlpatterns += [
 ]
 
 urlpatterns += i18n_patterns(
-    path('', include('main.urls')),
+    path('', welcome, name='welcome'),
 )
 
 
