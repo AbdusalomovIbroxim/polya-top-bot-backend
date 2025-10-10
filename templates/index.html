@@ -228,18 +228,17 @@
           <a href="#contacts" role="menuitem">{% trans "Контакты" %}</a>
           <a href="#cta" class="btn btn-ghost" role="menuitem"><i class="fa-regular fa-calendar-check"></i>{% trans "Забронировать" %}</a>
         </div>
+        <div class="lang-switcher">
+          <form action="{% url 'set_language' %}" method="post">
+            {% csrf_token %}
+            <select name="language" onchange="this.form.submit()" aria-label="Выбор языка">
+              <option value="ru" {% if LANGUAGE_CODE == 'ru' %}selected{% endif %}>🇷🇺 RU</option>
+              <option value="uz" {% if LANGUAGE_CODE == 'uz' %}selected{% endif %}>🇺🇿 UZ</option>
+              <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>🇬🇧 EN</option>
+            </select>
+          </form>
+        </div>
       </nav>
-      <!-- 🔽 Переключатель языка -->
-      <div class="lang-switcher">
-        <form action="{% url 'set_language' %}" method="post">
-          {% csrf_token %}
-          <select name="language" onchange="this.form.submit()" aria-label="Выбор языка">
-            <option value="ru" {% if LANGUAGE_CODE == 'ru' %}selected{% endif %}>🇷🇺 RU</option>
-            <option value="uz" {% if LANGUAGE_CODE == 'uz' %}selected{% endif %}>🇺🇿 UZ</option>
-            <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>🇬🇧 EN</option>
-          </select>
-        </form>
-      </div>
     </div>
     </div>
   </header>
