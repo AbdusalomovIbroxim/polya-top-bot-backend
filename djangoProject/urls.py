@@ -3,7 +3,7 @@ from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.static import serve   
-from django.conf.urls.i18n import i18n_patterns
+from django.conf.urls.i18n import set_language
 from djangoProject.settings import BASE_DIR
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
@@ -40,7 +40,8 @@ urlpatterns = [
     path('api/', include('playgrounds.urls')),
     path('api/', include('bookings.urls')),
     path('api/', include('customers.urls')),
-    # path('', welcome, name='welcome'),
+    path('', welcome, name='welcome'),
+    path('set-language/<str:language_code>/', set_language, name='set_language'),
 
     # Swagger URLs
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0),
@@ -65,9 +66,6 @@ urlpatterns += [
     }),
 ]
 
-urlpatterns += i18n_patterns(
-    path('', welcome, name='welcome'),
-)
 
 
 handler404 = custom_page_not_found_view
