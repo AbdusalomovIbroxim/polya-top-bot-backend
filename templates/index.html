@@ -227,16 +227,65 @@
           <a href="#features" role="menuitem">{% trans "Возможности" %}</a>
           <a href="#contacts" role="menuitem">{% trans "Контакты" %}</a>
           <a href="#cta" class="btn btn-ghost" role="menuitem"><i class="fa-regular fa-calendar-check"></i>{% trans "Забронировать" %}</a>
-          <div class="lang-switcher">
-            <form action="{% url 'set_language' %}" method="post">
-              {% csrf_token %}
-              <select name="language" onchange="this.form.submit()" aria-label="Выбор языка">
-                <option value="ru" {% if LANGUAGE_CODE == 'ru' %}selected{% endif %}>🇷🇺 RU</option>
-                <option value="uz" {% if LANGUAGE_CODE == 'uz' %}selected{% endif %}>🇺🇿 UZ</option>
-                <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>🇬🇧 EN</option>
-              </select>
-            </form>
-          </div>
+          <div class="lang-switcher" style="
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          padding: 10px;
+        ">
+          <form action="{% url 'set_language' %}" method="post" style="margin: 0;">
+            {% csrf_token %}
+            <select name="language" onchange="this.form.submit()" aria-label="Выбор языка" style="
+              appearance: none;
+              -webkit-appearance: none;
+              -moz-appearance: none;
+              background-color: #f8f9fa;
+              border: 1px solid #ddd;
+              border-radius: 12px;
+              padding: 8px 36px 8px 12px;
+              font-size: 15px;
+              font-weight: 500;
+              color: #333;
+              cursor: pointer;
+              outline: none;
+              transition: all 0.2s ease-in-out;
+              background-image: url('data:image/svg+xml;utf8,<svg fill=\'%23333\' height=\'16\' viewBox=\'0 0 24 24\' width=\'16\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/></svg>');
+              background-repeat: no-repeat;
+              background-position: right 10px center;
+              background-size: 14px;
+            ">
+              <option value="ru" {% if LANGUAGE_CODE == 'ru' %}selected{% endif %}>🇷🇺 Рус</option>
+              <option value="uz" {% if LANGUAGE_CODE == 'uz' %}selected{% endif %}>🇺🇿 O‘zb</option>
+              <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>🇬🇧 Eng</option>
+            </select>
+          </form>
+        </div>
+        
+        <style>
+          /* Адаптив для мобильных устройств */
+          @media (max-width: 768px) {
+            .lang-switcher {
+              justify-content: center !important;
+              padding: 6px 0;
+            }
+            .lang-switcher select {
+              font-size: 14px !important;
+              padding: 6px 32px 6px 10px !important;
+            }
+          }
+        
+          /* Эффекты при наведении */
+          .lang-switcher select:hover {
+            background-color: #f0f0f0 !important;
+            border-color: #bbb !important;
+          }
+        
+          .lang-switcher select:focus {
+            border-color: #007bff !important;
+            box-shadow: 0 0 4px rgba(0, 123, 255, 0.4) !important;
+          }
+        </style>
+        
         </div>
         
       </nav>
