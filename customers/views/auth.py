@@ -6,9 +6,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from drf_yasg.utils import swagger_auto_schema
 import logging
 
-from accounts.models import User  # путь подстрой под свой проект
+from accounts.models import User
 from accounts.serializers import UserSerializer, LoginSerializer
-from accounts.utils import check_telegram_auth  # путь к твоей функции проверки initData
+from accounts.utils import check_telegram_auth
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
@@ -17,17 +17,22 @@ logger = logging.getLogger(__name__)
 class AdminAuthViewSet(viewsets.ViewSet):
     """
     Авторизация для админ-панели:
-    принимает initData из Telegram WebApp и проверяет, что пользователь — админ, супер-админ или владелец.
+    доступна только владельцам (owner) и супер-админам (superadmin).
     """
 
     permission_classes = [AllowAny]
 
     @swagger_auto_schema(
-        operation_description="Логин администратора по initData (Telegram WebApp)",
+        operation_description="Логин владельца или супер-админа по initData (Telegram WebApp)",
         request_body=LoginSerializer,
         responses={200: UserSerializer()}
     )
-    @action(detail=False, methods=["post"])
+    @action(
+        detail=False,
+        methods=["post"],
+        permission_classes=[AllowAny],
+        authentication_classes=[],
+    )
     def login(self, request):
         logger.info("Получен запрос на /admin/auth/login/")
 
@@ -61,7 +66,6 @@ class AdminAuthViewSet(viewsets.ViewSet):
         try:
             user = User.objects.get(telegram_id=telegram_id)
             logger.info("Пользователь с telegram_id=%s найден", telegram_id)
-
         except User.DoesNotExist:
             logger.warning("Пользователь не найден в базе (telegram_id=%s)", telegram_id)
             return Response(
@@ -69,18 +73,19 @@ class AdminAuthViewSet(viewsets.ViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        # --- Проверка роли ---
-        allowed_roles = ["owner", "admin", "superadmin"]
+        # --- Проверка роли (только owner и superadmin) ---
+        allowed_roles = ["owner", "superadmin"]
         if user.role not in allowed_roles:
             logger.warning("Доступ запрещен: роль '%s' не входит в список разрешенных", user.role)
             return Response(
-                {"error": "Доступ запрещен. Недостаточно прав."},
+                {"error": "Доступ запрещен. Только владельцы и супер-админы могут войти."},
                 status=status.HTTP_403_FORBIDDEN
             )
 
         # --- Генерация JWT токенов ---
         refresh = RefreshToken.for_user(user)
-        logger.info("Авторизация администратора успешна (роль=%s)", user.role)
+        logger.info("Авторизация успешна (роль=%s)", user.role)
+
         return Response({
             "refresh": str(refresh),
             "access": str(refresh.access_token),
