@@ -22,20 +22,12 @@ class BookingViewSet(viewsets.ReadOnlyModelViewSet):
         if getattr(self, "swagger_fake_view", False) or user.is_anonymous:
             return Booking.objects.none()
         
-        # --- Используем ПРАВИЛЬНЫЕ отношения: 'user' и 'stadium' ---
-        
-        # --- Супер админ видит все брони ---
         if user.is_superuser or user.role == Role.SUPERADMIN:
-            # ИСПРАВЛЕНО: 'client', 'field' заменены на 'user', 'stadium'
             return Booking.objects.all().select_related('user', 'stadium')
 
-        # --- Владелец видит только свои поля ---
         if getattr(user, "is_owner", False) or user.role == Role.OWNER:
-            # ИСПРАВЛЕНО: 'client', 'field' заменены на 'user', 'stadium'
-            # (Предполагая, что 'field' корректно работает в фильтре: field__owner=user)
             return Booking.objects.filter(field__owner=user).select_related('user', 'stadium')
 
-        # Остальные роли — без доступа
         return Booking.objects.none()
     
     
