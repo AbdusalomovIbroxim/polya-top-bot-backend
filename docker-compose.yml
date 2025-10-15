@@ -1,17 +1,8 @@
+networks: 
+  django_network:
+    driver: bridge
+
 services:
-  backend:
-    build: .
-    container_name: backend
-    restart: always
-    env_file:
-      - .env
-    depends_on:
-      - postgres
-    volumes:
-      - ./media:/app/media
-      - ./static:/app/static
-    expose:
-      - "8000"
 
   postgres:
     image: postgres:15
@@ -20,8 +11,30 @@ services:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "0.0.0.0:54321:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - django_network
+
+  backend:
+    build: .
+    container_name: backend
+    restart: always
+    env_file:
+      - .env_prod
+    depends_on:
+      - postgres
+    volumes:
+      - ./media:/app/media
+      - ./static:/app/static
+    ports:
+      - "0.0.0.0:8000:8000"
+    networks:
+      - django_network
+    # command: make run
+    
 
   nginx:
     image: nginx:stable-alpine
@@ -37,6 +50,8 @@ services:
       - ./media:/app/media
     depends_on:
       - backend
+    networks:
+      - django_network
 
 volumes:
   pgdata:

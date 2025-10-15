@@ -19,6 +19,12 @@ class BookingViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         user = self.request.user
 
+        if getattr(self, "swagger_fake_view", False):
+            return Booking.objects.none()
+        
+        if user.is_anonymous:
+            return Booking.objects.none()
+        
         # --- Супер админ видит все брони ---
         if user.is_superuser or user.role == Role.SUPERADMIN:
             return Booking.objects.all().select_related('client', 'field')

@@ -79,12 +79,18 @@ celerybeat-schedule
 
 # Environments
 .env
+.env_dev
+.env_prod
 .venv
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
+.pytest_cache/
+docker-compose-dev.yml
+
+media/
 
 # Spyder project settings
 .spyderproject
