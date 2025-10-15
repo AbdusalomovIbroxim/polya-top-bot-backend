@@ -6,3 +6,4 @@ staticfiles/
 *.pyc
 *.log
 .git
+docker-dev-db/

@@ -19,7 +19,7 @@ services:
       - django_network
 
   backend:
-    build: .
+    image: polya-top-bot-backend
     container_name: backend
     restart: always
     env_file:
