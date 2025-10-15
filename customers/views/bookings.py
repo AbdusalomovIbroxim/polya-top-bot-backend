@@ -9,15 +9,10 @@ from customers.permissions import IsOwnerOrSuperAdmin
 from rest_framework.permissions import IsAuthenticated
 
 class BookingViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    Управление бронями (для владельцев полей и супер админов).
-    - Владелец видит только брони своих полей.
-    - Супер админ видит все брони.
-    """
     serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrSuperAdmin]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter]
-    filterset_fields = ['status', 'field', 'date']
+    filterset_fields = ['status', 'stadium', 'start_time', 'end_time']
     ordering_fields = ['date', 'created_at']
     search_fields = ['client__full_name', 'client__phone']
 
