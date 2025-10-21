@@ -12,6 +12,26 @@ from playgrounds.models import SportVenue as Playground
 from ..permissions import IsOwnerOrSuperAdmin
 
 
+"""Dashboard API View
+Возвращает статистику по бронированиям, площадкам и доходу за выбранный период.
+Доступно только для владельцев площадок и супер-админов.
+
+return: {
+    "period": "week",
+    "stats": {
+        "total_bookings": 42,
+        "change_bookings": 8,
+        "total_playgrounds": 5,
+        "total_revenue": 2450000
+    },
+    "top_fields": [
+        {"playground__name": "Стадион №1", "total_income": 1500000},
+        {"playground__name": "Стадион №2", "total_income": 950000}
+    ]
+}
+
+"""
+
 class DashboardView(APIView):
     """
     Дашборд владельцев и супер-админов.
@@ -98,12 +118,12 @@ class DashboardView(APIView):
         change_bookings = total_bookings - prev_total_bookings
 
         total_playgrounds = Playground.objects.filter(is_active=True, **({"owner": user} if user.role == "owner" else {})).count()
-        total_revenue = current_bookings.filter(status="paid").aggregate(sum=Sum("price"))["sum"] or 0
+        total_revenue = (Booking.objects.filter(status=Booking.STATUS_CONFIRMED).aggregate(sum=Sum("amount"))["sum"] or 0)
 
         top_fields = (
             current_bookings.filter(status="paid")
-            .values("playground__name")
-            .annotate(total_income=Sum("price"))
+            .values("stadium__name")
+            .annotate(total_income=Sum("amount"))
             .order_by("-total_income")[:5]
         )
 

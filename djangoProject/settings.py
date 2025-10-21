@@ -9,16 +9,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = int(os.getenv('DEBUG', 0)) == 1
+print(f"DEBUG is set to: {DEBUG}")
 
 ALLOWED_HOSTS = [
-    "10.12.1.18",
-    "polya.top",
-    "www.polya.top",
-    'api.polya.top',
-    'www.api.polya.top',
-    "127.0.0.1",
-    "localhost",
-    "176.98.177.140",
+    "*"
+    # "10.12.1.18",
+    # "polya.top",
+    # "www.polya.top",
+    # 'api.polya.top',
+    # 'www.api.polya.top',
+    # "127.0.0.1",
+    # "localhost",
+    # "176.98.177.140",
 ]
 
 INSTALLED_APPS = [
@@ -87,7 +89,11 @@ DATABASES = {
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT', '5432'),
+        'OPTIONS': {
+            'client_encoding': 'UTF8',
+        }
     }
+    
 }
 
 # DATABASES = {
@@ -218,16 +224,20 @@ SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False,
 }
 
-# if not DEBUG:
-#     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-#     SECURE_SSL_REDIRECT = True
-#     SESSION_COOKIE_SECURE = True
-#     CSRF_COOKIE_SECURE = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'http')
-SECURE_SSL_REDIRECT = False
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
 
+# --- Настройки безопасности (HTTPS) ---
+# В режиме разработки (DEBUG=True) отключаем принудительный HTTPS
+if DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'http')
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+else:
+    # В продакшене (DEBUG=False) включаем принудительный HTTPS
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -320,12 +330,6 @@ LOGGING = {
     },
 }
 
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-# SECURE_SSL_REDIRECT = True
-# CSRF_COOKIE_SECURE = True
-# SESSION_COOKIE_SECURE = True
-
-# FORCE_SCRIPT_NAME = '/api'
 
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
@@ -336,25 +340,6 @@ sentry_sdk.init(
     auto_session_tracking=False,
     traces_sample_rate=0
 )
-
-
-# JAZZMIN_SETTINGS = {
-#     "site_title": "Админка PolyaTop",
-#     "site_header": "PolyaTop Администрирование",
-#     "site_brand": "PolyaTop",
-#     "site_logo": 'logo.png',
-#     "welcome_sign": "Добро пожаловать в панель администратора PolyaTop",
-#     "copyright": "PolyaTop © 2025",
-#     "show_sidebar": True,
-#     "navigation_expanded": True,
-#     "theme": "cyborg",  # варианты: "flatly", "cosmo", "minty", "cyborg" (тёмная)
-#     # "dark_mode_theme": "cyborg",
-#     "hide_models": [
-#         "auth.Group",              # скрыть группы
-#         "authtoken.Token",         # скрыть токены DRF
-#     ],
-    
-# }
 
 
 UNFOLD = {

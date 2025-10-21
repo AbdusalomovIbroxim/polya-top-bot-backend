@@ -73,14 +73,35 @@ class AdminAuthViewSet(viewsets.ViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        # --- Проверка роли (только owner и superadmin) ---
+        # --- Проверка роли (owner, superadmin ИЛИ is_superuser/is_staff) ---
         allowed_roles = ["owner", "superadmin"]
-        if user.role not in allowed_roles:
-            logger.warning("Доступ запрещен: роль '%s' не входит в список разрешенных", user.role)
+
+        # Разрешаем доступ, если выполнено ЛЮБОЕ из условий:
+        is_admin_access = (
+            # 1. Пользователь является системным суперпользователем Django (наивысший уровень)
+            user.is_superuser
+            # 2. Пользователь является сотрудником Django (is_staff), что обычно используется для админ-доступа
+            or user.is_staff
+            # 3. Кастомная роль пользователя находится в списке разрешенных ('owner' или 'superadmin')
+            or getattr(user, 'role', None) in allowed_roles
+        )
+
+        if not is_admin_access:
+            # Собираем данные для лога для более полной картины
+            current_role = getattr(user, 'role', 'N/A')
+            privileges = f"Role: {current_role}, is_superuser: {user.is_superuser}, is_staff: {user.is_staff}"
+            
+            logger.warning(
+                "Доступ к админ-панели запрещен для пользователя (ID: %s, Привилегии: %s)", 
+                telegram_id, 
+                privileges
+            )
             return Response(
-                {"error": "Доступ запрещен. Только владельцы и супер-админы могут войти."},
+                {"error": "Доступ запрещен. Только владельцы, супер-админы или пользователи с правами персонала могут войти."},
                 status=status.HTTP_403_FORBIDDEN
             )
+
+        # ... Если доступ разрешен, выполнение продолжается ...
 
         # --- Генерация JWT токенов ---
         refresh = RefreshToken.for_user(user)

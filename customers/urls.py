@@ -14,5 +14,5 @@ router.register(r'users', UserManagementViewSet, basename='user-management')
 
 urlpatterns = [
     path('admin-panel/', include(router.urls)),
-    path('dashboard/', DashboardView.as_view(), name='dashboard'),
+    path('admin-panel/dashboard/', DashboardView.as_view(), name='dashboard'),
 ]
