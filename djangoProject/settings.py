@@ -11,17 +11,10 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = int(os.getenv('DEBUG', 0)) == 1
 print(f"DEBUG is set to: {DEBUG}")
 
-ALLOWED_HOSTS = [
-    "*"
-    # "10.12.1.18",
-    # "polya.top",
-    # "www.polya.top",
-    # 'api.polya.top',
-    # 'www.api.polya.top',
-    # "127.0.0.1",
-    # "localhost",
-    # "176.98.177.140",
-]
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+if DEBUG:
+    ALLOWED_HOSTS = ['*'] # Разрешить все хосты в режиме отладки
+
 
 INSTALLED_APPS = [
     'unfold', 
@@ -48,9 +41,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     # 'djangoProject.middleware.RequestTimingMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -241,44 +234,29 @@ else:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+
+ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',')
+
+CORS_ALLOWED_ORIGINS = [
+    origin.strip() for origin in ALLOWED_ORIGINS if origin.strip()
+]
+
 CORS_ALLOW_CREDENTIALS = True
 
-# CSRF_TRUSTED_ORIGINS = [
-#     "https://polya.top",
-#     "https://www.polya.top",
-    
-# ]
+CSRF_TRUSTED_ORIGINS = [
+    f'{origin.strip()}/' 
+    for origin in ALLOWED_ORIGINS 
+    if origin.strip() and not origin.strip().endswith('/')
+]
 
+CSRF_TRUSTED_ORIGINS.extend(
+    [origin.strip() for origin in ALLOWED_ORIGINS if origin.strip().endswith('/')]
+)
 
-CORS_ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',')
-
-CSRF_TRUSTED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',')
-
-# CORS_ALLOW_METHODS = [
-#     'DELETE',
-#     'GET',
-#     'OPTIONS',
-#     'PATCH',
-#     'POST',
-#     'PUT',
-# ]
-
-# CORS_ALLOW_HEADERS = [
-#     'accept',
-#     'accept-encoding',
-#     'authorization',
-#     'content-type',
-#     'dnt',
-#     'origin',
-#     'user-agent',
-#     'x-csrftoken',
-#     'x-requested-with',
-#     'x-timezone-offset',
-# ]
-
-# CORS_EXPOSE_HEADERS = [
-#     'x-timezone-offset',
-# ]
+CORS_ALLOWED_ORIGIN_REGEXES = [
+   r"^https://.*\.telegram\.org$",
+]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
