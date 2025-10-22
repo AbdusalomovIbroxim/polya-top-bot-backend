@@ -235,28 +235,41 @@ else:
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-
-ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',')
-
-CORS_ALLOWED_ORIGINS = [
-    origin.strip() for origin in ALLOWED_ORIGINS if origin.strip()
+# --- Настройки CORS и CSRF (ВРЕМЕННОЕ РЕШЕНИЕ ДЛЯ ТЕСТИРОВАНИЯ) ---
+# ВРЕМЕННЫЙ СПИСОК URL-адресов
+HARDCODED_ALLOWED_ORIGINS = [
+    "https://polya.top",
+    "https://sport-fields.onrender.com",
+    "https://polya-admin.vercel.app", # Ваш проблемный фронтенд
 ]
+
+# 1. CORS_ALLOWED_ORIGINS
+# Список доменов, которым разрешен кросс-доменный доступ.
+CORS_ALLOWED_ORIGINS = HARDCODED_ALLOWED_ORIGINS
 
 CORS_ALLOW_CREDENTIALS = True
 
+# 2. CSRF_TRUSTED_ORIGINS 
+# Домены, которым доверяет Django для получения CSRF токена.
+# Добавляем конечный слэш для надежности.
 CSRF_TRUSTED_ORIGINS = [
     f'{origin.strip()}/' 
-    for origin in ALLOWED_ORIGINS 
-    if origin.strip() and not origin.strip().endswith('/')
+    for origin in HARDCODED_ALLOWED_ORIGINS 
+    if not origin.strip().endswith('/')
 ]
 
+# Добавляем те, что уже содержат слэш
 CSRF_TRUSTED_ORIGINS.extend(
-    [origin.strip() for origin in ALLOWED_ORIGINS if origin.strip().endswith('/')]
+    [origin.strip() for origin in HARDCODED_ALLOWED_ORIGINS if origin.strip().endswith('/')]
 )
 
-CORS_ALLOWED_ORIGIN_REGEXES = [
-   r"^https://.*\.telegram\.org$",
-]
+# 3. Настройка для Web App (если Web App отправляет запросы из Telegram)
+# Если ваш клиент Web App установлен в Telegram, вам может потребоваться разрешить
+# поддомен telegram.org
+# CORS_ALLOWED_ORIGIN_REGEXES = [
+#    r"^https://.*\.telegram\.org$",
+# ]
+
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
