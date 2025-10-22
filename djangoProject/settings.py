@@ -265,9 +265,9 @@ CSRF_TRUSTED_ORIGINS.extend(
 # 3. Настройка для Web App (если Web App отправляет запросы из Telegram)
 # Если ваш клиент Web App установлен в Telegram, вам может потребоваться разрешить
 # поддомен telegram.org
-# CORS_ALLOWED_ORIGIN_REGEXES = [
-#    r"^https://.*\.telegram\.org$",
-# ]
+CORS_ALLOWED_ORIGIN_REGEXES = [
+   r"^https://.*\.telegram\.org$",
+]
 
 
 
