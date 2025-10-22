@@ -49,20 +49,15 @@ class UserViewSet(viewsets.ViewSet):
     
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def check_admin_access(self, request):
-        """
-        Проверка, может ли пользователь получить доступ к админке.
-        Входные данные: telegram_id
-        """
-        telegram_id = request.data.get("telegram_id")
+        telegram_id = int(request.data.get("telegram_id"))
         if not telegram_id:
             return Response({"allowed": False}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             user = User.objects.get(telegram_id=telegram_id)
-            if user.role in ["superadmin", "owner"]:
+            if user.role.strip().lower() in ["superadmin", "owner"] or user.is_superuser or user.is_staff:
                 return Response({"allowed": True})
         except ObjectDoesNotExist:
-            # Пользователь не найден
             pass
         except Exception as e:
             print(f"[ERROR] check_admin_access: {e}")
