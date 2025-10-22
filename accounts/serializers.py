@@ -36,11 +36,10 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UpdateUserSerializer(serializers.ModelSerializer):
-    football_formats = serializers.MultipleChoiceField(
-        choices=FootballFormat.choices,
+    football_formats = serializers.ListField(
+        child=serializers.ChoiceField(choices=FootballFormat.choices),
         required=False
     )
-
 
     class Meta:
         model = User
@@ -58,12 +57,24 @@ class UpdateUserSerializer(serializers.ModelSerializer):
             'football_formats',
             'football_position',
         )
+    
+    # # --- Добавьте этот метод ---
+    # def to_internal_value(self, data):
+    #     # Вызываем родительский метод, чтобы выполнить стандартную валидацию
+    #     # и преобразование, включая MultipleChoiceField, которое вернет 'set'
+    #     internal_value = super().to_internal_value(data)
+
+    #     # Если поле football_formats присутствует в данных и является 'set',
+    #     # преобразуем его обратно в 'list'
+    #     if 'football_formats' in internal_value:
+    #         # Преобразование set в list (это и устраняет ошибку)
+    #         internal_value['football_formats'] = list(internal_value['football_formats'])
+            
+    #     return internal_value
+    # # --------------------------
 
 
 def slugify_cyrillic(text):
-    """
-    Транслитерирует русские символы в латинские и очищает строку.
-    """
     translit_map = {
         'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo',
         'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
@@ -71,15 +82,14 @@ def slugify_cyrillic(text):
         'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'shch',
         'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya',
     }
-    # Преобразуем в нижний регистр и заменяем кириллицу
     text = text.lower()
     for cyr, lat in translit_map.items():
         text = text.replace(cyr, lat)
-    # Удаляем все символы, кроме букв, цифр и '_', заменяем пробелы на '_'
     text = re.sub(r'[^a-z0-9\s]+', '', text).strip().replace(' ', '_')
-    # Убираем повторяющиеся '_'
     text = re.sub(r'_+', '_', text)
     return text
+
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     initData = serializers.CharField(write_only=True)
